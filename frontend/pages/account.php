@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -12,13 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main class="acct" id="acct" hidden>
     <header class="acct-top">
         <div class="in">
-            <a class="btn btn-ghost" href="index.php">
+            <a class="btn btn-ghost" href="../index.php">
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="m12 19-7-7 7-7"/>
                     <path d="M19 12H5"/>
@@ -93,6 +93,6 @@
     </svg>
 </template>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/app.js"></script>
+<script src="../assets/app.js"></script>
 </body>
 </html>

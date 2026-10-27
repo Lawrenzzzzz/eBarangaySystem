@@ -1,4 +1,4 @@
-ï»¿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main class="reset-page">
@@ -24,17 +24,17 @@
             </svg>
         </span>
         <h1>Choose a new password</h1>
-        <p>Use at least 8 characters that you donâ€™t use elsewhere.</p>
+        <p>Use at least 8 characters that you don’t use elsewhere.</p>
         <form id="r-form" class="stack hidden" style="margin-top:1.75rem" novalidate>
             <label class="field"><span class="label">New password</span><input class="input" id="r-pass" type="password" minlength="8"></label>
             <label class="field"><span class="label">Confirm password</span><input class="input" id="r-conf" type="password" minlength="8"></label>
             <p class="err hidden" id="r-err"></p>
             <button class="btn btn-primary btn-full" style="height:2.5rem">Update password</button>
         </form>
-        <p class="notice" id="r-msg">Checking your recovery linkâ€¦</p>
+        <p class="notice" id="r-msg">Checking your recovery link…</p>
     </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/app.js"></script>
+<script src="../assets/app.js"></script>
 </body>
 </html>

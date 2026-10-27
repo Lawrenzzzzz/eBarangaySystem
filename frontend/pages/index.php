@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body id="top">
     <header class="site-header">
@@ -53,7 +53,7 @@
                         Register
                     </a>
                 </span>
-                <a data-auth="in" class="btn btn-primary hidden" href="account.php">
+                <a data-auth="in" class="btn btn-primary hidden" href="../account.php">
                     My account
                     <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M5 12h14"/>
@@ -85,22 +85,22 @@
         </nav>
         <div class="actions">
             <span data-auth="out" style="display:grid;gap:.5rem">
-                <a class="btn btn-outline" href="login.php">Sign in</a>
-                <a class="btn btn-primary" href="signup.php">Register</a>
+                <a class="btn btn-outline" href="../login.php">Sign in</a>
+                <a class="btn btn-primary" href="../signup.php">Register</a>
             </span>
-            <a data-auth="in" class="btn btn-primary hidden" href="account.php">My account</a>
+            <a data-auth="in" class="btn btn-primary hidden" href="../account.php">My account</a>
         </div>
     </aside>
 
     <main>
         <section class="hero">
-            <img src="assets/barangay-hall.jpg" alt="Barangay hall and community plaza" width="1600" height="1000">
+            <img src="../assets/barangay-hall.jpg" alt="Barangay hall and community plaza" width="1600" height="1000">
             <div class="hero-overlay"></div>
             <div class="container hero-in">
                 <div class="hero-copy">
                     <p class="hero-kicker"><span></span>Malasakit. Aksyon. Pag-unlad.</p>
                     <h1>Serbisyong barangay, mas malapit sa iyo.</h1>
-                    <p>Access essential services, receive community updates, and connect with your barangay—wherever you are.</p>
+                    <p>Access essential services, receive community updates, and connect with your barangay�wherever you are.</p>
                     <div class="hero-btns">
                         <a class="btn btn-lg btn-gold" href="signup.php">
                             Create resident account
@@ -142,7 +142,7 @@
                         </span>
                         <h3>Request documents</h3>
                         <p>Barangay clearance, residency, indigency, and other certificates.</p>
-                        <a class="btn btn-link" data-service href="login.php">Open service
+                        <a class="btn btn-link" data-service href="../login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -157,7 +157,7 @@
                         </span>
                         <h3>Community assistance</h3>
                         <p>Ask about health, senior, livelihood, and social support programs.</p>
-                        <a class="btn btn-link" data-service href="login.php">Open service
+                        <a class="btn btn-link" data-service href="../login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -172,7 +172,7 @@
                         </span>
                         <h3>Report a concern</h3>
                         <p>Send a local concern to the barangay office for proper action.</p>
-                        <a class="btn btn-link" data-service href="login.php">Open service
+                        <a class="btn btn-link" data-service href="../login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -194,21 +194,21 @@
                         <time>15 SEP</time>
                         <div>
                             <h3>Free medical and dental mission</h3>
-                            <p>Barangay covered court · 8:00 AM to 3:00 PM</p>
+                            <p>Barangay covered court � 8:00 AM to 3:00 PM</p>
                         </div>
                     </article>
                     <article class="ann">
                         <time>18 SEP</time>
                         <div>
                             <h3>Community clean-up drive</h3>
-                            <p>Assembly at the barangay hall · 6:30 AM</p>
+                            <p>Assembly at the barangay hall � 6:30 AM</p>
                         </div>
                     </article>
                     <article class="ann">
                         <time>22 SEP</time>
                         <div>
                             <h3>Senior citizen assistance registration</h3>
-                            <p>Barangay session hall · 9:00 AM to 4:00 PM</p>
+                            <p>Barangay session hall � 9:00 AM to 4:00 PM</p>
                         </div>
                     </article>
                 </div>
@@ -267,7 +267,7 @@
                             <path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
                         </svg>
                     </span>
-                    <div><small>Office hours</small><b>Mon–Fri · 8:00 AM–5:00 PM</b></div>
+                    <div><small>Office hours</small><b>Mon�Fri � 8:00 AM�5:00 PM</b></div>
                 </div>
             </div>
         </section>
@@ -275,12 +275,12 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>© 2026 Barangay San Isidro. Serbisyo para sa lahat.</p>
-            <p>Privacy · Accessibility · Citizen’s Charter</p>
+            <p>� 2026 Barangay San Isidro. Serbisyo para sa lahat.</p>
+            <p>Privacy � Accessibility � Citizen�s Charter</p>
         </div>
     </footer>
 
     <div id="toasts" aria-live="polite"></div>
-    <script src="assets/app.js"></script>
+    <script src="../assets/app.js"></script>
 </body>
 </html>

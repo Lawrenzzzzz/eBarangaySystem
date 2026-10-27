@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -12,15 +12,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <main class="auth-page">
     <aside class="auth-aside">
-        <img src="assets/barangay-hall.jpg" alt="Barangay hall">
+        <img src="../assets/barangay-hall.jpg" alt="Barangay hall">
         <div class="hero-overlay"></div>
         <div class="auth-aside-in">
-            <a href="index.php" class="logo-link">
+            <a href="../index.php" class="logo-link">
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
                     <path d="m9 12 2 2 4-4"/>
@@ -182,6 +182,6 @@
     </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/app.js"></script>
+<script src="../assets/app.js"></script>
 </body>
 </html>

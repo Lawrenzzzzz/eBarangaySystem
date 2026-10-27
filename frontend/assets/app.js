@@ -1,4 +1,4 @@
-ï»¿/* e-Barangay San Isidro â€” static front-end demo.
+/* e-Barangay San Isidro — static front-end demo.
    No server: the "session" and "accounts" live in this browser's localStorage only.
    Passwords are never stored. */
 (function () {
@@ -85,7 +85,7 @@
       ],
       forgot: [
         "Reset your password",
-        "Weâ€™ll send a secure reset link to your email.",
+        "We’ll send a secure reset link to your email.",
         "Send reset link",
         "Remembered your password?",
         null,
@@ -187,7 +187,7 @@
             application: null,
           };
         store.set("bsi-session", acc);
-        location.href = "account.php";
+        location.href = "../account.php";
         return;
       }
       if (mode === "forgot") {
@@ -367,7 +367,7 @@
           },
           application: null,
         });
-      location.href = "account.php";
+      location.href = "../account.php";
     };
   }
 
