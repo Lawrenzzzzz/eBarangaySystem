@@ -15,10 +15,6 @@
     <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body id="top">
-    <div class="topstrip">
-        Emergency hotline: <a href="tel:911">911</a> · Barangay response desk: <a href="tel:+639171234567">0917 123 4567</a>
-    </div>
-
     <header class="site-header">
         <div class="container header-in">
             <a href="#top" class="logo">
