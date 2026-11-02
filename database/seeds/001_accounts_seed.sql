@@ -13,7 +13,8 @@ INSERT IGNORE INTO users (
 VALUES
   (1, 1, 'resident@ebarangay.local', '09171234567', '$2y$10$H.DLpjfeITOY6AwiGm/qpuAneIUDWjKOKZdavz8PZwu619hayGDOO', 'resident', 'active', NOW(), NOW(), NOW()),
   (2, 1, 'official@ebarangay.local', '09181234567', '$2y$10$H.DLpjfeITOY6AwiGm/qpuAneIUDWjKOKZdavz8PZwu619hayGDOO', 'official', 'active', NOW(), NOW(), NOW()),
-  (3, 2, 'secretary@ebarangay.local', '09191234567', '$2y$10$H.DLpjfeITOY6AwiGm/qpuAneIUDWjKOKZdavz8PZwu619hayGDOO', 'official', 'active', NOW(), NOW(), NOW());
+  (3, 2, 'secretary@ebarangay.local', '09191234567', '$2y$10$H.DLpjfeITOY6AwiGm/qpuAneIUDWjKOKZdavz8PZwu619hayGDOO', 'official', 'active', NOW(), NOW(), NOW()),
+  (4, 3, 'admin@ebarangay.local', '09201234567', '$2y$10$gFFO5clIMLv1wd7U0eQxmO1HxTnMQkAg4mG2d4pHn0yfwSHliSuRW', 'official', 'active', NOW(), NOW(), NOW());
 
 INSERT IGNORE INTO residents (
   id, user_id, resident_code, full_name, first_name, middle_name, last_name, suffix,

@@ -25,3 +25,35 @@
     if (window.innerWidth > 860) setOpen(false);
   });
 })();
+
+// Sign out
+(function () {
+  var button = document.getElementById('signout');
+  if (!button) return;
+
+  button.addEventListener('click', async function () {
+    button.disabled = true;
+    try {
+      var sessionResponse = await fetch('../../backend/api/session.php', {
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      });
+      var session = await sessionResponse.json();
+      var logoutResponse = await fetch('../../backend/api/logout.php', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': session.csrf || '',
+        },
+        credentials: 'same-origin',
+      });
+      var result = await logoutResponse.json();
+      location.href = result.redirect || '../login_page/login.php';
+    } catch (error) {
+      location.href = '../login_page/login.php';
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();

@@ -40,6 +40,7 @@ require __DIR__ . '/_user.php';
     <div class="nav-right">
       <span class="status"><i class="dot"></i> Logged in</span>
       <span class="avatar round" aria-label="Your profile"><?= $esc($userInitials) ?></span>
+      <button class="btn-signout" id="signout" type="button">Sign out</button>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="main-nav">
         <span></span><span></span><span></span>
       </button>

@@ -250,7 +250,7 @@ function sign_in_user(string $rawEmail, string $password): array
     }
 
     $pdo = db();
-    $statement = $pdo->prepare("SELECT * FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1");
+    $statement = $pdo->prepare("SELECT u.*, r.code AS role_code FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.email = ? AND u.deleted_at IS NULL LIMIT 1");
     $statement->execute([$email]);
     $user = $statement->fetch();
 
@@ -288,13 +288,20 @@ function sign_in_user(string $rawEmail, string $password): array
     $_SESSION['user_id'] = (int) $user['id'];
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
+    $roleCode = (string) ($user['role_code'] ?? 'resident');
+    $redirect = match ($roleCode) {
+        'admin', 'captain', 'super_admin' => '../admin/dashboard.php',
+        default => '../user_pages/index.php',
+    };
+
     return [
         'ok' => true,
-        'redirect' => '../user_pages/index.php',
+        'redirect' => $redirect,
         'user' => [
             'user_id' => (int) $user['id'],
             'email' => $user['email'],
             'account_type' => $user['account_type'],
+            'role_code' => $roleCode,
             'status' => $user['status'],
         ],
     ];
