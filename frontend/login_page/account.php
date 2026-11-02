@@ -1,8 +1,14 @@
+<?php
+declare(strict_types=1);
+require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+$csrf = csrf_token();
+?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
     <title>My Account | Barangay San Isidro</title>
     <meta name="description" content="Manage your Barangay San Isidro resident account and official access request.">
     <meta property="og:title" content="My Account | Barangay San Isidro">

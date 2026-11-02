@@ -1,0 +1,584 @@
+/* ==========================================================
+   Barangay resident portal
+   ========================================================== */
+:root {
+  --bg: #eaf0fd;
+  --card: #fafbff;
+  --ink: #14213d;
+  --muted: #5c6781;
+  --blue: #2563eb;
+  --navy: #12388f;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --orange: #f97316;
+
+  --blue-bg: #dbe7fe;
+  --green-bg: #d5f3e8;
+  --amber-bg: #fbecd0;
+
+  --shadow: 0 2px 4px rgba(37, 70, 140, .05), 0 10px 24px rgba(37, 70, 140, .07);
+  --radius: 20px;
+
+  --head: "Sora", system-ui, sans-serif;
+  --body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 110px; }
+
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 14px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, dl, dd { margin: 0; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+
+.shell { max-width: 1240px; margin: 0 auto; padding: 18px 36px 48px; }
+
+/* ---------- Top nav ---------- */
+.topnav {
+  position: sticky; top: 12px; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  background: #fff; border-radius: 22px; padding: 14px 20px;
+  box-shadow: 0 6px 24px rgba(37, 70, 140, .14);
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+.brand-text strong { font: 600 16px/1.25 var(--head); }
+.brand-text small { font-size: 11.5px; color: var(--muted); }
+
+.avatar { display: grid; place-items: center; color: #fff; font: 600 13px var(--head); }
+.avatar.sq { width: 38px; height: 38px; border-radius: 12px; background: var(--blue); font-size: 17px; }
+.avatar.round { width: 38px; height: 38px; border-radius: 50%; background: #2f4f9a; }
+
+.nav { display: flex; gap: 30px; }
+.nav a { font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 6px 0; transition: color .15s, background-color .2s; }
+.nav a:hover { color: var(--blue); }
+
+.nav-right { display: flex; align-items: center; gap: 18px; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+.nav-toggle { display: none; background: none; border: 0; width: 38px; height: 38px; padding: 9px; cursor: pointer; }
+.nav-toggle span { display: block; height: 2px; background: var(--ink); margin: 5px 0; transition: transform .2s, opacity .2s; }
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ---------- Layout ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 305px; gap: 18px; margin-top: 24px; }
+.col-main { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.col-side { display: flex; flex-direction: column; gap: 22px; padding-top: 4px; }
+
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+/* ---------- Greeting ---------- */
+.greeting { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.date { color: var(--blue); font-size: 12.5px; font-weight: 500; }
+.greeting h1 { font: 600 clamp(1.7rem, 3vw, 2.15rem)/1.2 var(--head); letter-spacing: -.01em; }
+.summary { font-size: 13px; font-weight: 500; padding-bottom: 6px; }
+
+/* ---------- Stats ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stat { padding: 18px 18px 16px; display: flex; flex-direction: column; }
+.stat .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.stat strong { font: 600 28px/1.3 var(--head); margin: 6px 0 2px; }
+.stat small { font-size: 11.5px; color: var(--muted); }
+small.good { color: var(--green); }
+small.warn { color: var(--orange); }
+
+/* ---------- Section heads ---------- */
+.section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.section-head h2, .side-title { font: 600 17px/1.3 var(--head); }
+.side-title { margin-bottom: 12px; }
+.hint { font-size: 12px; font-weight: 500; }
+.link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--blue); }
+.link .arrow { transition: transform .2s; }
+.link:hover .arrow { transform: translateX(3px); }
+
+/* ---------- Chips / badges ---------- */
+.chip {
+  display: grid; place-items: center; flex: none;
+  width: 36px; height: 36px; border-radius: 11px; font: 600 14px var(--head);
+}
+.chip.sm { width: 26px; height: 26px; border-radius: 50%; font-size: 10px; }
+.chip.blue, .cat.blue { background: var(--blue-bg); color: var(--blue); }
+.chip.green { background: var(--green-bg); color: var(--green); }
+.chip.amber { background: var(--amber-bg); color: var(--amber); }
+
+.badge { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 1px 10px; border-radius: 99px; font: 500 11px/1.6 var(--body); }
+.badge.good { background: var(--green-bg); color: #0b9a6c; }
+.badge.warn { background: var(--amber-bg); color: #d98a06; }
+.badge.info { background: var(--blue-bg); color: var(--blue); }
+
+/* ---------- Document cards ---------- */
+.doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.doc { padding: 18px; }
+.doc .chip { width: 34px; height: 34px; margin-bottom: 26px; }
+.doc h3 { font: 600 14.5px/1.3 var(--head); }
+.doc p { font-size: 12.5px; margin: 6px 0 14px; }
+
+/* ---------- Requests ---------- */
+.req-list { display: flex; flex-direction: column; gap: 12px; }
+.req { display: flex; align-items: center; gap: 16px; padding: 16px 20px; }
+.req .chip { width: 38px; height: 38px; }
+.req-body { flex: 1; min-width: 0; }
+.req-body h3 { font: 600 14.5px/1.4 var(--head); }
+.ref { font-size: 11.5px; color: var(--muted); margin-bottom: 8px; }
+.bar { display: flex; gap: 5px; max-width: 520px; }
+.seg { flex: 1; height: 4px; border-radius: 4px; background: #e6ebf5; overflow: hidden; }
+.seg i { display: block; height: 100%; background: var(--blue); border-radius: 4px; }
+.req-note { flex: none; max-width: 190px; text-align: right; font-size: 12px; font-weight: 600; }
+
+/* ---------- Announcements ---------- */
+.note { padding: 16px 18px; margin-bottom: 12px; }
+.cat { display: inline-block; padding: 0; background: none; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.cat.blue { color: var(--blue); } .cat.green { color: var(--green); }
+.note h3 { font: 600 14.5px/1.35 var(--head); margin: 4px 0 6px; }
+.note p { font-size: 13px; line-height: 1.5; }
+.note small { display: block; margin-top: 12px; font-size: 11.5px; font-weight: 600; }
+
+/* ---------- Blotter ---------- */
+.blotter { padding: 16px; }
+.blotter p { font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+.mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.mini-stats div { background: #fff; border-radius: 14px; padding: 12px 8px; text-align: center; }
+.mini-stats strong { display: block; font: 600 16px/1.3 var(--head); }
+.mini-stats .blue { color: var(--blue); } .mini-stats .good { color: var(--green); }
+.mini-stats span { font-size: 11px; }
+.btn {
+  display: block; width: 100%; text-align: center; padding: 12px;
+  background: var(--navy); color: #fff; border-radius: 14px;
+  font: 600 13px var(--head); transition: background .2s;
+}
+.btn:hover { background: #0d2c74; }
+
+/* ---------- Details ---------- */
+.details { padding: 8px 18px; }
+.details > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; }
+.details dt { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.details dd { font: 600 13px var(--head); text-align: right; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+  .layout { grid-template-columns: 1fr; }
+  .col-side { padding-top: 0; }
+}
+
+@media (max-width: 860px) {
+  .shell { padding: 12px 16px 40px; }
+  .nav-toggle { display: block; }
+  .status { display: none; }
+  .nav {
+    position: absolute; left: 0; right: 0; top: calc(100% + 8px);
+    flex-direction: column; gap: 0; background: #fff; border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(37, 70, 140, .16);
+    max-height: 0; overflow: hidden; visibility: hidden;
+    transition: max-height .25s ease, visibility .25s;
+  }
+  .nav.open { max-height: 320px; visibility: visible; }
+  .nav a { padding: 14px 22px; }
+  .nav a + a { border-top: 1px solid #edf0f7; }
+  .nav-right { gap: 8px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .doc-grid { grid-template-columns: 1fr; }
+  .doc .chip { margin-bottom: 14px; }
+}
+
+@media (max-width: 560px) {
+  .req { flex-wrap: wrap; }
+  .req-note { max-width: none; width: 100%; text-align: left; padding-left: 54px; }
+  .brand-text small { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
+
+
+/* ==========================================================
+   Documents page
+   ========================================================== */
+.nav a.active { background: var(--blue-bg); color: var(--blue); padding: 6px 12px; margin: 0 -12px; border-radius: 10px; }
+
+.doc-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+.pick { display: block; padding: 18px; border: 1.5px solid transparent; transition: border-color .15s; }
+.pick:hover { border-color: #b9cdf8; }
+.pick.selected { border-color: var(--blue); }
+.pick .chip { width: 34px; height: 34px; margin-bottom: 22px; }
+.pick h3 { font: 600 14.5px/1.3 var(--head); }
+.pick p { font-size: 11.5px; margin-top: 6px; }
+
+.form-card { padding: 20px 20px 22px; }
+.form-card h2 { font: 600 16px/1.3 var(--head); margin-bottom: 4px; }
+.form-card .desc { font-size: 13px; margin-bottom: 18px; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: block; border: 1px solid #4a5163; border-radius: 14px; padding: 9px 14px 10px; background: #fbfcff; cursor: text; }
+.field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, .15); }
+.field > span { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+.field input, .field textarea {
+  display: block; width: 100%; padding: 0; border: 0; background: none; outline: 0;
+  font: 500 13px/1.5 var(--body); color: var(--ink);
+}
+.field textarea { resize: none; min-height: 52px; font-weight: 400; }
+.field textarea::placeholder { color: #b4bccb; }
+.field-label { display: block; margin: 20px 0 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.field.area { padding-top: 12px; }
+.error { color: #dc2626; font-size: 12px; font-weight: 500; margin-top: 8px; }
+
+.form-foot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.btn-primary {
+  border: 0; cursor: pointer; padding: 12px 18px; border-radius: 14px;
+  background: var(--blue); color: #fff; font: 600 13px var(--head); transition: background .2s;
+}
+.btn-primary:hover { background: #1d4fc4; }
+.fee-note { font-size: 11.5px; }
+
+.done { text-align: left; }
+.done .chip { width: 40px; height: 40px; margin-bottom: 14px; background: var(--green-bg); color: var(--green); }
+.done p { font-size: 13px; margin: 6px 0 4px; }
+.done .ref-no { font: 600 15px var(--head); color: var(--blue); }
+
+.bring { padding: 20px; }
+.bring h2 { font: 600 16px/1.3 var(--head); margin-bottom: 14px; }
+.bring ul { margin: 0 0 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.bring li { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.bring li i { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.bring li i.blue { background: var(--blue); } .bring li i.green { background: var(--green); } .bring li i.amber { background: var(--amber); }
+.bring small { display: block; font-size: 11.5px; line-height: 1.6; }
+
+@media (max-width: 860px) { .doc-picker { grid-template-columns: 1fr; } .pick .chip { margin-bottom: 14px; } }
+@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+
+
+
+/* Page switch: soft cross-fade of the content only; the frame and header stay in place */
+@view-transition { navigation: none; }
+::view-transition-group(root) { animation-duration: .22s; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .22s; animation-timing-function: ease; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+
+/* ---------- Documents page: larger tabs & form so the page fills the frame ---------- */
+@media (min-width: 861px) {
+  .doc-picker { gap: 16px; margin-bottom: 18px; }
+  .pick { padding: 26px 24px 24px; }
+  .pick .chip { width: 44px; height: 44px; font-size: 16px; margin-bottom: 34px; }
+  .pick h3 { font-size: 16px; }
+  .pick p { font-size: 12.5px; margin-top: 8px; }
+
+  .form-card { padding: 28px 28px 30px; }
+  .form-card h2 { font-size: 19px; }
+  .form-card .desc { font-size: 14px; margin-bottom: 24px; }
+  .field-grid { gap: 16px; }
+  .field { padding: 13px 18px 14px; border-radius: 16px; }
+  .field > span { font-size: 11px; margin-bottom: 4px; }
+  .field input, .field textarea { font-size: 14px; }
+  .field-label { font-size: 11.5px; margin: 26px 0 10px; }
+  .field.area { padding-top: 14px; }
+  .field textarea { min-height: 92px; }
+  .form-foot { margin-top: 26px; gap: 16px; }
+  .btn-primary { padding: 14px 26px; font-size: 14px; }
+  .fee-note { font-size: 12.5px; }
+
+  .bring { padding: 26px; }
+  .bring h2 { font-size: 19px; margin-bottom: 18px; }
+  .bring ul { gap: 16px; margin-bottom: 22px; }
+  .bring li { font-size: 14px; }
+  .bring small { font-size: 12.5px; }
+}
+
+
+/* ==========================================================
+   Blotter page
+   ========================================================== */
+.field.wide { grid-column: 1 / -1; }
+.field input:not([readonly]) { cursor: text; }
+.field input::placeholder { color: #b4bccb; font-weight: 400; }
+
+.rep { padding: 18px 20px; margin-bottom: 12px; }
+.rep h3 { font: 600 15px/1.4 var(--head); }
+.rep .badge { margin-left: 8px; }
+.rep .ref { margin: 2px 0 8px; }
+.rep p:last-child { font-size: 13px; color: var(--muted); }
+@media (min-width: 861px) {
+  .rep { padding: 22px 24px; }
+  .rep h3 { font-size: 16px; }
+  .rep p:last-child { font-size: 14px; }
+}
+
+
+/* ---------- Blotter page: bigger form & report cards to use the space ---------- */
+@media (min-width: 861px) {
+  .form-card.tall { padding: 36px 36px 40px; }
+  .form-card.tall h2 { font-size: 22px; }
+  .form-card.tall .desc { font-size: 15px; margin-bottom: 30px; }
+  .form-card.tall .field-grid { gap: 20px; }
+  .form-card.tall .field { padding: 18px 22px 19px; border-radius: 18px; }
+  .form-card.tall .field > span { font-size: 12px; margin-bottom: 6px; }
+  .form-card.tall .field input, .form-card.tall .field textarea { font-size: 15px; }
+  .form-card.tall .field-label { font-size: 12.5px; margin: 32px 0 12px; }
+  .form-card.tall .field.area { padding-top: 18px; }
+  .form-card.tall .field textarea { min-height: 170px; }
+  .form-card.tall .form-foot { margin-top: 32px; }
+  .form-card.tall .btn-primary { padding: 16px 32px; font-size: 15px; border-radius: 16px; }
+
+  .rep { padding: 28px 30px; margin-bottom: 16px; }
+  .rep h3 { font-size: 18px; }
+  .rep .ref { font-size: 12.5px; margin: 4px 0 12px; }
+  .rep p:last-child { font-size: 15px; }
+}
+
+
+/* Page title spans both columns, so the right column starts level with the first card on the left */
+.layout > .greeting { grid-column: 1 / -1; margin-bottom: 10px; }
+.layout > .greeting ~ .col-side { padding-top: 0; }
+
+
+/* ==========================================================
+   Announcements page
+   ========================================================== */
+.cat.blue, .cat.green, .cat.amber { background: none; }
+.cat.amber { color: var(--amber); }
+.layout.single { grid-template-columns: minmax(0, 1fr); }
+.notice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.notice-grid .note { margin: 0; display: flex; flex-direction: column; }
+.notice-grid .note p { color: var(--muted); }
+.notice-grid .note small { margin-top: auto; padding-top: 14px; font-weight: 500; color: var(--muted); }
+.greeting .summary.muted { color: var(--muted); font-weight: 400; }
+@media (min-width: 861px) {
+  .notice-grid .note { padding: 26px 28px 24px; min-height: 230px; }
+  .notice-grid .cat { font-size: 11.5px; }
+  .notice-grid .note h3 { font-size: 19px; margin: 8px 0 10px; }
+  .notice-grid .note p { font-size: 14.5px; line-height: 1.6; }
+  .notice-grid .note small { font-size: 12.5px; }
+}
+@media (max-width: 860px) { .notice-grid { grid-template-columns: 1fr; } }
+
+/* ==========================================================
+   Track page
+   ========================================================== */
+.card[hidden], [hidden] { display: none !important; }
+.search { padding: 20px 24px 22px; }
+.search label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); margin-bottom: 10px; }
+.search input {
+  width: 100%; border: 0; outline: 0; background: #fff; border-radius: 12px;
+  padding: 14px 16px; font: 500 14px var(--body); color: var(--ink);
+}
+.search input:focus { box-shadow: 0 0 0 3px rgba(37, 99, 235, .18); }
+.search input::placeholder { color: #b4bccb; font-weight: 400; }
+
+.track-list { display: flex; flex-direction: column; gap: 14px; }
+.track-item { padding: 20px 24px 22px; }
+.track-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.track-head h3 { font: 600 15px/1.3 var(--head); }
+.track-head .ref { margin: 2px 0 0; }
+.track-head .badge { margin-left: auto; }
+.bar.full { max-width: none; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 8px; font-size: 11px; color: var(--muted); }
+.steps span:nth-child(2) { text-align: center; }
+.steps span:nth-child(3) { text-align: right; }
+.track-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+.sub-title { font: 600 17px/1.3 var(--head); margin: 12px 0 14px; }
+.track-reps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.track-reps .rep { margin: 0; }
+.empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px 0; }
+
+@media (max-width: 860px) { .track-reps { grid-template-columns: 1fr; } .track-item { padding: 16px; } }
+
+/* ---------- Home page: slightly larger tabs so the page fills the frame ---------- */
+@media (min-width: 861px) {
+  .layout.home .col-main { gap: 34px; }
+  .layout.home .col-side { gap: 26px; }
+
+  .layout.home .stats { gap: 16px; }
+  .layout.home .stat { padding: 24px 22px 22px; }
+  .layout.home .stat .label { font-size: 12px; }
+  .layout.home .stat strong { font-size: 34px; margin: 8px 0 4px; }
+  .layout.home .stat small { font-size: 12.5px; }
+
+  .layout.home .section-head { margin-bottom: 18px; }
+  .layout.home .section-head h2, .layout.home .side-title { font-size: 19px; }
+  .layout.home .doc-grid { gap: 16px; }
+  .layout.home .doc { padding: 26px 24px 24px; }
+  .layout.home .doc .chip { width: 42px; height: 42px; font-size: 15px; margin-bottom: 38px; }
+  .layout.home .doc h3 { font-size: 16.5px; }
+  .layout.home .doc p { font-size: 13px; margin: 8px 0 18px; }
+  .layout.home .link { font-size: 13px; }
+
+  .layout.home .req-list { gap: 16px; }
+  .layout.home .req { padding: 24px 28px; gap: 18px; }
+  .layout.home .req .chip { width: 44px; height: 44px; font-size: 15px; }
+  .layout.home .req-body h3 { font-size: 16px; }
+  .layout.home .ref { font-size: 12.5px; margin-bottom: 12px; }
+  .layout.home .seg { height: 5px; }
+  .layout.home .req-note { font-size: 13px; }
+
+  .layout.home .note { padding: 20px 22px; margin-bottom: 14px; }
+  .layout.home .note h3 { font-size: 15.5px; }
+  .layout.home .note p { font-size: 13.5px; }
+  .layout.home .blotter { padding: 20px; }
+  .layout.home .blotter p { font-size: 13.5px; }
+  .layout.home .mini-stats div { padding: 16px 8px; }
+  .layout.home .mini-stats strong { font-size: 18px; }
+  .layout.home .btn { padding: 14px; font-size: 14px; }
+  .layout.home .details { padding: 12px 22px; }
+  .layout.home .details > div { padding: 15px 0; }
+  .layout.home .details dt, .layout.home .details dd { font-size: 14px; }
+}
+
+
+/* ---------- Documents & Blotter: larger tabs/forms to fill the frame, inputs clearly editable ---------- */
+.field input:not([readonly]) { cursor: text; }
+@media (min-width: 861px) {
+  .layout.docs .doc-picker { gap: 18px; margin-bottom: 22px; }
+  .layout.docs .pick { padding: 32px 28px 30px; }
+  .layout.docs .pick .chip { width: 50px; height: 50px; font-size: 18px; margin-bottom: 44px; }
+  .layout.docs .pick h3 { font-size: 18px; }
+  .layout.docs .pick p { font-size: 13.5px; margin-top: 10px; }
+
+  .layout.docs .form-card { padding: 34px 34px 38px; }
+  .layout.docs .form-card h2 { font-size: 22px; }
+  .layout.docs .form-card .desc { font-size: 15px; margin-bottom: 28px; }
+  .layout.docs .field-grid { gap: 20px; }
+  .layout.docs .field { padding: 17px 22px 18px; border-radius: 18px; }
+  .layout.docs .field > span { font-size: 12px; margin-bottom: 6px; }
+  .layout.docs .field input, .layout.docs .field textarea { font-size: 15px; }
+  .layout.docs .field-label { font-size: 12.5px; margin: 30px 0 12px; }
+  .layout.docs .field textarea { min-height: 140px; }
+  .layout.docs .form-foot { margin-top: 30px; }
+  .layout.docs .btn-primary { padding: 16px 32px; font-size: 15px; border-radius: 16px; }
+  .layout.docs .fee-note { font-size: 13.5px; }
+  .layout.docs .bring { padding: 32px; }
+  .layout.docs .bring h2 { font-size: 21px; }
+  .layout.docs .bring li { font-size: 15px; }
+  .layout.docs .bring small { font-size: 13.5px; }
+
+  .layout.blotter-page .form-card.tall { padding: 40px 40px 44px; }
+  .layout.blotter-page .form-card.tall .field textarea { min-height: 230px; }
+  .layout.blotter-page .form-card.tall .field { padding: 20px 24px 21px; }
+}
+
+
+/* ---------- Blotter: form card stretches to fill the frame, like the Documents form ---------- */
+@media (min-width: 861px) {
+  .layout.blotter-page .col-main { align-self: stretch; }
+  .layout.blotter-page .form-card.tall { flex: 1; display: flex; flex-direction: column; }
+  .layout.blotter-page .form-card.tall > form { flex: 1; display: flex; flex-direction: column; }
+  .layout.blotter-page .form-card.tall .field.area { flex: 1; display: flex; flex-direction: column; }
+  .layout.blotter-page .form-card.tall .field.area textarea { flex: 1; min-height: 200px; }
+  .layout.blotter-page .form-card.tall .field { padding: 17px 22px 18px; }
+  .layout.blotter-page .form-card.tall .field > span { font-size: 12px; }
+}
+
+/* ---------- Home & Track: larger, higher-contrast text for readability ---------- */
+.layout.home, .layout.track-page { --muted: #46526b; }
+
+.layout.home .date, .layout.track-page .date { font-size: 14px; }
+.layout.home .summary, .layout.track-page .summary { font-size: 14.5px; }
+.layout.home .badge, .layout.track-page .badge { font-size: 12.5px; padding: 2px 12px; }
+.layout.home .ref, .layout.track-page .ref { font-size: 13.5px; }
+
+/* Home */
+.layout.home .stat .label { font-size: 13px; }
+.layout.home .stat small { font-size: 13.5px; }
+.layout.home .hint { font-size: 13.5px; }
+.layout.home .link { font-size: 14px; }
+.layout.home .doc h3 { font-size: 17px; }
+.layout.home .doc p { font-size: 14px; }
+.layout.home .req-body h3 { font-size: 16.5px; }
+.layout.home .req-note { font-size: 14px; }
+.layout.home .cat { font-size: 12px; }
+.layout.home .note h3 { font-size: 16.5px; }
+.layout.home .note p { font-size: 14.5px; }
+.layout.home .note small { font-size: 13px; }
+.layout.home .blotter p { font-size: 14.5px; }
+.layout.home .mini-stats span { font-size: 12.5px; }
+.layout.home .btn { font-size: 14.5px; }
+.layout.home .details dt { font-size: 14.5px; }
+.layout.home .details dd { font-size: 15px; }
+.layout.home .chip.sm { width: 30px; height: 30px; font-size: 11px; }
+
+/* Track */
+.layout.track-page .search label { font-size: 12.5px; }
+.layout.track-page .search input { font-size: 15.5px; }
+.layout.track-page .track-head h3 { font-size: 17px; }
+.layout.track-page .steps { font-size: 13px; margin-top: 10px; }
+.layout.track-page .track-note { font-size: 14.5px; }
+.layout.track-page .sub-title { font-size: 20px; }
+.layout.track-page .rep h3 { font-size: 17px; }
+.layout.track-page .rep p:last-child { font-size: 15px; }
+.layout.track-page .empty { font-size: 15px; }
+
+/* ---------- Header: larger, easier to read on desktop ---------- */
+@media (min-width: 861px) {
+  .topnav { padding: 18px 26px; border-radius: 24px; }
+  .brand { gap: 16px; }
+  .brand-text strong { font-size: 19px; }
+  .brand-text small { font-size: 13.5px; }
+  .avatar.sq, .avatar.round { width: 46px; height: 46px; }
+  .avatar.sq { font-size: 20px; border-radius: 14px; }
+  .avatar.round { font-size: 15px; }
+  .nav { gap: 36px; }
+  .nav a { font-size: 16px; padding: 8px 0; }
+  .nav a.active { padding: 8px 15px; margin: 0 -15px; border-radius: 12px; }
+  .nav-right { gap: 20px; }
+  .status { font-size: 14.5px; }
+  .dot { width: 8px; height: 8px; }
+}
+
+/* ---------- Larger text: status badges, ref lines, request notes, stats ---------- */
+@media (min-width: 861px) {
+  .layout.home .badge, .layout.track-page .badge, .layout.blotter-page .badge, .layout.docs .badge,
+  .badge { font-size: 14px; padding: 2px 14px; margin-left: 10px; }
+  .layout.home .ref, .layout.track-page .ref, .layout.blotter-page .ref,
+  .layout.home .rep .ref, .layout.track-page .rep .ref, .layout.blotter-page .rep .ref,
+  .ref { font-size: 15px; }
+  .layout.home .req-body h3 { font-size: 18px; }
+  .layout.home .req-note { font-size: 15.5px; max-width: 240px; }
+  .layout.home .stat .label { font-size: 14.5px; }
+  .layout.home .stat small { font-size: 15px; }
+  .layout.home .summary, .layout.track-page .summary { font-size: 16px; }
+}
+
+/* ---------- Announcements page: bigger cards and text ---------- */
+@media (min-width: 861px) {
+  .notice-grid { gap: 20px; }
+  .notice-grid .note { padding: 34px 34px 30px; min-height: 310px; }
+  .notice-grid .cat { font-size: 13.5px; }
+  .notice-grid .note h3 { font-size: 23px; margin: 10px 0 14px; }
+  .notice-grid .note p { font-size: 16.5px; line-height: 1.65; }
+  .notice-grid .note small { font-size: 14.5px; }
+}
+
+/* ---------- Blotter form: bigger, easier-to-read fields; "What happened?" box no longer takes all the space ---------- */
+@media (min-width: 861px) {
+  .layout.blotter-page .form-card.tall { padding: 36px 38px 38px; }
+  .layout.blotter-page .form-card.tall h2 { font-size: 26px; }
+  .layout.blotter-page .form-card.tall .desc { font-size: 16.5px; margin-bottom: 26px; }
+  .layout.blotter-page .form-card.tall .field-grid { gap: 22px; }
+  .layout.blotter-page .form-card.tall .field { padding: 22px 26px 23px; border-radius: 20px; }
+  .layout.blotter-page .form-card.tall .field > span { font-size: 14px; margin-bottom: 8px; }
+  .layout.blotter-page .form-card.tall .field input,
+  .layout.blotter-page .form-card.tall .field textarea { font-size: 18px; }
+  .layout.blotter-page .form-card.tall .field-label { font-size: 14.5px; margin: 26px 0 12px; }
+  .layout.blotter-page .form-card.tall .field.area textarea { min-height: 110px; }
+  .layout.blotter-page .form-card.tall .form-foot { margin-top: 26px; }
+  .layout.blotter-page .form-card.tall .btn-primary { padding: 18px 38px; font-size: 17px; }
+  .layout.blotter-page .form-card.tall .error { font-size: 15px; margin-top: 12px; }
+}
+
+/* ---------- Blotter: fixed, smaller "What happened?" box (card height follows its content) ---------- */
+@media (min-width: 861px) {
+  .layout.blotter-page .col-main { align-self: start; }
+  .layout.blotter-page .form-card.tall { flex: none; }
+  .layout.blotter-page .form-card.tall .field.area { flex: none; }
+  .layout.blotter-page .form-card.tall .field.area textarea { flex: none; height: 120px; min-height: 120px; }
+}

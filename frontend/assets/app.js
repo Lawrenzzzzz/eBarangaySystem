@@ -1,61 +1,78 @@
-/* e-Barangay San Isidro — static front-end demo.
-   No server: the "session" and "accounts" live in this browser's localStorage only.
-   Passwords are never stored. */
 (function () {
   const $ = (s, r = document) => r.querySelector(s),
     $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const store = {
-    get(k) {
-      try {
-        return JSON.parse(localStorage.getItem(k));
-      } catch (e) {
-        return null;
-      }
-    },
-    set(k, v) {
-      try {
-        localStorage.setItem(k, JSON.stringify(v));
-      } catch (e) {}
-    },
-    del(k) {
-      try {
-        localStorage.removeItem(k);
-      } catch (e) {}
-    },
-  };
-  const session = () => store.get("bsi-session"),
-    accounts = () => store.get("bsi-accounts") || {};
+  const API = "../../backend/api";
+  let csrf =
+    document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ||
+    "";
   const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
   function toast(msg, type, ms) {
+    const holder = $("#toasts");
+    if (!holder) return;
     const t = document.createElement("div");
     t.className = "toast " + (type || "");
     t.textContent = msg;
-    $("#toasts").appendChild(t);
+    holder.appendChild(t);
     setTimeout(() => t.remove(), ms || 5000);
   }
-  const iconUse = (id) => $("#" + id).innerHTML;
 
-  // ---- home: signed-in state, drawer, service links
-  const inn = session();
-  $$('[data-auth="in"]').forEach((e) => e.classList.toggle("hidden", !inn));
-  $$('[data-auth="out"]').forEach((e) => e.classList.toggle("hidden", !!inn));
-  $$("[data-service]").forEach((a) =>
-    a.setAttribute("href", inn ? "account.php" : "login.php"),
-  );
+  async function api(path, options = {}) {
+    const method = options.method || "GET";
+    const headers = { Accept: "application/json" };
+    if (options.body !== undefined) headers["Content-Type"] = "application/json";
+    if (csrf) headers["X-CSRF-Token"] = csrf;
+    let response;
+    try {
+      response = await fetch(API + path, {
+        method,
+        headers,
+        credentials: "same-origin",
+        body:
+          options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      });
+    } catch (e) {
+      const error = new Error(
+        "Unable to reach the barangay server. Check your connection and try again.",
+      );
+      error.status = 0;
+      throw error;
+    }
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (e) {}
+    if (!response.ok || !data || data.ok === false) {
+      const error = new Error(
+        (data && data.error) || "Something went wrong. Please try again.",
+      );
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+    return data;
+  }
+
+  const iconUse = (id) => {
+    const source = $("#" + id);
+    return source ? source.innerHTML : "";
+  };
+
   const dr = $("#open-drawer");
   if (dr) {
     const b = document.body,
       close = () => b.classList.remove("drawer-open");
     dr.onclick = () => b.classList.add("drawer-open");
-    $("#close-drawer").onclick = close;
-    $("#drawer-bg").onclick = close;
+    const closeButton = $("#close-drawer"),
+      backdrop = $("#drawer-bg");
+    if (closeButton) closeButton.onclick = close;
+    if (backdrop) backdrop.onclick = close;
     $$(".drawer nav a").forEach((a) => (a.onclick = close));
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") close();
     });
   }
 
-  // ---- auth form
   const A = $("#auth");
   if (A) {
     const form = $("#a-form"),
@@ -64,8 +81,11 @@
       submit = $("#a-submit");
     let mode = A.dataset.initial,
       type = "resident",
-      verified = "",
-      lastMsg = "";
+      verifiedEmail = "",
+      emailProof = "",
+      emailVerificationId = null,
+      lastMsg = "",
+      lastKind = "forgot";
     const T = {
       signin: [
         "Welcome back",
@@ -85,7 +105,7 @@
       ],
       forgot: [
         "Reset your password",
-        "We’ll send a secure reset link to your email.",
+        "We'll send a secure reset link to your email.",
         "Send reset link",
         "Remembered your password?",
         null,
@@ -95,7 +115,10 @@
     };
     function render() {
       const t = T[mode];
-      $("#a-title").textContent = t[0];
+      $("#a-title").textContent =
+        mode === "success" && lastKind === "signup"
+          ? "Account created"
+          : t[0];
       $("#a-sub").textContent = mode === "success" ? lastMsg : t[1];
       succ.classList.toggle("hidden", mode !== "success");
       form.classList.toggle("hidden", mode === "success");
@@ -151,52 +174,191 @@
       $(".eye", A).classList.toggle("hidden", show);
       $(".eye-off", A).classList.toggle("hidden", !show);
     };
-    const phone = form.elements.phone,
-      vb = $("#verify-btn");
-    const syncVerify = () => {
-      const v = phone.value.trim(),
-        ok = verified && verified === v;
-      vb.textContent = ok ? "Verified" : "Verify";
-      vb.className = "btn " + (ok ? "btn-secondary" : "btn-outline");
-      vb.disabled = v.length < 7;
-    };
-    phone.oninput = syncVerify;
+
     const fail = (m) => {
       err.textContent = m;
       err.classList.remove("hidden");
     };
     const f = (n) => (form.elements[n]?.value || "").trim();
 
-    form.onsubmit = (ev) => {
+    const email = form.elements.email,
+      evb = $("#email-verify-btn");
+    const EM = $("#email-modal"),
+      emBoxes = $$("#email-otp input"),
+      emBtn = $("#em-verify"),
+      emRs = $("#em-resend"),
+      emErr = $("#em-err");
+    let emCd = 0,
+      emTimer = null;
+    const emCode = () => emBoxes.map((b) => b.value).join("");
+    const syncEmailVerify = () => {
+      const v = email.value.trim(),
+        ok = !!verifiedEmail && verifiedEmail === v;
+      if (!ok) emailProof = "";
+      evb.textContent = ok ? "Verified" : "Verify";
+      evb.classList.toggle("btn-secondary", ok);
+      evb.classList.toggle("btn-outline", !ok);
+      evb.disabled = !emailOk(v);
+    };
+    email.oninput = syncEmailVerify;
+    function emTick() {
+      clearInterval(emTimer);
+      const u = () => {
+        emRs.disabled = emCd > 0;
+        emRs.textContent = emCd > 0 ? "Resend in " + emCd + "s" : "Resend code";
+      };
+      u();
+      emTimer = setInterval(() => {
+        emCd--;
+        u();
+        if (emCd <= 0) clearInterval(emTimer);
+      }, 1000);
+    }
+    async function sendEmailCode() {
+      const value = email.value.trim();
+      if (!emailOk(value)) {
+        toast("Enter a valid email address first.", "bad");
+        return;
+      }
+      $("#em-email").textContent = value;
+      EM.classList.add("open");
+      emBoxes.forEach((b) => (b.value = ""));
+      emBtn.disabled = true;
+      emErr.classList.add("hidden");
+      emRs.disabled = true;
+      emRs.textContent = "Sending...";
+      try {
+        const data = await api("/email-send.php", {
+          method: "POST",
+          body: { email: value },
+        });
+        emailVerificationId = data.verification_id;
+        if (data.debug_code) {
+          toast(
+            "Verification code for " + value + ": " + data.debug_code,
+            "",
+            15000,
+          );
+        } else {
+          toast("Verification code sent to " + value + ".", "ok", 5000);
+        }
+        emCd = 30;
+        emTick();
+        emBoxes[0].focus();
+      } catch (e) {
+        if (e.data && e.data.retry_after) {
+          emCd = e.data.retry_after;
+          emTick();
+        } else {
+          emRs.disabled = false;
+          emRs.textContent = "Resend code";
+        }
+        emErr.textContent = e.message;
+        emErr.classList.remove("hidden");
+      }
+    }
+    function openEmail() {
+      if (!emailOk(email.value.trim())) return;
+      sendEmailCode();
+    }
+    const closeEmail = () => EM.classList.remove("open");
+    evb.onclick = openEmail;
+    $("#em-close").onclick = closeEmail;
+    EM.onclick = (e) => {
+      if (e.target === EM) closeEmail();
+    };
+    emRs.onclick = sendEmailCode;
+    emBoxes.forEach((b, i) => {
+      b.oninput = () => {
+        b.value = b.value.replace(/\D/g, "").slice(-1);
+        if (b.value && emBoxes[i + 1]) emBoxes[i + 1].focus();
+        emBtn.disabled = emCode().length !== 6;
+        emErr.classList.add("hidden");
+      };
+      b.onkeydown = (e) => {
+        if (e.key === "Backspace" && !b.value && emBoxes[i - 1])
+          emBoxes[i - 1].focus();
+      };
+      b.onpaste = (e) => {
+        const d = (e.clipboardData.getData("text") || "")
+          .replace(/\D/g, "")
+          .slice(0, 6);
+        if (!d) return;
+        e.preventDefault();
+        emBoxes.forEach((x, j) => (x.value = d[j] || ""));
+        emBtn.disabled = d.length !== 6;
+      };
+    });
+    emBtn.onclick = async () => {
+      const entered = emCode();
+      if (entered.length !== 6 || !emailVerificationId) return;
+      emBtn.disabled = true;
+      emErr.classList.add("hidden");
+      try {
+        const data = await api("/email-verify.php", {
+          method: "POST",
+          body: { verification_id: emailVerificationId, code: entered },
+        });
+        verifiedEmail = email.value.trim();
+        emailProof = data.email_proof;
+        emailVerificationId = null;
+        syncEmailVerify();
+        closeEmail();
+        err.classList.add("hidden");
+        toast("Email verified. You can now create your account.", "ok");
+      } catch (e) {
+        emErr.textContent = e.message;
+        emErr.classList.remove("hidden");
+        emBtn.disabled = false;
+      }
+    };
+
+    form.onsubmit = async (ev) => {
       ev.preventDefault();
       err.classList.add("hidden");
       if (mode === "signin") {
-        if (!emailOk(f("email")) || form.elements.password.value.length < 8)
+        if (!emailOk(f("email")) || form.elements.password.value.length < 8) {
           return fail(
             "Enter a valid email and a password with at least 8 characters.",
           );
-        const email = f("email").toLowerCase(),
-          acc = accounts()[email] || {
-            email,
-            profile: {
-              full_name: "Barangay Resident",
-              phone: "Not provided",
-              address: "To be completed",
-              account_type: "resident",
+        }
+        submit.disabled = true;
+        try {
+          const data = await api("/login.php", {
+            method: "POST",
+            body: {
+              email: f("email"),
+              password: form.elements.password.value,
             },
-            application: null,
-          };
-        store.set("bsi-session", acc);
-        location.href = "../account.php";
+          });
+          location.href = data.redirect || "../user_pages/index.php";
+        } catch (e) {
+          fail(e.message);
+          submit.disabled = false;
+        }
         return;
       }
       if (mode === "forgot") {
         if (!emailOk(f("email"))) return fail("Enter a valid email address.");
-        lastMsg =
-          "We sent a secure password reset link to your email. (Demo: open reset-password.php#type=recovery to try the next step.)";
-        return setMode("success");
+        submit.disabled = true;
+        try {
+          const data = await api("/forgot-password.php", {
+            method: "POST",
+            body: { email: f("email") },
+          });
+          lastKind = "forgot";
+          lastMsg = data.message || "If an account exists, a reset link has been sent.";
+          if (data.debug_reset_url) {
+            toast(data.debug_reset_url, "", 20000);
+          }
+          setMode("success");
+        } catch (e) {
+          fail(e.message);
+        } finally {
+          submit.disabled = false;
+        }
+        return;
       }
-      // signup
       const full = f("fullName"),
         em = f("email"),
         ph = f("phone"),
@@ -208,213 +370,182 @@
         ph.length < 7 ||
         ad.length < 5 ||
         pw.length < 8
-      )
+      ) {
         return fail(
           "Please complete all required fields with valid information.",
         );
-      if (verified !== ph) {
-        openPhone();
-        return fail("Please verify your phone number first.");
       }
-      if (type === "official" && (!f("position") || !f("employeeNumber")))
+      if (type === "official" && (!f("position") || !f("employeeNumber"))) {
         return fail("Position and employee number are required for officials.");
-      const official = type === "official",
-        acc = {
-          email: em.toLowerCase(),
-          profile: {
-            full_name: full,
+      }
+      if (verifiedEmail !== em || !emailProof) {
+        openEmail();
+        return fail("Please verify your email address first.");
+      }
+      submit.disabled = true;
+      try {
+        const data = await api("/signup.php", {
+          method: "POST",
+          body: {
+            fullName: full,
+            email: em,
             phone: ph,
             address: ad,
-            household_number: f("householdNumber") || null,
-            account_type: official ? "official_applicant" : "resident",
+            householdNumber: f("householdNumber"),
+            password: pw,
+            accountType: type === "official" ? "official" : "resident",
+            position: f("position"),
+            employeeNumber: f("employeeNumber"),
+            emailProof,
           },
-          application: official
-            ? { position: f("position"), status: "pending" }
-            : null,
-        };
-      const all = accounts();
-      all[acc.email] = acc;
-      store.set("bsi-accounts", all);
-      lastMsg = official
-        ? "Account created (demo). Your official access request is pending review. Sign in to continue."
-        : "Account created (demo). Sign in to continue.";
-      setMode("success");
-    };
-    $("#google").onclick = () =>
-      toast("Google sign-in is not available in the static demo.", "bad");
-
-    // phone verification (demo: code shown on screen)
-    const M = $("#phone-modal"),
-      boxes = $$("#otp input"),
-      vBtn = $("#pm-verify"),
-      rs = $("#pm-resend"),
-      pe = $("#pm-err");
-    let sent = "",
-      cd = 0,
-      timer = null;
-    const code = () => boxes.map((b) => b.value).join("");
-    function send() {
-      sent = String(Math.floor(100000 + Math.random() * 900000));
-      boxes.forEach((b) => (b.value = ""));
-      pe.classList.add("hidden");
-      vBtn.disabled = true;
-      toast(
-        "Verification code for " + phone.value.trim() + ": " + sent,
-        "",
-        15000,
-      );
-      cd = 30;
-      tick();
-      boxes[0].focus();
-    }
-    function tick() {
-      clearInterval(timer);
-      const u = () => {
-        rs.disabled = cd > 0;
-        rs.textContent = cd > 0 ? "Resend in " + cd + "s" : "Resend code";
-      };
-      u();
-      timer = setInterval(() => {
-        cd--;
-        u();
-        if (cd <= 0) clearInterval(timer);
-      }, 1000);
-    }
-    function openPhone() {
-      if (phone.value.trim().length < 7) return;
-      $("#pm-phone").textContent = phone.value.trim();
-      M.classList.add("open");
-      send();
-    }
-    const closePhone = () => M.classList.remove("open");
-    vb.onclick = openPhone;
-    $("#pm-close").onclick = closePhone;
-    M.onclick = (e) => {
-      if (e.target === M) closePhone();
-    };
-    rs.onclick = send;
-    boxes.forEach((b, i) => {
-      b.oninput = () => {
-        b.value = b.value.replace(/\D/g, "").slice(-1);
-        if (b.value && boxes[i + 1]) boxes[i + 1].focus();
-        vBtn.disabled = code().length !== 6;
-        pe.classList.add("hidden");
-      };
-      b.onkeydown = (e) => {
-        if (e.key === "Backspace" && !b.value && boxes[i - 1])
-          boxes[i - 1].focus();
-      };
-      b.onpaste = (e) => {
-        const d = (e.clipboardData.getData("text") || "")
-          .replace(/\D/g, "")
-          .slice(0, 6);
-        if (!d) return;
-        e.preventDefault();
-        boxes.forEach((x, j) => (x.value = d[j] || ""));
-        vBtn.disabled = d.length !== 6;
-      };
-    });
-    vBtn.onclick = () => {
-      vBtn.disabled = true;
-      setTimeout(() => {
-        if (code() !== sent) {
-          pe.textContent = "That code is incorrect. Please try again.";
-          pe.classList.remove("hidden");
-          vBtn.disabled = false;
-          return;
-        }
-        verified = phone.value.trim();
-        syncVerify();
-        closePhone();
-        err.classList.add("hidden");
-        toast("Phone number verified. You can now create your account.", "ok");
-      }, 400);
+        });
+        lastKind = "signup";
+        lastMsg =
+          data.message ||
+          (type === "official"
+            ? "Account created. Your official access request is pending review."
+            : "Account created. You can now sign in.");
+        setMode("success");
+      } catch (e) {
+        fail(e.message);
+        submit.disabled = false;
+      }
     };
     render();
-    syncVerify();
+    syncEmailVerify();
   }
 
-  // ---- reset password
   const R = $("#r-form");
   if (R) {
     const msg = $("#r-msg"),
-      h = new URLSearchParams(location.hash.slice(1));
-    const valid =
-      h.get("type") === "recovery" || !!h.get("access_token") || !!session();
+      query = new URLSearchParams(location.search),
+      hash = new URLSearchParams(location.hash.slice(1));
+    const token = query.get("token") || hash.get("token") || "";
+    const valid = token.length >= 32;
     R.classList.toggle("hidden", !valid);
     msg.classList.toggle("hidden", valid);
-    if (!valid)
-      msg.textContent = "This recovery link is invalid or has expired.";
-    R.onsubmit = (e) => {
+    if (!valid) msg.textContent = "This recovery link is invalid or has expired.";
+    R.onsubmit = async (e) => {
       e.preventDefault();
       const p = $("#r-pass").value,
         c = $("#r-conf").value,
-        er = $("#r-err");
+        er = $("#r-err"),
+        button = $("#r-submit");
       if (p.length < 8 || p !== c) {
-        er.textContent =
-          "Passwords must match and contain at least 8 characters.";
+        er.textContent = "Passwords must match and contain at least 8 characters.";
         er.classList.remove("hidden");
         return;
       }
-      if (!session())
-        store.set("bsi-session", {
-          email: "resident@example.com",
-          profile: {
-            full_name: "Barangay Resident",
-            phone: "Not provided",
-            address: "To be completed",
-            account_type: "resident",
-          },
-          application: null,
+      er.classList.add("hidden");
+      if (button) button.disabled = true;
+      try {
+        await api("/reset-password.php", {
+          method: "POST",
+          body: { token, password: p, confirmPassword: c },
         });
-      location.href = "../account.php";
+        toast("Password updated. You can now sign in.", "ok");
+        setTimeout(() => (location.href = "login.php"), 800);
+      } catch (err) {
+        er.textContent = err.message;
+        er.classList.remove("hidden");
+        if (button) button.disabled = false;
+      }
     };
   }
 
-  // ---- account
   const C = $("#acct");
   if (C) {
-    const s = session();
-    if (!s) {
-      location.replace("login.php");
-      return;
-    }
-    const p = s.profile,
-      a = s.application,
-      set = (id, v) => ($("#" + id).textContent = v);
-    C.hidden = false;
-    set("u-first", (p.full_name || "Barangay resident").split(" ")[0]);
-    set("u-email", s.email || "Not available");
-    set("u-phone", p.phone);
-    set("u-address", p.address);
-    set(
-      "u-type",
-      p.account_type === "official_applicant"
-        ? "Official applicant"
-        : "Resident",
-    );
-    set(
-      "s-title",
-      a
-        ? a.status === "pending"
-          ? "Under review"
-          : a.status
-        : "Resident access",
-    );
-    set(
-      "s-text",
-      a
-        ? a.position +
-            " application. Barangay administrators will review your submitted credentials."
-        : "Your resident account is active and ready for available online services.",
-    );
-    $("#s-ico").innerHTML = iconUse(
-      a && a.status === "pending" ? "ico-clock" : "ico-ok",
-    );
-    $("#s-ico").style.display = "inline-flex";
-    $("#signout").onclick = () => {
-      store.del("bsi-session");
-      location.replace("index.php");
-    };
+    (async () => {
+      try {
+        const data = await api("/account.php");
+        const u = data.user;
+        const set = (id, v) => {
+          const el = $("#" + id);
+          if (el) el.textContent = v;
+        };
+        C.hidden = false;
+        set("u-first", (u.full_name || "Barangay resident").split(" ")[0]);
+        set("u-email", u.email || "Not available");
+        set("u-phone", u.phone || "Not provided");
+        set("u-address", u.address_line || "To be completed");
+        const appStatus = u.official_application_status;
+        set(
+          "u-type",
+          appStatus === "approved"
+            ? "Barangay official"
+            : appStatus
+              ? "Official applicant"
+              : "Resident",
+        );
+        set(
+          "s-title",
+          appStatus === "approved"
+            ? "Official access approved"
+            : appStatus === "pending"
+              ? "Under review"
+              : appStatus === "rejected"
+                ? "Application not approved"
+                : "Resident access",
+        );
+        set(
+          "s-text",
+          appStatus === "pending"
+            ? (u.requested_position || "Official") +
+                " application. Barangay administrators will review your submitted credentials."
+            : appStatus === "approved"
+              ? (u.requested_position || "Official") +
+                " access is active. Use the resident portal to serve residents."
+              : appStatus === "rejected"
+                ? "Your official access request was not approved. Contact the barangay office for details."
+                : "Your resident account is active and ready for available online services.",
+        );
+        const icon = $("#s-ico");
+        if (icon) {
+          icon.innerHTML = iconUse(appStatus === "pending" ? "ico-clock" : "ico-ok");
+          icon.style.display = "inline-flex";
+        }
+        $("#signout").onclick = async () => {
+          try {
+            const out = await api("/logout.php", { method: "POST" });
+            location.replace(out.redirect || "index.php");
+          } catch (e) {
+            location.replace("index.php");
+          }
+        };
+      } catch (e) {
+        if (e.status === 401) {
+          location.replace("login.php");
+          return;
+        }
+        toast(e.message, "bad");
+      }
+    })();
   }
+
+  (async () => {
+    try {
+      const data = await api("/session.php");
+      if (data.csrf) csrf = data.csrf;
+      const signedIn = !!data.authenticated;
+      $$('[data-auth="in"]').forEach((e) =>
+        e.classList.toggle("hidden", !signedIn),
+      );
+      $$('[data-auth="out"]').forEach((e) =>
+        e.classList.toggle("hidden", signedIn),
+      );
+      const destinations = {
+        documents: "../user_pages/documents.php",
+        assistance: "../user_pages/index.php",
+        concern: "../user_pages/blotter.php",
+      };
+      $$("[data-service]").forEach((a) => {
+        a.setAttribute(
+          "href",
+          signedIn
+            ? destinations[a.dataset.service] || "../user_pages/index.php"
+            : "login.php",
+        );
+      });
+    } catch (e) {}
+  })();
 })();

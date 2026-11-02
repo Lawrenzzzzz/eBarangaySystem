@@ -53,7 +53,7 @@
                         Register
                     </a>
                 </span>
-                <a data-auth="in" class="btn btn-primary hidden" href="../account.php">
+                <a data-auth="in" class="btn btn-primary hidden" href="account.php">
                     My account
                     <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M5 12h14"/>
@@ -85,10 +85,10 @@
         </nav>
         <div class="actions">
             <span data-auth="out" style="display:grid;gap:.5rem">
-                <a class="btn btn-outline" href="../login.php">Sign in</a>
-                <a class="btn btn-primary" href="../signup.php">Register</a>
+                <a class="btn btn-outline" href="login.php">Sign in</a>
+                <a class="btn btn-primary" href="signup.php">Register</a>
             </span>
-            <a data-auth="in" class="btn btn-primary hidden" href="../account.php">My account</a>
+            <a data-auth="in" class="btn btn-primary hidden" href="account.php">My account</a>
         </div>
     </aside>
 
@@ -142,7 +142,7 @@
                         </span>
                         <h3>Request documents</h3>
                         <p>Barangay clearance, residency, indigency, and other certificates.</p>
-                        <a class="btn btn-link" data-service href="../login.php">Open service
+                        <a class="btn btn-link" data-service="documents" href="login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -157,7 +157,7 @@
                         </span>
                         <h3>Community assistance</h3>
                         <p>Ask about health, senior, livelihood, and social support programs.</p>
-                        <a class="btn btn-link" data-service href="../login.php">Open service
+                        <a class="btn btn-link" data-service="assistance" href="login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -172,7 +172,7 @@
                         </span>
                         <h3>Report a concern</h3>
                         <p>Send a local concern to the barangay office for proper action.</p>
-                        <a class="btn btn-link" data-service href="../login.php">Open service
+                        <a class="btn btn-link" data-service="concern" href="login.php">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>

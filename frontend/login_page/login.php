@@ -1,12 +1,18 @@
+<?php
+declare(strict_types=1);
+require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+$csrf = csrf_token();
+?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create account | e-Barangay San Isidro</title>
-    <meta name="description" content="Register as a resident or request official access to e-Barangay San Isidro.">
-    <meta property="og:title" content="Create account | e-Barangay San Isidro">
-    <meta property="og:description" content="Register as a resident or request official access to e-Barangay San Isidro.">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+    <title>Sign in | e-Barangay San Isidro</title>
+    <meta name="description" content="Sign in to your e-Barangay San Isidro resident or official account.">
+    <meta property="og:title" content="Sign in | e-Barangay San Isidro">
+    <meta property="og:description" content="Sign in to your e-Barangay San Isidro resident or official account.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,8 +34,8 @@
                 e-Barangay San Isidro
             </a>
             <div style="max-width:28rem">
-                <h2>Join your barangay online.</h2>
-                <p class="lead">Create a verified account to request services and stay informed.</p>
+                <h2>Welcome back, ka-barangay.</h2>
+                <p class="lead">Access documents, announcements, and services from anywhere.</p>
                 <ul>
                     <li>
                         <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
@@ -37,7 +43,7 @@
                     </li>
                     <li>
                         <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
-                        Verified accounts via phone number
+                        Phone number for service updates
                     </li>
                     <li>
                         <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
@@ -56,7 +62,7 @@
             Back to home
         </a>
         <div class="auth-wrap">
-            <div class="auth-card" id="auth" data-initial="signup">
+            <div class="auth-card" id="auth" data-initial="signin">
                 <div class="auth-head">
                     <div class="ico">
                         <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
@@ -91,15 +97,15 @@
                     </div>
                     <div class="grid2" data-modes="signup">
                         <label class="field"><span class="label">Full name</span><input class="input" name="fullName" placeholder="Juan Dela Cruz" autocomplete="name"></label>
-                        <div class="field">
-                            <label class="label" for="phone">Phone number</label>
-                            <div class="row">
-                                <input class="input" id="phone" name="phone" placeholder="09XX XXX XXXX" autocomplete="tel">
-                                <button type="button" class="btn btn-outline" id="verify-btn" style="height:2.75rem" disabled>Verify</button>
-                            </div>
+                        <label class="field"><span class="label">Phone number</span><input class="input" name="phone" placeholder="09XX XXX XXXX" autocomplete="tel"></label>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="email">Email address</label>
+                        <div class="row">
+                            <input class="input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email">
+                            <button type="button" class="btn btn-outline" id="email-verify-btn" style="height:2.75rem" data-modes="signup" disabled>Verify</button>
                         </div>
                     </div>
-                    <label class="field"><span class="label">Email address</span><input class="input" type="email" name="email" placeholder="you@example.com" autocomplete="email"></label>
                     <div class="stack" data-modes="signup">
                         <label class="field"><span class="label">Complete address</span><input class="input" name="address" placeholder="House no., street, purok" autocomplete="street-address"></label>
                         <label class="field"><span class="label">Household number (optional)</span><input class="input" name="householdNumber" placeholder="e.g. HH-0241"></label>
@@ -135,22 +141,12 @@
                         <button type="button" class="btn btn-link small" data-mode="forgot">Forgot password?</button>
                     </div>
                     <button type="submit" class="btn btn-primary btn-full btn-lg-form" id="a-submit"></button>
-                    <div data-modes="signin signup" class="stack">
-                        <div class="or"><span></span>or continue with<span></span></div>
-                        <button type="button" class="btn btn-outline btn-full" id="google" style="height:2.75rem">
-                            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                            </svg>
-                            Google
-                        </button>
-                    </div>
                     <p class="center"><span id="a-foot"></span> <a id="a-link" href="#"></a><button type="button" class="btn btn-link hidden" id="a-back" data-mode="signin">Sign in</button></p>
                 </form>
             </div>
-            <div class="modal-bg" id="phone-modal">
+            <div class="modal-bg" id="email-modal">
                 <div class="modal" role="dialog" aria-modal="true">
-                    <button class="btn btn-ghost btn-icon modal-x" type="button" id="pm-close" aria-label="Close">
+                    <button class="btn btn-ghost btn-icon modal-x" type="button" id="em-close" aria-label="Close">
                         <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M18 6 6 18M6 6l12 12"/>
                         </svg>
@@ -158,14 +154,14 @@
                     <div class="head">
                         <div class="ico">
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="5" y="2" width="14" height="20" rx="2"/>
-                                <path d="M12 18h.01"/>
+                                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                <path d="m22 7-10 5L2 7"/>
                             </svg>
                         </div>
-                        <h2>Verify your number</h2>
-                        <p>Enter the 6-digit code sent to <b id="pm-phone"></b>.</p>
+                        <h2>Verify your email</h2>
+                        <p>Enter the 6-digit code sent to <b id="em-email"></b>.</p>
                     </div>
-                    <div class="otp" id="otp">
+                    <div class="otp" id="email-otp">
                         <input inputmode="numeric" maxlength="1" aria-label="Digit 1">
                         <input inputmode="numeric" maxlength="1" aria-label="Digit 2">
                         <input inputmode="numeric" maxlength="1" aria-label="Digit 3">
@@ -173,9 +169,9 @@
                         <input inputmode="numeric" maxlength="1" aria-label="Digit 5">
                         <input inputmode="numeric" maxlength="1" aria-label="Digit 6">
                     </div>
-                    <p class="err hidden center" id="pm-err" role="alert" style="color:var(--destructive)"></p>
-                    <button class="btn btn-primary btn-full" id="pm-verify" style="height:2.75rem" disabled>Verify number</button>
-                    <p class="center">Didn't get it? <button class="btn btn-link" id="pm-resend" type="button">Resend code</button></p>
+                    <p class="err hidden center" id="em-err" role="alert" style="color:var(--destructive)"></p>
+                    <button class="btn btn-primary btn-full" id="em-verify" style="height:2.75rem" disabled>Verify email</button>
+                    <p class="center">Didn't get it? <button class="btn btn-link" id="em-resend" type="button">Resend code</button></p>
                 </div>
             </div>
         </div>

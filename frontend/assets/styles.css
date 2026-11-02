@@ -768,6 +768,25 @@ svg.i {
   width: 2.25rem;
   height: 2.25rem;
 }
+.pw .eye,
+.pw .eye-off {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pw .eye.hidden,
+.pw .eye-off.hidden {
+  display: none !important;
+}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+}
 .auth-page {
   display: grid;
   min-height: 100vh;
@@ -952,18 +971,6 @@ svg.i {
   padding: 1rem;
   font-size: 0.875rem;
   line-height: 1.5;
-}
-.or {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-}
-.or span {
-  height: 1px;
-  flex: 1;
-  background: var(--border);
 }
 .center {
   text-align: center;
