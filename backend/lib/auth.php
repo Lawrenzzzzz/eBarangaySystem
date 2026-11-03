@@ -291,6 +291,7 @@ function sign_in_user(string $rawEmail, string $password): array
     $roleCode = (string) ($user['role_code'] ?? 'resident');
     $redirect = match ($roleCode) {
         'admin', 'captain', 'super_admin' => '../admin/dashboard.php',
+        'official', 'staff', 'kagawad', 'secretary', 'treasurer' => '../barangay_officials/dashboard.php',
         default => '../user_pages/index.php',
     };
 

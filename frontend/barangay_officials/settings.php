@@ -1,3 +1,7 @@
+<?php
+declare(strict_types=1);
+require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,10 +56,10 @@
     </div>
     
     <div class="user-profile">
-      <img src="img/captain.jpg" alt="Captain" class="avatar">
+      <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="avatar">
       <div>
-        <div class="name">Capt. Choi Seungcheol Batumbakal</div>
-        <div class="role">Barangay Captain of Bucana</div>
+        <div class="name"><?= $esc($officialFullName) ?></div>
+        <div class="role"><?= $esc($officialRoleName) ?></div>
       </div>
     </div>
   </div>
