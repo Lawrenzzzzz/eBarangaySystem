@@ -595,3 +595,42 @@ small.warn { color: var(--orange); }
   .layout.blotter-page .form-card.tall .field.area { flex: none; }
   .layout.blotter-page .form-card.tall .field.area textarea { flex: none; height: 120px; min-height: 120px; }
 }
+
+/* ---------- Blotter report details ---------- */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.detail-grid > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--blue-bg);
+}
+.detail-grid span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.detail-grid strong { font: 600 14px/1.4 var(--head); }
+.detail-title { font: 600 16px/1.3 var(--head); margin: 24px 0 8px; }
+.detail-copy { font-size: 14px; line-height: 1.7; }
+.rep .link { margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 861px) {
+  .detail-grid { gap: 16px; }
+  .detail-grid > div { padding: 15px 18px; }
+  .detail-grid span { font-size: 11.5px; }
+  .detail-grid strong { font-size: 16px; }
+  .detail-title { font-size: 19px; margin: 28px 0 10px; }
+  .detail-copy { font-size: 15.5px; }
+}

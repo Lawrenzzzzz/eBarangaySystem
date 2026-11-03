@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
-$csrf = csrf_token();
+require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
 ?>
 <!doctype html>
 <html lang="en">

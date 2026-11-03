@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
-require_login_page('../login_page/login.php');
-require __DIR__ . '/_user.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/resident/announcements.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

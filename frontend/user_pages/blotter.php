@@ -1,14 +1,13 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
-require_login_page('../login_page/login.php');
-require __DIR__ . '/_user.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Barangay Bucana | Blotter</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -59,20 +58,22 @@ require __DIR__ . '/_user.php';
         <h2>File a blotter report</h2>
         <p class="desc">Report a complaint, nuisance, or incident for the barangay blotter record.</p>
 
-        <form>
+        <form id="blotter-form" novalidate>
           <div class="field-grid">
-            <label class="field"><span>Filed by</span><input type="text" name="filed_by" maxlength="80" value="<?= $esc($userFullName) ?>"></label>
-            <label class="field"><span>Address</span><input type="text" name="address" maxlength="120" value="<?= $esc($userAddress) ?>"></label>
-            <label class="field wide"><span>What is the report about</span><input type="text" name="subject" maxlength="80" value="" required placeholder="e.g. Noise complaint"></label>
+            <label class="field"><span>Filed by</span><input type="text" name="filed_by" maxlength="80" value="<?= $esc($userFullName) ?>" readonly></label>
+            <label class="field"><span>Address</span><input type="text" name="address" maxlength="120" value="<?= $esc($userAddress) ?>" readonly></label>
+            <label class="field wide"><span>What is the report about</span><input type="text" name="subject" id="blotter-subject" maxlength="160" minlength="5" value="" required placeholder="e.g. Noise complaint"></label>
           </div>
 
           <label class="field-label" for="details">What happened?</label>
           <label class="field area">
-            <textarea id="details" name="details" rows="3" maxlength="1000" required placeholder="Include the date, time, place, and people involved if you know them"></textarea>
+            <textarea id="details" name="details" rows="3" maxlength="1000" minlength="10" required placeholder="Include the date, time, place, and people involved if you know them"></textarea>
           </label>
 
+          <p class="error" id="blotter-error" role="alert" hidden></p>
+
           <div class="form-foot">
-            <button type="submit" class="btn-primary">Submit report</button>
+            <button type="submit" class="btn-primary" id="blotter-submit">Submit report</button>
           </div>
         </form>
       </section>
@@ -82,7 +83,19 @@ require __DIR__ . '/_user.php';
     <aside class="col-side">
       <section>
         <h2 class="side-title">Your reports</h2>
-        <p class="empty">You have no blotter reports yet.</p>
+        <?php if ($blotterReports): ?>
+          <?php foreach ($blotterReports as $report): ?>
+            <article class="card rep">
+              <h3><?= $esc($report['subject']) ?> <span class="badge <?= $esc($report['status_tone']) ?>"><?= $esc($report['status_label']) ?></span></h3>
+              <p class="ref">Ref <?= $esc($report['reference_no']) ?> · <?= $esc(date('M j, Y', strtotime($report['created_at']))) ?></p>
+              <p><?= $esc($blotterExcerpt($report['details'])) ?></p>
+              <a class="link" href="blotter-report.php?ref=<?= urlencode($report['reference_no']) ?>">View full report <span class="arrow">→</span></a>
+            </article>
+          <?php endforeach; ?>
+          <a href="track.php" class="link">View all reports</a>
+        <?php else: ?>
+          <p class="empty">You have no blotter reports yet.</p>
+        <?php endif; ?>
       </section>
     </aside>
   </div>
@@ -91,21 +104,84 @@ require __DIR__ . '/_user.php';
 <script>
 (function () {
   var card = document.getElementById('blotter-card');
-  var form = card.querySelector('form');
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var ref = 'BL-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+  var form = document.getElementById('blotter-form');
+  if (!card || !form) return;
+
+  var subjectEl = document.getElementById('blotter-subject');
+  var detailsEl = document.getElementById('details');
+  var errorEl = document.getElementById('blotter-error');
+  var submitBtn = document.getElementById('blotter-submit');
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+    });
+  }
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+  }
+
+  function renderSuccess(report) {
     card.innerHTML =
       '<div class="done">' +
         '<span class="chip">✓</span>' +
         '<h2>Report submitted</h2>' +
         '<p>The barangay has received your report and it is now pending review.</p>' +
-        '<p>Reference number: <span class="ref-no">' + ref + '</span></p>' +
+        '<p>Reference number: <span class="ref-no">' + escapeHtml(report.reference_no) + '</span></p>' +
         '<div class="form-foot">' +
-          '<a href="blotter.php" class="btn-primary">File another report</a>' +
-          '<a href="index.php" class="link">Back to home</a>' +
+          '<a href="track.php" class="btn-primary">View my reports</a>' +
+          '<a href="blotter.php" class="link">File another report</a>' +
         '</div>' +
       '</div>';
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    errorEl.hidden = true;
+
+    var subject = subjectEl.value.trim();
+    var details = detailsEl.value.trim();
+
+    if (subject.length < 5) {
+      showError('Enter a subject for your report (at least 5 characters).');
+      subjectEl.focus();
+      return;
+    }
+    if (details.length < 10) {
+      showError('Describe what happened (at least 10 characters).');
+      detailsEl.focus();
+      return;
+    }
+
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      var response = await fetch('../../backend/api/blotter-reports.php', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfMeta ? csrfMeta.content : ''
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ subject: subject, details: details })
+      });
+      var result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Unable to submit your report right now.');
+      }
+
+      renderSuccess(result.report);
+    } catch (error) {
+      showError(error.message || 'Unable to submit your report right now.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit report';
+    }
   });
 })();
 </script>

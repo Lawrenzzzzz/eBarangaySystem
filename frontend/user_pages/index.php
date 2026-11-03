@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
-require_login_page('../login_page/login.php');
-require __DIR__ . '/_user.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,29 +49,29 @@ require __DIR__ . '/_user.php';
           <p class="date"><?= $esc(date('l, F j')) ?></p>
           <h1>Good day, <?= $esc($userFirstName) ?></h1>
         </div>
-        <p class="summary">Your requests will appear here once you submit one.</p>
+        <p class="summary"><?= $homeStats['active'] > 0 ? $esc($homeStats['active'] . ' active request' . ($homeStats['active'] === 1 ? '' : 's')) : 'Your requests will appear here once you submit one.' ?></p>
       </section>
 
       <section class="stats" aria-label="Summary">
         <div class="card stat">
           <span class="label">Active requests</span>
-          <strong>0</strong>
-          <small class="good">No active requests</small>
+          <strong><?= $homeStats['active'] ?></strong>
+          <small class="good"><?= $homeStats['active'] > 0 ? 'Awaiting action' : 'No active requests' ?></small>
         </div>
         <div class="card stat">
           <span class="label">Processing</span>
-          <strong>0</strong>
-          <small class="warn">Nothing in progress</small>
+          <strong><?= $homeStats['processing'] ?></strong>
+          <small class="warn"><?= $homeStats['processing'] > 0 ? 'In progress' : 'Nothing in progress' ?></small>
         </div>
         <div class="card stat">
           <span class="label">Blotter filed</span>
-          <strong>0</strong>
-          <small class="">No reports filed</small>
+          <strong><?= $homeBlotterStats['total'] ?></strong>
+          <small class=""><?= $homeBlotterStats['active'] > 0 ? $homeBlotterStats['active'] . ' active report' . ($homeBlotterStats['active'] === 1 ? '' : 's') : 'No active reports' ?></small>
         </div>
         <div class="card stat">
           <span class="label">Completed</span>
-          <strong>0</strong>
-          <small class="">No completed requests</small>
+          <strong><?= $homeStats['completed'] ?></strong>
+          <small class=""><?= $homeStats['completed'] > 0 ? 'Released documents' : 'No completed requests' ?></small>
         </div>
       </section>
 
@@ -110,7 +108,26 @@ require __DIR__ . '/_user.php';
           <a href="track.php" class="link">View all</a>
         </div>
         <div class="req-list">
-          <p class="empty">You have no document requests yet. Start one from the Documents page.</p>
+          <?php if ($homeRequests): ?>
+            <?php foreach ($homeRequests as $request): ?>
+              <?php $homeProgress = (int) $request['progress']; ?>
+              <article class="card req">
+                <span class="chip <?= $esc($homeChipClasses[$request['document_type']] ?? 'blue') ?>"><?= $esc($homeChipLetters[$request['document_type']] ?? strtoupper(substr($request['document_type'], 0, 1))) ?></span>
+                <div class="req-body">
+                  <h3><?= $esc($request['document_name']) ?> <span class="badge <?= $esc($request['status_tone']) ?>"><?= $esc($request['status_label']) ?></span></h3>
+                  <p class="ref">Ref <?= $esc($request['reference_no']) ?> · <?= $esc(date('M j, Y', strtotime($request['created_at']))) ?></p>
+                  <div class="bar">
+                    <span class="seg"><i style="width:<?= $homeProgress >= 1 ? '100%' : '0' ?>"></i></span>
+                    <span class="seg"><i style="width:<?= $homeProgress >= 2 ? '100%' : '0' ?>"></i></span>
+                    <span class="seg"><i style="width:<?= $homeProgress >= 3 ? '100%' : '0' ?>"></i></span>
+                  </div>
+                </div>
+                <span class="req-note"><?= $esc($homeRequestNotes[$request['status']] ?? $request['status_label']) ?></span>
+              </article>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p class="empty">You have no document requests yet. Start one from the Documents page.</p>
+          <?php endif; ?>
         </div>
       </section>
     </main>

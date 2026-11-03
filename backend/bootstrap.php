@@ -56,3 +56,5 @@ require_once __DIR__ . '/lib/helpers.php';
 require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/mailer.php';
 require_once __DIR__ . '/lib/auth.php';
+require_once __DIR__ . '/lib/documents.php';
+require_once __DIR__ . '/lib/blotter.php';

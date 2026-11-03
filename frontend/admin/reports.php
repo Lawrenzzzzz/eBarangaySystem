@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/_auth.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

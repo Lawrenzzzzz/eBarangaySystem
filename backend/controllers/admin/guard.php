@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 $currentUser = account_details((int) current_user_id());
 $adminRoles = ['admin', 'captain', 'super_admin'];
