@@ -18,11 +18,11 @@ VALUES
 
 INSERT IGNORE INTO residents (
   id, user_id, resident_code, full_name, first_name, middle_name, last_name, suffix,
-  household_number, address_line, verification_status, verified_by, verified_at
-)
-VALUES
-  (1, 1, 'BSG-20417', 'Marco Dela Peña', 'Marco', NULL, 'Dela Peña', NULL, '4-118', 'Household #4-118, Barangay San Isidro', 'verified', 3, NOW()),
-  (2, 2, 'BSG-20418', 'Maria Santos', 'Maria', NULL, 'Santos', NULL, NULL, 'Barangay San Isidro', 'verified', 3, NOW());
+  household_number, address_line
+) VALUES
+
+  (1, 1, 'BSG-20417', 'Marco Dela Peña', 'Marco', NULL, 'Dela Peña', NULL, '4-118', 'Household #4-118, Barangay San Isidro'),
+  (2, 2, 'BSG-20418', 'Maria Santos', 'Maria', NULL, 'Santos', NULL, NULL, 'Barangay San Isidro');
 
 INSERT IGNORE INTO official_applications (
   id, user_id, requested_position, employee_number, status

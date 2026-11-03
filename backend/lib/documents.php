@@ -198,8 +198,7 @@ function create_document_request(int $userId, array $input): array
 
     $pdo = db();
     $residentStatement = $pdo->prepare(
-        "SELECT r.id, r.resident_code, r.full_name, r.household_number, r.address_line,
-                r.verification_status, u.status AS account_status
+        "SELECT r.id, r.resident_code, r.full_name, r.household_number, r.address_line, u.status AS account_status
          FROM residents r
          JOIN users u ON u.id = r.user_id
          WHERE r.user_id = ? AND u.deleted_at IS NULL

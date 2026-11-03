@@ -60,22 +60,14 @@ CREATE TABLE IF NOT EXISTS residents (
   birth_date DATE NULL,
   sex ENUM('male', 'female', 'other') NULL,
   civil_status ENUM('single', 'married', 'widowed', 'separated', 'annulled') NULL,
-  verification_status ENUM('unverified', 'pending', 'verified', 'rejected') NOT NULL DEFAULT 'unverified',
-  verified_by BIGINT UNSIGNED NULL,
-  verified_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_residents_user (user_id),
   UNIQUE KEY uq_residents_code (resident_code),
-  KEY idx_residents_verification (verification_status),
-  KEY idx_residents_verified_by (verified_by),
   CONSTRAINT fk_residents_user
     FOREIGN KEY (user_id) REFERENCES users (id)
-    ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_residents_verified_by
-    FOREIGN KEY (verified_by) REFERENCES users (id)
-    ON DELETE SET NULL ON UPDATE CASCADE
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS official_applications (

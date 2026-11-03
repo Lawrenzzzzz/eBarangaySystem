@@ -62,6 +62,12 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <div class="role"><?= $esc($officialRoleName) ?></div>
       </div>
     </div>
+
+    <div class="px-3 pb-3">
+      <button class="btn btn-outline-light btn-sm w-100" id="official-signout" type="button">
+        <i class="bi bi-box-arrow-right me-1"></i> Sign out
+      </button>
+    </div>
   </div>
 
   <div class="eb-main">
@@ -73,7 +79,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         </div>
       </div>
       <div class="d-flex align-items-center gap-3">
-        <span class="sys-live"><span class="dot"></span> System Live</span>
         <button class="btn btn-orange btn-sm px-3">
           <i class="bi bi-check-lg me-1"></i> Save All
         </button>
@@ -185,5 +190,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

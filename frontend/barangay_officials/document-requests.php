@@ -63,6 +63,12 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <div class="role"><?= $esc($officialRoleName) ?></div>
       </div>
     </div>
+
+    <div class="px-3 pb-3">
+      <button class="btn btn-outline-light btn-sm w-100" id="official-signout" type="button">
+        <i class="bi bi-box-arrow-right me-1"></i> Sign out
+      </button>
+    </div>
   </div>
 
   <div class="eb-main">
@@ -72,12 +78,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <h5>Document Requests</h5>
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <span class="sys-live"><span class="dot"></span> System Live</span>
-        <a href="#" class="btn btn-orange btn-sm px-3">
-          <i class="bi bi-plus-lg me-1"></i> New Request
-        </a>
       </div>
     </div>
 
@@ -114,5 +114,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

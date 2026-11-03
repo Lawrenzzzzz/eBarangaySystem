@@ -13,6 +13,7 @@ if ($currentUser === null || !in_array($currentUser['role_code'] ?? '', $officia
 $esc = static function ($value): string {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 };
+$csrf = csrf_token();
 
 $officialFullName = trim((string) ($currentUser['full_name'] ?? ''));
 if ($officialFullName === '') {

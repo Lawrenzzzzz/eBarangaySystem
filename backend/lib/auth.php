@@ -202,7 +202,7 @@ function register_account(array $input): array
         $firstName = $parts[0];
         $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
 
-        $insertResident = $pdo->prepare("INSERT INTO residents (user_id, resident_code, full_name, first_name, last_name, household_number, address_line, verification_status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+        $insertResident = $pdo->prepare("INSERT INTO residents (user_id, resident_code, full_name, first_name, last_name, household_number, address_line) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $insertResident->execute([
             $userId,
             $residentCode,
