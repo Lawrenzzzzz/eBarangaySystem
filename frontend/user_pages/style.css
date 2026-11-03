@@ -634,3 +634,48 @@ small.warn { color: var(--orange); }
   .detail-title { font-size: 19px; margin: 28px 0 10px; }
   .detail-copy { font-size: 15.5px; }
 }
+
+/* ==========================================================
+   Resident onboarding (profile interview modal)
+   ========================================================== */
+.onb-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; justify-content: center;
+  padding: 32px 18px; overflow-y: auto;
+  background: rgba(15, 28, 58, .55);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.onb-modal {
+  width: 100%; max-width: 560px; margin: auto 0;
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: 0 24px 64px rgba(15, 28, 58, .38);
+  padding: 28px 28px 24px;
+}
+.onb-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 14px; padding: 5px 11px; border-radius: 999px;
+  background: var(--blue-bg); color: var(--blue);
+  font: 700 11px/1 var(--head); letter-spacing: .05em; text-transform: uppercase;
+}
+.onb-modal h2 { font: 700 22px/1.25 var(--head); margin-bottom: 8px; }
+.onb-modal .onb-desc { font-size: 13.5px; line-height: 1.6; color: var(--muted); margin-bottom: 20px; }
+.onb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.onb-grid .wide { grid-column: 1 / -1; }
+.onb-modal .field select {
+  width: 100%; margin: 0; padding: 0; border: 0; outline: none;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+}
+.onb-error { margin-top: 14px; color: #b91c1c; font-size: 13px; }
+.onb-foot { display: flex; justify-content: flex-end; margin-top: 22px; }
+.onb-foot .btn-primary {
+  width: auto; padding: 12px 26px; border: 0; border-radius: 12px; cursor: pointer;
+  font-family: var(--head);
+}
+.onb-foot .btn-primary:disabled { opacity: .65; cursor: default; }
+
+@media (max-width: 560px) {
+  .onb-overlay { padding: 16px 12px; }
+  .onb-modal { padding: 22px 18px 20px; }
+  .onb-modal h2 { font-size: 19px; }
+  .onb-grid { grid-template-columns: 1fr; }
+}

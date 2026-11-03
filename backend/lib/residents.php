@@ -104,6 +104,143 @@ function delete_official_resident(int $residentId, int $officialUserId): array
     return ['ok' => true, 'message' => $resident['full_name'] . ' has been removed.'];
 }
 
+function resident_profile_record(int $userId): ?array
+{
+    if ($userId < 1) {
+        return null;
+    }
+
+    $statement = db()->prepare(
+        "SELECT r.id, r.first_name, r.middle_name, r.last_name, r.suffix, r.full_name,
+                r.birth_date, r.sex, r.civil_status, r.profile_completed_at, u.account_type
+         FROM residents r
+         JOIN users u ON u.id = r.user_id
+         WHERE r.user_id = ? AND u.deleted_at IS NULL
+         LIMIT 1"
+    );
+    $statement->execute([$userId]);
+    $row = $statement->fetch();
+
+    return $row === false ? null : $row;
+}
+
+function resident_needs_profile(int $userId): bool
+{
+    $record = resident_profile_record($userId);
+    if ($record === null || (string) $record['account_type'] !== 'resident') {
+        return false;
+    }
+
+    return $record['profile_completed_at'] === null;
+}
+
+function resident_profile_payload(int $userId): array
+{
+    $record = resident_profile_record($userId);
+    if ($record === null) {
+        return ['needs_onboarding' => false, 'profile' => null];
+    }
+
+    return [
+        'needs_onboarding' => resident_needs_profile($userId),
+        'profile' => [
+            'first_name' => (string) ($record['first_name'] ?? ''),
+            'middle_name' => (string) ($record['middle_name'] ?? ''),
+            'last_name' => (string) ($record['last_name'] ?? ''),
+            'suffix' => (string) ($record['suffix'] ?? ''),
+            'birth_date' => (string) ($record['birth_date'] ?? ''),
+            'sex' => (string) ($record['sex'] ?? ''),
+            'civil_status' => (string) ($record['civil_status'] ?? ''),
+        ],
+    ];
+}
+
+function save_resident_profile(int $userId, array $input): array
+{
+    $record = resident_profile_record($userId);
+    if ($record === null) {
+        return ['ok' => false, 'status' => 404, 'error' => 'Resident record was not found.'];
+    }
+    if ((string) $record['account_type'] !== 'resident') {
+        return ['ok' => false, 'status' => 403, 'error' => 'Only resident accounts can update this profile.'];
+    }
+
+    $firstName = trim((string) ($input['first_name'] ?? ''));
+    $middleName = trim((string) ($input['middle_name'] ?? ''));
+    $lastName = trim((string) ($input['last_name'] ?? ''));
+    $suffix = trim((string) ($input['suffix'] ?? ''));
+    $birthDate = trim((string) ($input['birth_date'] ?? ''));
+    $sex = strtolower(trim((string) ($input['sex'] ?? '')));
+    $civilStatus = strtolower(trim((string) ($input['civil_status'] ?? '')));
+
+    $namePattern = "/^[\p{L}\s.'-]+$/u";
+
+    if ($firstName === '' || mb_strlen($firstName) > 80 || !preg_match($namePattern, $firstName)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid first name.'];
+    }
+    if ($lastName === '' || mb_strlen($lastName) > 80 || !preg_match($namePattern, $lastName)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid last name.'];
+    }
+    if ($middleName !== '' && (mb_strlen($middleName) > 80 || !preg_match($namePattern, $middleName))) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid middle name.'];
+    }
+    if ($suffix !== '' && (mb_strlen($suffix) > 20 || !preg_match("/^[\p{L}.'-]+$/u", $suffix))) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid suffix.'];
+    }
+
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $birthDate);
+    if ($date === false || $date->format('Y-m-d') !== $birthDate) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter your birth date.'];
+    }
+    $today = new DateTimeImmutable('today');
+    if ($date > $today) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Birth date cannot be in the future.'];
+    }
+    if ($date->diff($today)->y > 130) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid birth date.'];
+    }
+
+    if (!in_array($sex, ['male', 'female', 'other'], true)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Select your sex.'];
+    }
+    if (!in_array($civilStatus, ['single', 'married', 'widowed', 'separated', 'annulled'], true)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Select your civil status.'];
+    }
+
+    $fullName = $firstName;
+    if ($middleName !== '') {
+        $fullName .= ' ' . $middleName;
+    }
+    $fullName .= ' ' . $lastName;
+    if ($suffix !== '') {
+        $fullName .= ' ' . $suffix;
+    }
+
+    $statement = db()->prepare(
+        "UPDATE residents
+         SET first_name = ?, middle_name = ?, last_name = ?, suffix = ?, full_name = ?,
+             birth_date = ?, sex = ?, civil_status = ?, profile_completed_at = NOW()
+         WHERE user_id = ?"
+    );
+    $statement->execute([
+        $firstName,
+        $middleName !== '' ? $middleName : null,
+        $lastName,
+        $suffix !== '' ? $suffix : null,
+        $fullName,
+        $birthDate,
+        $sex,
+        $civilStatus,
+        $userId,
+    ]);
+
+    return [
+        'ok' => true,
+        'message' => 'Your profile has been saved.',
+        'full_name' => $fullName,
+    ];
+}
+
 function official_resident_stats(): array
 {
     $statement = db()->query(

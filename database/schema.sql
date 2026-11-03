@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS residents (
   birth_date DATE NULL,
   sex ENUM('male', 'female', 'other') NULL,
   civil_status ENUM('single', 'married', 'widowed', 'separated', 'annulled') NULL,
+  profile_completed_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
