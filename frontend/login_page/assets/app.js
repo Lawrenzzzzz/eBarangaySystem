@@ -471,12 +471,21 @@
       const data = await api("/session.php");
       if (data.csrf) csrf = data.csrf;
       const signedIn = !!data.authenticated;
-      $$('[data-auth="in"]').forEach((e) =>
-        e.classList.toggle("hidden", !signedIn),
-      );
       $$('[data-auth="out"]').forEach((e) =>
         e.classList.toggle("hidden", signedIn),
       );
+      const role = (data.user && data.user.role_code) || "resident";
+      const dashboard = ["admin", "captain", "super_admin"].includes(role)
+        ? "../admin/dashboard.php"
+        : ["official", "staff", "kagawad", "secretary", "treasurer"].includes(
+              role,
+            )
+          ? "../barangay_officials/dashboard.php"
+          : "../user_pages/index.php";
+      $$('[data-auth="in"]').forEach((e) => {
+        e.classList.toggle("hidden", !signedIn);
+        e.setAttribute("href", dashboard);
+      });
       const destinations = {
         documents: "../user_pages/documents.php",
         assistance: "../user_pages/index.php",
