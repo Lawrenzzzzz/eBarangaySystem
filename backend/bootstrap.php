@@ -42,8 +42,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     session_name('ebarangay_session');
     ini_set('session.use_strict_mode', '1');
+    ini_set('session.gc_maxlifetime', '28800');
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => 28800,
         'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',

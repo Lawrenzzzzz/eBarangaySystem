@@ -275,10 +275,20 @@ function resident_profile_record(int $userId): ?array
     return $row === false ? null : $row;
 }
 
+function resident_can_complete_profile(array $account): bool
+{
+    return (string) ($account['account_type'] ?? '') === 'resident'
+        || (string) ($account['role_code'] ?? '') === 'resident';
+}
+
 function resident_needs_profile(int $userId): bool
 {
     $record = resident_profile_record($userId);
-    if ($record === null || (string) $record['account_type'] !== 'resident') {
+    if ($record === null) {
+        return resident_can_complete_profile(account_details($userId) ?? []);
+    }
+
+    if ((string) $record['account_type'] !== 'resident') {
         return false;
     }
 
@@ -289,7 +299,27 @@ function resident_profile_payload(int $userId): array
 {
     $record = resident_profile_record($userId);
     if ($record === null) {
-        return ['needs_onboarding' => false, 'profile' => null];
+        $account = account_details($userId);
+        if ($account === null || !resident_can_complete_profile($account)) {
+            return ['needs_onboarding' => false, 'profile' => null];
+        }
+
+        return [
+            'needs_onboarding' => true,
+            'profile' => [
+                'first_name' => '',
+                'middle_name' => '',
+                'last_name' => '',
+                'suffix' => '',
+                'birth_date' => '',
+                'sex' => '',
+                'civil_status' => '',
+                'resident_code' => resident_code_for_user($userId),
+                'household_number' => '',
+                'address_line' => '',
+                'email' => (string) ($account['email'] ?? ''),
+            ],
+        ];
     }
 
     return [
@@ -314,9 +344,14 @@ function save_resident_profile(int $userId, array $input): array
 {
     $record = resident_profile_record($userId);
     if ($record === null) {
-        return ['ok' => false, 'status' => 404, 'error' => 'Resident record was not found.'];
-    }
-    if ((string) $record['account_type'] !== 'resident') {
+        $account = account_details($userId);
+        if ($account === null) {
+            return ['ok' => false, 'status' => 404, 'error' => 'Account was not found.'];
+        }
+        if (!resident_can_complete_profile($account)) {
+            return ['ok' => false, 'status' => 403, 'error' => 'Only resident accounts can update this profile.'];
+        }
+    } elseif ((string) $record['account_type'] !== 'resident') {
         return ['ok' => false, 'status' => 403, 'error' => 'Only resident accounts can update this profile.'];
     }
 
@@ -371,23 +406,44 @@ function save_resident_profile(int $userId, array $input): array
         $fullName .= ' ' . $suffix;
     }
 
-    $statement = db()->prepare(
-        "UPDATE residents
-         SET first_name = ?, middle_name = ?, last_name = ?, suffix = ?, full_name = ?,
-             birth_date = ?, sex = ?, civil_status = ?, profile_completed_at = NOW()
-         WHERE user_id = ?"
-    );
-    $statement->execute([
-        $firstName,
-        $middleName !== '' ? $middleName : null,
-        $lastName,
-        $suffix !== '' ? $suffix : null,
-        $fullName,
-        $birthDate,
-        $sex,
-        $civilStatus,
-        $userId,
-    ]);
+    if ($record === null) {
+        $statement = db()->prepare(
+            "INSERT INTO residents
+                (user_id, resident_code, full_name, first_name, middle_name, last_name, suffix,
+                 household_number, address_line, birth_date, sex, civil_status, profile_completed_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NULL, '', ?, ?, ?, NOW())"
+        );
+        $statement->execute([
+            $userId,
+            resident_code_for_user($userId),
+            $fullName,
+            $firstName,
+            $middleName !== '' ? $middleName : null,
+            $lastName,
+            $suffix !== '' ? $suffix : null,
+            $birthDate,
+            $sex,
+            $civilStatus,
+        ]);
+    } else {
+        $statement = db()->prepare(
+            "UPDATE residents
+             SET first_name = ?, middle_name = ?, last_name = ?, suffix = ?, full_name = ?,
+                 birth_date = ?, sex = ?, civil_status = ?, profile_completed_at = NOW()
+             WHERE user_id = ?"
+        );
+        $statement->execute([
+            $firstName,
+            $middleName !== '' ? $middleName : null,
+            $lastName,
+            $suffix !== '' ? $suffix : null,
+            $fullName,
+            $birthDate,
+            $sex,
+            $civilStatus,
+            $userId,
+        ]);
+    }
 
     return [
         'ok' => true,
