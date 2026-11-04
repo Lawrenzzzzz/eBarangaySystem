@@ -12,6 +12,16 @@ function resident_page_context(string $loginPath = '../login_page/login.php'): a
         exit;
     }
 
+    $roleCode = (string) ($currentUser['role_code'] ?? '');
+    if (in_array($roleCode, ['admin', 'captain', 'super_admin'], true)) {
+        header('Location: ../admin/dashboard.php');
+        exit;
+    }
+    if (in_array($roleCode, ['official', 'staff', 'kagawad', 'secretary', 'treasurer'], true)) {
+        header('Location: ../barangay_officials/dashboard.php');
+        exit;
+    }
+
     $esc = static function ($value): string {
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };

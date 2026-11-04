@@ -242,6 +242,124 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const newAnnouncementModal = document.getElementById("newAnnouncementModal");
+  if (newAnnouncementModal) {
+    const announcementForm = document.getElementById("new-announcement-form");
+    const errorEl = document.getElementById("new-announcement-error");
+    const submitBtn = announcementForm.querySelector('button[type="submit"]');
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = csrfMeta ? csrfMeta.getAttribute("content") || "" : "";
+
+    const openBtn = document.querySelector('[data-bs-target="#newAnnouncementModal"]');
+    let backdrop = null;
+
+    const showError = (message) => {
+      errorEl.textContent = message;
+      errorEl.classList.remove("d-none");
+    };
+
+    function openModal() {
+      errorEl.classList.add("d-none");
+      announcementForm.reset();
+      newAnnouncementModal.style.display = "block";
+      newAnnouncementModal.classList.add("show");
+      newAnnouncementModal.removeAttribute("aria-hidden");
+      newAnnouncementModal.setAttribute("aria-modal", "true");
+      document.body.classList.add("modal-open");
+      document.body.style.overflow = "hidden";
+      if (!backdrop) {
+        backdrop = document.createElement("div");
+        backdrop.className = "modal-backdrop fade show";
+        document.body.appendChild(backdrop);
+      }
+      const typeField = announcementForm.querySelector("select[name='type']");
+      if (typeField) typeField.focus();
+    }
+
+    function closeModal() {
+      newAnnouncementModal.style.display = "none";
+      newAnnouncementModal.classList.remove("show");
+      newAnnouncementModal.setAttribute("aria-hidden", "true");
+      newAnnouncementModal.removeAttribute("aria-modal");
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      if (backdrop) {
+        backdrop.remove();
+        backdrop = null;
+      }
+      announcementForm.reset();
+      errorEl.classList.add("d-none");
+    }
+
+    announcementForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorEl.classList.add("d-none");
+
+      const type = announcementForm.type.value;
+      const title = announcementForm.title.value.trim();
+      const content = announcementForm.content.value.trim();
+
+      if (!type) {
+        showError("Select the announcement type.");
+        return;
+      }
+      if (!title) {
+        showError("Enter the announcement title.");
+        return;
+      }
+      if (!content) {
+        showError("Enter the announcement content.");
+        return;
+      }
+
+      const originalMarkup = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Posting\u2026';
+
+      try {
+        const response = await fetch("../../backend/api/announcements.php", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrf,
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({ type, title, content }),
+        });
+        const data = await response.json();
+
+        if (data && data.ok === true) {
+          location.reload();
+          return;
+        }
+
+        showError((data && data.error) || "Unable to post the announcement.");
+      } catch (error) {
+        showError("Unable to reach the server. Please try again.");
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalMarkup;
+    });
+
+    if (openBtn) {
+      openBtn.addEventListener("click", openModal);
+    }
+    newAnnouncementModal
+      .querySelectorAll('[data-bs-dismiss="modal"]')
+      .forEach((button) => button.addEventListener("click", closeModal));
+    newAnnouncementModal.addEventListener("click", (event) => {
+      if (event.target === newAnnouncementModal) closeModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && newAnnouncementModal.classList.contains("show")) {
+        closeModal();
+      }
+    });
+  }
+
   const signOutButton = document.getElementById("official-signout");
   if (signOutButton) {
     signOutButton.addEventListener("click", async () => {

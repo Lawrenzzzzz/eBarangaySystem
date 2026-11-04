@@ -136,18 +136,18 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
     <aside class="col-side">
       <section id="announcements">
         <h2 class="side-title">Announcements</h2>
-        <article class="card note">
-          <span class="cat blue">Health</span>
-          <h3>Free Hepatitis B vaccination</h3>
-          <p>Community health post, 9AM–12NN, 18–20 June. Bring a valid ID.</p>
-          <small>Posted 12 Jun</small>
-        </article>
-        <article class="card note">
-          <span class="cat green">Safety</span>
-          <h3>Streetlight repair, Purok 4</h3>
-          <p>Two poles along Rizal St. scheduled for 16 June. Report outages via blotter.</p>
-          <small>Posted 10 Jun</small>
-        </article>
+        <?php if ($announcements): ?>
+          <?php foreach ($announcements as $announcement): ?>
+            <article class="card note">
+              <span class="cat <?= $esc($announcement['type_tone']) ?>"><?= $esc($announcement['type_label']) ?></span>
+              <h3><?= $esc($announcement['title']) ?></h3>
+              <p><?= nl2br($esc($announcement['content'])) ?></p>
+              <small>Posted <?= $esc(date('M j', strtotime($announcement['created_at']))) ?></small>
+            </article>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p class="empty">No announcements posted yet.</p>
+        <?php endif; ?>
       </section>
 
       <section id="blotter">

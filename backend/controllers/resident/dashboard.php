@@ -6,6 +6,7 @@ require_once __DIR__ . '/context.php';
 
 extract(resident_page_context('../login_page/login.php'), EXTR_SKIP);
 
+$announcements = list_announcements(2);
 $homeRequests = list_document_requests((int) current_user_id(), null, 5);
 $homeStats = document_request_stats((int) current_user_id());
 $homeBlotterStats = blotter_stats((int) current_user_id());
