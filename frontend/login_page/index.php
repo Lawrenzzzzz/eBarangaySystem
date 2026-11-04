@@ -53,13 +53,6 @@
                         Register
                     </a>
                 </span>
-                <a data-auth="in" class="btn btn-primary hidden" href="account.php">
-                    My account
-                    <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M5 12h14"/>
-                        <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                </a>
             </div>
             <button class="btn btn-outline btn-icon menu-btn" id="open-drawer" aria-label="Open navigation">
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
@@ -88,7 +81,6 @@
                 <a class="btn btn-outline" href="login.php">Sign in</a>
                 <a class="btn btn-primary" href="signup.php">Register</a>
             </span>
-            <a data-auth="in" class="btn btn-primary hidden" href="account.php">My account</a>
         </div>
     </aside>
 

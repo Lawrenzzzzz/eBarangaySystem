@@ -53,11 +53,6 @@
     return data;
   }
 
-  const iconUse = (id) => {
-    const source = $("#" + id);
-    return source ? source.innerHTML : "";
-  };
-
   const dr = $("#open-drawer");
   if (dr) {
     const b = document.body,
@@ -451,75 +446,6 @@
         if (button) button.disabled = false;
       }
     };
-  }
-
-  const C = $("#acct");
-  if (C) {
-    (async () => {
-      try {
-        const data = await api("/account.php");
-        const u = data.user;
-        const set = (id, v) => {
-          const el = $("#" + id);
-          if (el) el.textContent = v;
-        };
-        C.hidden = false;
-        set("u-first", (u.full_name || "Barangay resident").split(" ")[0]);
-        set("u-email", u.email || "Not available");
-        set("u-phone", u.phone || "Not provided");
-        set("u-address", u.address_line || "To be completed");
-        const appStatus = u.official_application_status;
-        set(
-          "u-type",
-          appStatus === "approved"
-            ? "Barangay official"
-            : appStatus
-              ? "Official applicant"
-              : "Resident",
-        );
-        set(
-          "s-title",
-          appStatus === "approved"
-            ? "Official access approved"
-            : appStatus === "pending"
-              ? "Under review"
-              : appStatus === "rejected"
-                ? "Application not approved"
-                : "Resident access",
-        );
-        set(
-          "s-text",
-          appStatus === "pending"
-            ? (u.requested_position || "Official") +
-                " application. Barangay administrators will review your submitted credentials."
-            : appStatus === "approved"
-              ? (u.requested_position || "Official") +
-                " access is active. Use the resident portal to serve residents."
-              : appStatus === "rejected"
-                ? "Your official access request was not approved. Contact the barangay office for details."
-                : "Your resident account is active and ready for available online services.",
-        );
-        const icon = $("#s-ico");
-        if (icon) {
-          icon.innerHTML = iconUse(appStatus === "pending" ? "ico-clock" : "ico-ok");
-          icon.style.display = "inline-flex";
-        }
-        $("#signout").onclick = async () => {
-          try {
-            const out = await api("/logout.php", { method: "POST" });
-            location.replace(out.redirect || "index.php");
-          } catch (e) {
-            location.replace("index.php");
-          }
-        };
-      } catch (e) {
-        if (e.status === 401) {
-          location.replace("login.php");
-          return;
-        }
-        toast(e.message, "bad");
-      }
-    })();
   }
 
   (async () => {
