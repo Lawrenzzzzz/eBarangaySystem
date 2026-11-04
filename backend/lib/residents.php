@@ -112,7 +112,9 @@ function resident_profile_record(int $userId): ?array
 
     $statement = db()->prepare(
         "SELECT r.id, r.first_name, r.middle_name, r.last_name, r.suffix, r.full_name,
-                r.birth_date, r.sex, r.civil_status, r.profile_completed_at, u.account_type
+                r.birth_date, r.sex, r.civil_status, r.profile_completed_at,
+                r.resident_code, r.household_number, r.address_line,
+                u.email, u.account_type
          FROM residents r
          JOIN users u ON u.id = r.user_id
          WHERE r.user_id = ? AND u.deleted_at IS NULL
@@ -151,6 +153,10 @@ function resident_profile_payload(int $userId): array
             'birth_date' => (string) ($record['birth_date'] ?? ''),
             'sex' => (string) ($record['sex'] ?? ''),
             'civil_status' => (string) ($record['civil_status'] ?? ''),
+            'resident_code' => (string) ($record['resident_code'] ?? ''),
+            'household_number' => $record['household_number'] !== null ? (string) $record['household_number'] : '',
+            'address_line' => (string) ($record['address_line'] ?? ''),
+            'email' => (string) ($record['email'] ?? ''),
         ],
     ];
 }
