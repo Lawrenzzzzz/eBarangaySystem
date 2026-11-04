@@ -128,6 +128,152 @@ function blotter_stats(int $userId): array
     ];
 }
 
+function official_blotter_badge_class(string $status): string
+{
+    return match ($status) {
+        'pending' => 'text-bg-warning',
+        'under_review', 'scheduled' => 'text-bg-info',
+        'resolved' => 'text-bg-success',
+        'referred' => 'text-bg-primary',
+        'dismissed', 'cancelled' => 'text-bg-secondary',
+        default => 'text-bg-secondary',
+    };
+}
+
+function official_blotter_status_label(string $status): string
+{
+    return $status === 'under_review' ? 'Investigating' : blotter_status_label($status);
+}
+
+function official_blotter_next_action(string $status): ?array
+{
+    return match ($status) {
+        'pending' => ['label' => 'Take Action', 'status' => 'under_review', 'class' => 'btn-orange'],
+        'under_review' => ['label' => 'Resolved', 'status' => 'resolved', 'class' => 'btn-success'],
+        default => null,
+    };
+}
+
+function official_blotter_report_details(array $row): array
+{
+    $details = blotter_report_details($row);
+    $details['status_label'] = official_blotter_status_label($details['status']);
+    $details['badge_class'] = official_blotter_badge_class($details['status']);
+    $details['action'] = official_blotter_next_action($details['status']);
+    $details['initial'] = resident_initial($details['filed_by']);
+    $details['date_label'] = date('M j, Y', strtotime($details['created_at']));
+
+    $excerpt = $details['details'];
+    $length = function_exists('mb_strlen') ? mb_strlen($excerpt) : strlen($excerpt);
+    if ($length > 120) {
+        $cut = function_exists('mb_substr') ? mb_substr($excerpt, 0, 120) : substr($excerpt, 0, 120);
+        $excerpt = rtrim($cut) . '…';
+    }
+    $details['excerpt'] = $excerpt;
+
+    $details['search_text'] = mb_strtolower(implode(' ', array_filter([
+        $details['reference_no'],
+        $details['filed_by'],
+        $details['subject'],
+        $details['address_line'],
+        $details['status_label'],
+    ], static fn ($value): bool => $value !== '')));
+
+    return $details;
+}
+
+function list_official_blotter_reports(?string $search = null, int $limit = 200): array
+{
+    $limit = max(1, min($limit, 500));
+    $sql = "SELECT br.*
+            FROM blotter_reports br
+            JOIN users u ON u.id = br.user_id
+            WHERE u.deleted_at IS NULL";
+    $params = [];
+
+    $search = trim((string) $search);
+    if ($search !== '') {
+        $sql .= " AND (br.reference_no LIKE ? OR br.filed_by LIKE ? OR br.subject LIKE ?
+                       OR br.details LIKE ? OR br.address_line LIKE ?)";
+        $like = '%' . $search . '%';
+        array_push($params, $like, $like, $like, $like, $like);
+    }
+
+    $sql .= " ORDER BY br.created_at DESC, br.id DESC LIMIT " . $limit;
+
+    $statement = db()->prepare($sql);
+    $statement->execute($params);
+
+    return array_map('official_blotter_report_details', $statement->fetchAll());
+}
+
+function official_blotter_stats(): array
+{
+    $statement = db()->query(
+        "SELECT
+            COUNT(*) AS total,
+            SUM(status = 'resolved') AS resolved,
+            SUM(status IN ('under_review', 'scheduled')) AS investigating,
+            SUM(status = 'pending') AS filed
+         FROM blotter_reports"
+    );
+    $row = $statement->fetch() ?: [];
+
+    return [
+        'total' => (int) ($row['total'] ?? 0),
+        'resolved' => (int) ($row['resolved'] ?? 0),
+        'investigating' => (int) ($row['investigating'] ?? 0),
+        'filed' => (int) ($row['filed'] ?? 0),
+    ];
+}
+
+function update_official_blotter_status(int $reportId, string $newStatus, int $officialUserId): array
+{
+    $newStatus = strtolower(trim($newStatus));
+
+    if ($reportId < 1 || $officialUserId < 1) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Invalid blotter report or official account.'];
+    }
+
+    $statement = db()->prepare(
+        "SELECT id, reference_no, status
+         FROM blotter_reports
+         WHERE id = ?
+         LIMIT 1"
+    );
+    $statement->execute([$reportId]);
+    $report = $statement->fetch();
+
+    if ($report === false) {
+        return ['ok' => false, 'status' => 404, 'error' => 'Blotter report was not found.'];
+    }
+
+    $currentStatus = (string) $report['status'];
+    $action = official_blotter_next_action($currentStatus);
+
+    if ($action === null || $action['status'] !== $newStatus) {
+        return ['ok' => false, 'status' => 409, 'error' => 'This blotter report can no longer be moved to that status.'];
+    }
+
+    $resolvedClause = $newStatus === 'resolved' ? ', resolved_at = NOW()' : '';
+    $update = db()->prepare(
+        "UPDATE blotter_reports
+         SET status = ?, reviewed_by = ?, reviewed_at = COALESCE(reviewed_at, NOW()){$resolvedClause}
+         WHERE id = ? AND status = ?"
+    );
+    $update->execute([$newStatus, $officialUserId, $reportId, $currentStatus]);
+
+    if ($update->rowCount() === 0) {
+        return ['ok' => false, 'status' => 409, 'error' => 'This report was already updated by another user. Please refresh the page.'];
+    }
+
+    return [
+        'ok' => true,
+        'status' => $newStatus,
+        'message' => $report['reference_no'] . ' is now ' . strtolower(official_blotter_status_label($newStatus)) . '.',
+    ];
+}
+
 function create_blotter_report(int $userId, array $input): array
 {
     $subject = trim((string) ($input['subject'] ?? ''));

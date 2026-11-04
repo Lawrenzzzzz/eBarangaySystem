@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/official/blotter.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,52 +79,55 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <a href="#" class="btn btn-orange btn-sm px-3">
-          <i class="bi bi-plus-lg me-1"></i> New Request
-        </a>
-      </div>
     </div>
 
     <div class="eb-content">
+      <?php if ($blotterNotice !== ''): ?>
+        <div class="alert alert-success py-2" role="alert"><?= $esc($blotterNotice) ?></div>
+      <?php endif; ?>
+      <?php if ($blotterError !== ''): ?>
+        <div class="alert alert-danger py-2" role="alert"><?= $esc($blotterError) ?></div>
+      <?php endif; ?>
+
       <!-- STATS CARDS -->
       <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Cases</div>
-            <div class="stats-value">0</div>
+            <div class="stats-value"><?= (int) $blotterStats['total'] ?></div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Resolved</div>
-            <div class="stats-value">0</div>
+            <div class="stats-value"><?= (int) $blotterStats['resolved'] ?></div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Investigating</div>
-            <div class="stats-value">0</div>
+            <div class="stats-value"><?= (int) $blotterStats['investigating'] ?></div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Filed</div>
-            <div class="stats-value">0</div>
+            <div class="stats-value"><?= (int) $blotterStats['filed'] ?></div>
           </div>
         </div>
       </div>
 
       <!-- BLOTTER TABLE -->
       <div class="table-card">
-        <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
+        <div class="p-4 d-flex flex-wrap justify-content-between align-items-center gap-3 border-bottom">
           <h6 class="mb-0 fw-bold">Blotter Log</h6>
-          <button class="btn btn-orange btn-sm px-3">
-            New Entry
-          </button>
+          <form class="search-box" method="get" action="blotter.php" role="search">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" value="<?= $esc($blotterSearch) ?>" placeholder="Search case no., complainant, or subject..." aria-label="Search blotter reports">
+          </form>
         </div>
         
         <div class="table-responsive">
@@ -134,20 +137,51 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
                 <th>Case No.</th>
                 <th>Date</th>
                 <th>Complainant</th>
-                <th>Respondent</th>
                 <th>Nature</th>
                 <th>Purok</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <!-- blank i2 rows -->
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <?php if ($blotterReports): ?>
+                <?php foreach ($blotterReports as $report): ?>
+                  <tr data-search="<?= $esc($report['search_text']) ?>">
+                    <td class="fw-semibold"><?= $esc($report['reference_no']) ?></td>
+                    <td><?= $esc($report['date_label']) ?></td>
+                    <td>
+                      <div class="resident-person">
+                        <span class="resident-avatar"><?= $esc($report['initial']) ?></span>
+                        <div class="fw-semibold"><?= $esc($report['filed_by']) ?></div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold"><?= $esc($report['subject']) ?></div>
+                      <div class="small text-muted"><?= $esc($report['excerpt']) ?></div>
+                    </td>
+                    <td><?= $esc($report['address_line']) ?></td>
+                    <td>
+                      <?php if ($report['action']): ?>
+                        <form method="post" action="blotter.php" class="d-inline">
+                          <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
+                          <input type="hidden" name="report_id" value="<?= (int) $report['id'] ?>">
+                          <input type="hidden" name="status" value="<?= $esc($report['action']['status']) ?>">
+                          <input type="hidden" name="q" value="<?= $esc($blotterSearch) ?>">
+                          <button type="submit" class="btn btn-sm fw-semibold <?= $esc($report['action']['class']) ?>">
+                            <?= $esc($report['action']['label']) ?>
+                          </button>
+                        </form>
+                      <?php else: ?>
+                        <span class="badge <?= $esc($report['badge_class']) ?>"><?= $esc($report['status_label']) ?></span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+              <tr data-blotter-empty<?= $blotterReports ? ' style="display: none;"' : '' ?>>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <?= $blotterSearch !== '' ? 'No blotter reports match your search.' : 'No blotter reports found.' ?>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
