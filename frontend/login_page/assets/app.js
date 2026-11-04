@@ -147,6 +147,7 @@
     }
     const setMode = (m) => {
       mode = m;
+      submit.disabled = false;
       render();
     };
     $$("[data-mode]", A).forEach(
@@ -400,7 +401,13 @@
           (type === "official"
             ? "Account created. Your official access request is pending review."
             : "Account created. You can now sign in.");
-        setMode("success");
+        if (type === "official") {
+          setMode("success");
+        } else {
+          toast(lastMsg, "ok");
+          location.href =
+            "login.php?registered=1&email=" + encodeURIComponent(em);
+        }
       } catch (e) {
         fail(e.message);
         submit.disabled = false;
@@ -408,6 +415,17 @@
     };
     render();
     syncEmailVerify();
+
+    const params = new URLSearchParams(location.search);
+    const prefillEmail = (params.get("email") || "").trim();
+    if (prefillEmail && email) {
+      email.value = prefillEmail;
+      syncEmailVerify();
+      if (params.get("registered") === "1") $("#password")?.focus();
+    }
+    if (params.get("registered") === "1") {
+      toast("Account created. Sign in to continue.", "ok", 6000);
+    }
   }
 
   const R = $("#r-form");

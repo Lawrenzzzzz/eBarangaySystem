@@ -174,6 +174,340 @@ function document_request_stats(int $userId): array
     ];
 }
 
+function document_request_tab(string $tab): string
+{
+    $tab = strtolower(trim($tab));
+
+    return in_array($tab, ['all', 'pending', 'processing', 'ready', 'rejected', 'archived'], true) ? $tab : 'all';
+}
+
+function official_document_request_status_filter(string $tab): ?string
+{
+    return match ($tab) {
+        'pending' => "dr.status = 'pending'",
+        'processing' => "dr.status IN ('processing', 'for_payment')",
+        'ready' => "dr.status = 'ready'",
+        'rejected' => "dr.status IN ('rejected', 'cancelled')",
+        'archived' => "dr.status = 'released'",
+        default => "dr.status <> 'released'",
+    };
+}
+
+function official_document_request_badge_class(string $status): string
+{
+    return match ($status) {
+        'pending' => 'text-bg-warning',
+        'processing', 'for_payment' => 'text-bg-info',
+        'ready' => 'text-bg-primary',
+        'released' => 'text-bg-success',
+        'rejected' => 'text-bg-danger',
+        default => 'text-bg-secondary',
+    };
+}
+
+function official_document_request_transitions(string $status): array
+{
+    return match ($status) {
+        'pending' => ['processing', 'rejected'],
+        'processing' => ['ready'],
+        'ready' => ['released'],
+        default => [],
+    };
+}
+
+function official_document_request_action_label(string $status): string
+{
+    return match ($status) {
+        'processing' => 'Processing',
+        'ready' => 'Ready for pick up',
+        'released' => 'Claimed',
+        'rejected' => 'Reject',
+        default => ucfirst(str_replace('_', ' ', $status)),
+    };
+}
+
+function official_document_request_action_class(string $status): string
+{
+    return match ($status) {
+        'processing' => 'btn-orange',
+        'ready' => 'btn-success',
+        'released' => 'btn-success',
+        'rejected' => 'btn-outline-danger',
+        default => 'btn-outline-secondary',
+    };
+}
+
+function generate_cash_reference(): string
+{
+    return 'CASH-' . date('Ymd') . '-' . str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
+function official_document_request_details(array $row): array
+{
+    $details = document_request_details($row);
+    $fee = (float) $details['fee'];
+
+    $details['email'] = (string) ($row['email'] ?? '');
+    $details['phone'] = (string) ($row['phone'] ?? '');
+    $details['initial'] = resident_initial((string) $row['full_name']);
+    $details['fee_label'] = $fee <= 0
+        ? 'Free'
+        : '₱' . number_format($fee, $fee === floor($fee) ? 0 : 2);
+    $details['badge_class'] = official_document_request_badge_class($details['status']);
+    $details['requires_payment'] = $fee > 0;
+    $details['cash_reference'] = $fee > 0 ? generate_cash_reference() : '';
+    $details['actions'] = array_map(
+        static fn (string $status): array => [
+            'status' => $status,
+            'label' => official_document_request_action_label($status),
+            'class' => official_document_request_action_class($status),
+        ],
+        official_document_request_transitions($details['status'])
+    );
+    $details['search_text'] = mb_strtolower(implode(' ', array_filter([
+        $details['reference_no'],
+        $details['full_name'],
+        $details['resident_code'],
+        $details['document_name'],
+        $details['purpose'],
+        $details['status_label'],
+        $details['email'],
+    ], static fn ($value): bool => $value !== '')));
+
+    return $details;
+}
+
+function official_document_request_query(): string
+{
+    return "SELECT dr.*, dt.code AS document_type_code, dt.name AS document_name,
+                   dt.description AS document_description, dt.processing_days,
+                   u.email, u.phone
+            FROM document_requests dr
+            JOIN document_types dt ON dt.id = dr.document_type_id
+            JOIN users u ON u.id = dr.user_id
+            WHERE u.deleted_at IS NULL";
+}
+
+function list_official_document_requests(string $tab = 'all', ?string $search = null, int $limit = 200): array
+{
+    $limit = max(1, min($limit, 500));
+    $sql = official_document_request_query();
+    $params = [];
+
+    $filter = official_document_request_status_filter(document_request_tab($tab));
+    if ($filter !== null) {
+        $sql .= ' AND ' . $filter;
+    }
+
+    $search = trim((string) $search);
+    if ($search !== '') {
+        $sql .= " AND (dr.reference_no LIKE ? OR dr.full_name LIKE ? OR dr.resident_code LIKE ?
+                       OR dt.name LIKE ? OR dr.purpose LIKE ? OR u.email LIKE ?)";
+        $like = '%' . $search . '%';
+        array_push($params, $like, $like, $like, $like, $like, $like);
+    }
+
+    $sql .= " ORDER BY dr.created_at DESC, dr.id DESC LIMIT " . $limit;
+
+    $statement = db()->prepare($sql);
+    $statement->execute($params);
+
+    return array_map('official_document_request_details', $statement->fetchAll());
+}
+
+function official_document_request_stats(): array
+{
+    $statement = db()->query(
+        "SELECT
+            SUM(status <> 'released') AS total,
+            SUM(status = 'pending') AS pending,
+            SUM(status IN ('processing', 'for_payment')) AS processing,
+            SUM(status = 'ready') AS ready,
+            SUM(status IN ('rejected', 'cancelled')) AS rejected,
+            SUM(status = 'released') AS archived
+         FROM document_requests"
+    );
+    $row = $statement->fetch() ?: [];
+
+    return [
+        'total' => (int) ($row['total'] ?? 0),
+        'pending' => (int) ($row['pending'] ?? 0),
+        'processing' => (int) ($row['processing'] ?? 0),
+        'ready' => (int) ($row['ready'] ?? 0),
+        'rejected' => (int) ($row['rejected'] ?? 0),
+        'archived' => (int) ($row['archived'] ?? 0),
+    ];
+}
+
+function update_official_document_request_status(int $requestId, string $newStatus, int $officialUserId): array
+{
+    $newStatus = strtolower(trim($newStatus));
+
+    if ($requestId < 1 || $officialUserId < 1) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Invalid document request or official account.'];
+    }
+
+    $statement = db()->prepare(
+        "SELECT id, reference_no, status
+         FROM document_requests
+         WHERE id = ?
+         LIMIT 1"
+    );
+    $statement->execute([$requestId]);
+    $request = $statement->fetch();
+
+    if ($request === false) {
+        return ['ok' => false, 'status' => 404, 'error' => 'Document request was not found.'];
+    }
+
+    $currentStatus = (string) $request['status'];
+    if ($newStatus === 'released') {
+        return ['ok' => false, 'status' => 409, 'error' => 'Use the Claimed button to release this request.'];
+    }
+    if (!in_array($newStatus, official_document_request_transitions($currentStatus), true)) {
+        return ['ok' => false, 'status' => 409, 'error' => 'This request can no longer be moved to that status.'];
+    }
+
+    $update = db()->prepare(
+        "UPDATE document_requests
+         SET status = ?, reviewed_by = ?, reviewed_at = COALESCE(reviewed_at, NOW())
+         WHERE id = ? AND status = ?"
+    );
+    $update->execute([$newStatus, $officialUserId, $requestId, $currentStatus]);
+
+    if ($update->rowCount() === 0) {
+        return ['ok' => false, 'status' => 409, 'error' => 'This request was already updated by another user. Please refresh the page.'];
+    }
+
+    return [
+        'ok' => true,
+        'status' => $newStatus,
+        'message' => $request['reference_no'] . ' is now ' . strtolower(document_request_status_label($newStatus)) . '.',
+    ];
+}
+
+function claim_official_document_request(int $requestId, int $officialUserId, array $input): array
+{
+    if ($requestId < 1 || $officialUserId < 1) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Invalid document request or official account.'];
+    }
+
+    $official = account_details($officialUserId);
+    if ($official === null) {
+        return ['ok' => false, 'status' => 403, 'error' => 'Your official account could not be verified.'];
+    }
+
+    $payee = trim((string) ($official['full_name'] ?? ''));
+    if ($payee === '') {
+        $payee = trim((string) ($official['email'] ?? '')) ?: 'Barangay Official';
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $statement = $pdo->prepare(
+            "SELECT id, reference_no, user_id, fee, status
+             FROM document_requests
+             WHERE id = ?
+             LIMIT 1
+             FOR UPDATE"
+        );
+        $statement->execute([$requestId]);
+        $request = $statement->fetch();
+
+        if ($request === false) {
+            $pdo->rollBack();
+            return ['ok' => false, 'status' => 404, 'error' => 'Document request was not found.'];
+        }
+
+        if ((string) $request['status'] !== 'ready') {
+            $pdo->rollBack();
+            return ['ok' => false, 'status' => 409, 'error' => 'Only requests that are ready for pickup can be claimed.'];
+        }
+
+        $fee = (float) $request['fee'];
+
+        if ($fee > 0) {
+            $method = strtolower(trim((string) ($input['payment_method'] ?? 'cash')));
+            if (!in_array($method, ['cash', 'online'], true)) {
+                $pdo->rollBack();
+                return ['ok' => false, 'status' => 422, 'error' => 'Select a valid payment method.'];
+            }
+
+            $reference = trim((string) ($input['reference_no'] ?? ''));
+            if ($method === 'online') {
+                $referenceLength = function_exists('mb_strlen') ? mb_strlen($reference) : strlen($reference);
+                if ($referenceLength < 3 || $referenceLength > 80) {
+                    $pdo->rollBack();
+                    return ['ok' => false, 'status' => 422, 'error' => 'Enter the online payment reference number.'];
+                }
+            } elseif ($reference === '' || strlen($reference) > 80) {
+                $reference = generate_cash_reference();
+            }
+
+            $insert = $pdo->prepare(
+                "INSERT INTO payments
+                    (document_request_id, user_id, received_by, payee, payment_method, reference_no, amount, status, paid_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 'received', NOW())"
+            );
+
+            try {
+                $insert->execute([
+                    $requestId,
+                    (int) $request['user_id'],
+                    $officialUserId,
+                    $payee,
+                    $method,
+                    $reference,
+                    $fee,
+                ]);
+            } catch (PDOException $exception) {
+                if ((string) $exception->getCode() !== '23000' || $method !== 'cash') {
+                    throw $exception;
+                }
+                $insert->execute([
+                    $requestId,
+                    (int) $request['user_id'],
+                    $officialUserId,
+                    $payee,
+                    $method,
+                    generate_cash_reference(),
+                    $fee,
+                ]);
+            }
+        }
+
+        $update = $pdo->prepare(
+            "UPDATE document_requests
+             SET status = 'released', released_at = NOW(),
+                 reviewed_by = ?, reviewed_at = COALESCE(reviewed_at, NOW())
+             WHERE id = ? AND status = 'ready'"
+        );
+        $update->execute([$officialUserId, $requestId]);
+
+        if ($update->rowCount() === 0) {
+            $pdo->rollBack();
+            return ['ok' => false, 'status' => 409, 'error' => 'This request was already claimed by another user.'];
+        }
+
+        $pdo->commit();
+
+        return [
+            'ok' => true,
+            'message' => $request['reference_no'] . ' has been claimed and archived.',
+        ];
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($exception instanceof PDOException && (string) $exception->getCode() === '23000') {
+            return ['ok' => false, 'status' => 409, 'error' => 'That payment reference number is already recorded. Please check and try again.'];
+        }
+        throw $exception;
+    }
+}
+
 function create_document_request(int $userId, array $input): array
 {
     $typeCode = strtolower(trim((string) ($input['document_type'] ?? $input['type'] ?? '')));

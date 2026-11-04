@@ -7,6 +7,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Residents - E-Barangay Official</title>
   
   <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
@@ -96,9 +97,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
         </form>
         <div class="d-flex align-items-center gap-2">
           <button class="btn btn-light border fw-semibold">
-            <i class="bi bi-download me-1"></i> Export
+            <i class="bi bi-file-earmark-text me-1"></i> Generate Report
           </button>
-          <button class="btn btn-orange fw-semibold">
+          <button class="btn btn-orange fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#addResidentModal">
             <i class="bi bi-plus-lg me-1"></i> Add Resident
           </button>
         </div>
@@ -180,6 +181,92 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addResidentModal" tabindex="-1" aria-labelledby="addResidentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <form id="add-resident-form" novalidate>
+          <div class="modal-header align-items-start">
+            <div>
+              <h5 class="modal-title" id="addResidentModalLabel">Add resident</h5>
+              <div class="small text-muted mt-1">
+                Resident code: <span class="fw-bold text-dark" id="add-resident-code">Loading&hellip;</span>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-danger py-2 d-none" id="add-resident-error" role="alert"></div>
+            <div class="alert alert-success py-2 d-none" id="add-resident-success" role="alert"></div>
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-first-name">First name</label>
+                <input class="form-control" id="ar-first-name" name="first_name" autocomplete="given-name" maxlength="80" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-middle-name">Middle name</label>
+                <input class="form-control" id="ar-middle-name" name="middle_name" autocomplete="additional-name" maxlength="80" placeholder="Optional">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-last-name">Last name</label>
+                <input class="form-control" id="ar-last-name" name="last_name" autocomplete="family-name" maxlength="80" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-suffix">Suffix</label>
+                <input class="form-control" id="ar-suffix" name="suffix" autocomplete="honorific-suffix" maxlength="20" placeholder="e.g. Jr., III">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-birth-date">Date of birth</label>
+                <input class="form-control" id="ar-birth-date" name="birth_date" type="text" autocomplete="bday" inputmode="numeric" maxlength="10" placeholder="MM/DD/YYYY" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-sex">Sex</label>
+                <select class="form-select" id="ar-sex" name="sex" required>
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-civil-status">Civil status</label>
+                <select class="form-select" id="ar-civil-status" name="civil_status" required>
+                  <option value="">Select</option>
+                  <option value="single">Single</option>
+                  <option value="married">Married</option>
+                  <option value="widowed">Widowed</option>
+                  <option value="separated">Separated</option>
+                  <option value="annulled">Annulled</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-phone">Phone number</label>
+                <input class="form-control" id="ar-phone" name="phone" type="tel" autocomplete="tel" placeholder="09XX XXX XXXX">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="ar-household">Household number</label>
+                <input class="form-control" id="ar-household" name="household_number" maxlength="40" placeholder="Optional">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="ar-email">Email address</label>
+                <input class="form-control" id="ar-email" name="email" type="email" autocomplete="email" maxlength="190" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="ar-address">Complete address</label>
+                <input class="form-control" id="ar-address" name="address_line" autocomplete="street-address" maxlength="255" placeholder="House no., street, purok" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-orange fw-semibold" id="add-resident-submit">
+              <i class="bi bi-person-plus me-1"></i> Save resident
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -104,6 +104,155 @@ function delete_official_resident(int $residentId, int $officialUserId): array
     return ['ok' => true, 'message' => $resident['full_name'] . ' has been removed.'];
 }
 
+function resident_code_for_user(int $userId): string
+{
+    return 'BSG-' . str_pad((string) $userId, 5, '0', STR_PAD_LEFT);
+}
+
+function next_resident_code_preview(): string
+{
+    $statement = db()->query(
+        "SELECT AUTO_INCREMENT FROM information_schema.TABLES
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' LIMIT 1"
+    );
+    $nextId = (int) ($statement->fetchColumn() ?: 1);
+
+    return resident_code_for_user(max(1, $nextId));
+}
+
+function create_official_resident(array $input): array
+{
+    $firstName = trim((string) ($input['first_name'] ?? ''));
+    $middleName = trim((string) ($input['middle_name'] ?? ''));
+    $lastName = trim((string) ($input['last_name'] ?? ''));
+    $suffix = trim((string) ($input['suffix'] ?? ''));
+    $birthDate = trim((string) ($input['birth_date'] ?? ''));
+    $sex = strtolower(trim((string) ($input['sex'] ?? '')));
+    $civilStatus = strtolower(trim((string) ($input['civil_status'] ?? '')));
+    $email = strtolower(trim((string) ($input['email'] ?? '')));
+    $phoneRaw = trim((string) ($input['phone'] ?? ''));
+    $phone = $phoneRaw === '' ? null : normalize_phone($phoneRaw);
+    $householdNumber = trim((string) ($input['household_number'] ?? ''));
+    $addressLine = trim((string) ($input['address_line'] ?? ''));
+
+    $namePattern = "/^[\p{L}\s.'-]+$/u";
+
+    if ($firstName === '' || mb_strlen($firstName) > 80 || !preg_match($namePattern, $firstName)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid first name.'];
+    }
+    if ($lastName === '' || mb_strlen($lastName) > 80 || !preg_match($namePattern, $lastName)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid last name.'];
+    }
+    if ($middleName !== '' && (mb_strlen($middleName) > 80 || !preg_match($namePattern, $middleName))) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid middle name.'];
+    }
+    if ($suffix !== '' && (mb_strlen($suffix) > 20 || !preg_match("/^[\p{L}.'-]+$/u", $suffix))) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid suffix.'];
+    }
+
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $birthDate);
+    if ($date === false || $date->format('Y-m-d') !== $birthDate) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid birth date.'];
+    }
+    $today = new DateTimeImmutable('today');
+    if ($date > $today) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Birth date cannot be in the future.'];
+    }
+    if ($date->diff($today)->y > 130) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid birth date.'];
+    }
+
+    if (!in_array($sex, ['male', 'female', 'other'], true)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Select a sex.'];
+    }
+    if (!in_array($civilStatus, ['single', 'married', 'widowed', 'separated', 'annulled'], true)) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Select a civil status.'];
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid email address.'];
+    }
+    if ($phoneRaw !== '' && $phone === null) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid Philippine mobile number (09XXXXXXXXX).'];
+    }
+    if (strlen($addressLine) < 5 || strlen($addressLine) > 255) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter the complete address.'];
+    }
+    if (strlen($householdNumber) > 40) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Household number is too long.'];
+    }
+
+    $fullName = $firstName;
+    if ($middleName !== '') {
+        $fullName .= ' ' . $middleName;
+    }
+    $fullName .= ' ' . $lastName;
+    if ($suffix !== '') {
+        $fullName .= ' ' . $suffix;
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $existing = $pdo->prepare("SELECT email, phone FROM users WHERE email = ? OR (? IS NOT NULL AND phone = ?) LIMIT 1");
+        $existing->execute([$email, $phone, $phone]);
+        $existingUser = $existing->fetch();
+        if ($existingUser) {
+            $pdo->rollBack();
+            $field = strtolower((string) $existingUser['email']) === $email ? 'email address' : 'mobile number';
+            return ['ok' => false, 'status' => 409, 'error' => 'An account with this ' . $field . ' already exists.'];
+        }
+
+        $insertUser = $pdo->prepare(
+            "INSERT INTO users (role_id, email, phone, password_hash, account_type, status)
+             VALUES (1, ?, ?, ?, 'resident', 'active')"
+        );
+        $insertUser->execute([$email, $phone, password_hash(random_token(32), PASSWORD_BCRYPT)]);
+        $userId = (int) $pdo->lastInsertId();
+        $residentCode = resident_code_for_user($userId);
+
+        $insertResident = $pdo->prepare(
+            "INSERT INTO residents
+                (user_id, resident_code, full_name, first_name, middle_name, last_name, suffix,
+                 household_number, address_line, birth_date, sex, civil_status, profile_completed_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())"
+        );
+        $insertResident->execute([
+            $userId,
+            $residentCode,
+            $fullName,
+            $firstName,
+            $middleName !== '' ? $middleName : null,
+            $lastName,
+            $suffix !== '' ? $suffix : null,
+            $householdNumber !== '' ? $householdNumber : null,
+            $addressLine,
+            $birthDate,
+            $sex,
+            $civilStatus,
+        ]);
+
+        $pdo->commit();
+
+        return [
+            'ok' => true,
+            'user_id' => $userId,
+            'resident_code' => $residentCode,
+            'full_name' => $fullName,
+            'message' => $fullName . ' has been added with resident code ' . $residentCode . '.',
+        ];
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($exception instanceof PDOException && (string) $exception->getCode() === '23000') {
+            return ['ok' => false, 'status' => 409, 'error' => 'An account with this email address or mobile number already exists.'];
+        }
+        throw $exception;
+    }
+}
+
 function resident_profile_record(int $userId): ?array
 {
     if ($userId < 1) {
