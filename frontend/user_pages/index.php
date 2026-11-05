@@ -155,8 +155,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
         <div class="card blotter">
           <p>Report a complaint, nuisance, or incident for the barangay blotter record.</p>
           <div class="mini-stats">
-            <div><strong class="blue">240</strong><span>filed this year</span></div>
-            <div><strong class="good">92%</strong><span>resolved</span></div>
+            <div><strong class="blue"><?= $homeBlotterStats['this_year'] ?></strong><span>filed this year</span></div>
+            <div><strong class="good"><?= $homeBlotterStats['total'] > 0 ? (int) round(($homeBlotterStats['resolved'] / $homeBlotterStats['total']) * 100) : 0 ?>%</strong><span>resolved</span></div>
           </div>
           <a href="blotter.php" class="btn">File a new report</a>
         </div>

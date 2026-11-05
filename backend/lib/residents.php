@@ -455,7 +455,8 @@ function save_resident_profile(int $userId, array $input): array
 function official_resident_stats(): array
 {
     $statement = db()->query(
-        "SELECT COUNT(*) AS total
+        "SELECT COUNT(*) AS total,
+                COALESCE(SUM(r.created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')), 0) AS new_this_month
          FROM residents r
          JOIN users u ON u.id = r.user_id
          WHERE u.deleted_at IS NULL"
@@ -464,5 +465,6 @@ function official_resident_stats(): array
 
     return [
         'total' => (int) ($row['total'] ?? 0),
+        'new_this_month' => (int) ($row['new_this_month'] ?? 0),
     ];
 }

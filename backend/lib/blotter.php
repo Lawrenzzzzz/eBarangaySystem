@@ -114,7 +114,8 @@ function blotter_stats(int $userId): array
         "SELECT
             COUNT(*) AS total,
             SUM(status IN ('pending', 'under_review', 'scheduled')) AS active,
-            SUM(status = 'resolved') AS resolved
+            SUM(status = 'resolved') AS resolved,
+            SUM(YEAR(created_at) = YEAR(NOW())) AS this_year
          FROM blotter_reports
          WHERE user_id = ?"
     );
@@ -125,6 +126,7 @@ function blotter_stats(int $userId): array
         'total' => (int) ($row['total'] ?? 0),
         'active' => (int) ($row['active'] ?? 0),
         'resolved' => (int) ($row['resolved'] ?? 0),
+        'this_year' => (int) ($row['this_year'] ?? 0),
     ];
 }
 

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -94,17 +94,18 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Residents</div>
-            <div class="stats-value">0</div>
-            <div class="stats-sub text-muted">0 this month</div>
+            <div class="stats-value"><?= number_format($residentStats['total']) ?></div>
+            <div class="stats-sub text-muted"><?= (int) $residentStats['new_this_month'] ?> this month</div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Pending Requests</div>
-            <div class="stats-value">0</div>
-            <div class="stats-sub text-warning">
-              <i class="bi bi-clock"></i> 0 due today
+            <div class="stats-value"><?= number_format($documentRequestStats['pending']) ?></div>
+            <div class="stats-sub <?= $documentRequestStats['pending'] > 0 ? 'text-warning' : 'text-muted' ?>">
+              <i class="bi bi-clock"></i>
+              <?= $documentRequestStats['pending'] > 0 ? (int) $documentRequestStats['pending'] . ' awaiting review' : 'All caught up' ?>
             </div>
           </div>
         </div>
@@ -112,16 +113,18 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Resolved Concerns</div>
-            <div class="stats-value">0</div>
-            <div class="stats-sub text-muted">0% closure rate</div>
+            <div class="stats-value"><?= number_format($blotterStats['resolved']) ?></div>
+            <div class="stats-sub text-muted">
+              <?= $blotterStats['total'] > 0 ? $blotterResolvedRate . '% closure rate' : 'No reports yet' ?>
+            </div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Fees Collected</div>
-            <div class="stats-value">₱0</div>
-            <div class="stats-sub text-muted">0% this month</div>
+            <div class="stats-value"><?= $esc($paymentStats['collected_label']) ?></div>
+            <div class="stats-sub text-muted"><?= (int) $paymentStats['month_count'] ?> payments this month</div>
           </div>
         </div>
       </div>
@@ -132,21 +135,41 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div>
                 <h6 class="mb-0 fw-bold">Document Request Queue</h6>
-                <small class="text-muted">Requires action</small>
+                <small class="text-muted"><?= $documentRequestQueueCount > 0 ? $documentRequestQueueCount . ' request' . ($documentRequestQueueCount === 1 ? '' : 's') . ' require action' : 'No pending action' ?></small>
               </div>
-              <small class="text-muted">Updated just now</small>
+              <small class="text-muted">Updated <?= $esc(date('M j, g:i A')) ?></small>
             </div>
             
-            <ul class="list-unstyled mb-0">
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-              <li class="queue-item" style="height: 55px;"></li>
-            </ul>
+            <?php if ($documentRequestQueue): ?>
+              <ul class="queue-list mb-0">
+                <?php foreach ($documentRequestQueue as $request): ?>
+                  <li class="queue-item">
+                    <span class="resident-avatar"><?= $esc($request['initial']) ?></span>
+
+                    <div class="flex-grow-1" style="min-width: 0;">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="fw-semibold"><?= $esc($request['full_name']) ?></span>
+                        <span class="badge <?= $esc($request['badge_class']) ?>"><?= $esc($request['status_label']) ?></span>
+                      </div>
+                      <div class="resident-meta">
+                        <?= $esc($request['document_name']) ?> · Ref <?= $esc($request['reference_no']) ?>
+                      </div>
+                    </div>
+
+                    <div class="text-end small flex-shrink-0">
+                      <div class="fw-semibold"><?= $esc($request['fee_label']) ?></div>
+                      <div class="text-muted"><?= $esc(date('M j, Y', strtotime($request['created_at']))) ?></div>
+                    </div>
+
+                    <a href="document-requests.php?q=<?= urlencode($request['reference_no']) ?>" class="btn btn-sm btn-light border fw-semibold">
+                      Review
+                    </a>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php else: ?>
+              <p class="text-center text-muted py-4 mb-0">No document requests need action right now.</p>
+            <?php endif; ?>
           </div>
         </div>
         
@@ -155,19 +178,18 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
             <h6 class="fw-bold mb-3">Quick Actions</h6>
             <div class="d-grid gap-2">
               
-              <button class="btn btn-light border text-start">
-                + New Resident
-              </button>
-              <!-- yung 3 sa baba na pamimilian -->
-              <button class="btn btn-light border text-start">
-                Stamp Clearance
-              </button>
-              <button class="btn btn-light border text-start">
-                New Document Request
-              </button>
-              <button class="btn btn-light border text-start">
-                Post Notice
-              </button>
+              <a class="btn btn-light border text-start" href="residents.php">
+                <i class="bi bi-person-plus me-1"></i> New Resident
+              </a>
+              <a class="btn btn-light border text-start" href="document-requests.php?status=ready">
+                <i class="bi bi-patch-check me-1"></i> Stamp Clearance
+              </a>
+              <a class="btn btn-light border text-start" href="document-requests.php">
+                <i class="bi bi-file-earmark-plus me-1"></i> New Document Request
+              </a>
+              <a class="btn btn-light border text-start" href="announcements.php">
+                <i class="bi bi-megaphone me-1"></i> Post Notice
+              </a>
               
             </div>
           </div>
@@ -175,18 +197,24 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <div class="table-card">
             <h6 class="fw-bold mb-3">Recent Activity</h6>
             
-            <div class="pb-3 mb-3 border-bottom">
-              <div class="bg-light rounded" style="height: 10px; width: 75%; margin-bottom: 8px;"></div>
-              <div class="bg-light rounded" style="height: 9px; width: 50%;"></div>
-            </div>
-            <div class="pb-3 mb-3 border-bottom">
-              <div class="bg-light rounded" style="height: 10px; width: 60%; margin-bottom: 8px;"></div>
-              <div class="bg-light rounded" style="height: 9px; width: 40%;"></div>
-            </div>
-            <div>
-              <div class="bg-light rounded" style="height: 10px; width: 80%; margin-bottom: 8px;"></div>
-              <div class="bg-light rounded" style="height: 9px; width: 55%;"></div>
-            </div>
+            <?php if ($recentActivity): ?>
+              <ul class="list-unstyled mb-0">
+                <?php foreach ($recentActivity as $activity): ?>
+                  <li class="pb-3 mb-3 border-bottom">
+                    <a href="<?= $esc($activity['url']) ?>" class="text-decoration-none d-flex gap-2">
+                      <i class="bi <?= $esc($activity['icon']) ?> text-muted mt-1"></i>
+                      <div style="min-width: 0;">
+                        <div class="small fw-semibold text-dark text-truncate"><?= $esc($activity['title']) ?></div>
+                        <div class="small text-muted text-truncate"><?= $esc($activity['meta']) ?></div>
+                        <div class="text-muted" style="font-size: .72rem;"><?= $esc($relativeTime($activity['at'])) ?></div>
+                      </div>
+                    </a>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php else: ?>
+              <p class="text-muted small mb-0">No activity recorded yet.</p>
+            <?php endif; ?>
           </div>
         </div>
       </div>
