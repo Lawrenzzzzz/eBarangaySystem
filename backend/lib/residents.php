@@ -62,6 +62,51 @@ function list_official_residents(?string $search = null, int $limit = 200): arra
     return array_map('official_resident_details', $statement->fetchAll());
 }
 
+function list_residents_for_report(): array
+{
+    $statement = db()->query(
+        "SELECT r.resident_code, r.first_name, r.middle_name, r.last_name, r.suffix,
+                r.address_line, r.birth_date, r.sex, r.civil_status
+         FROM residents r
+         JOIN users u ON u.id = r.user_id
+         WHERE u.deleted_at IS NULL
+         ORDER BY r.last_name ASC, r.first_name ASC, r.middle_name ASC, r.id ASC"
+    );
+
+    $rows = [];
+    foreach ($statement->fetchAll() as $row) {
+        $rows[] = [
+            'resident_code' => (string) $row['resident_code'],
+            'first_name' => (string) ($row['first_name'] ?? ''),
+            'middle_name' => (string) ($row['middle_name'] ?? ''),
+            'last_name' => (string) ($row['last_name'] ?? ''),
+            'suffix' => (string) ($row['suffix'] ?? ''),
+            'address_line' => (string) ($row['address_line'] ?? ''),
+            'birth_date' => $row['birth_date'] !== null ? (string) $row['birth_date'] : '',
+            'sex' => (string) ($row['sex'] ?? ''),
+            'civil_status' => (string) ($row['civil_status'] ?? ''),
+        ];
+    }
+
+    return $rows;
+}
+
+function official_barangay_chairman_name(string $fallback = ''): string
+{
+    $statement = db()->query(
+        "SELECT full_name
+         FROM v_user_accounts
+         WHERE role_code IN ('captain', 'admin')
+           AND full_name IS NOT NULL
+           AND full_name <> ''
+         ORDER BY FIELD(role_code, 'captain', 'admin'), user_id ASC
+         LIMIT 1"
+    );
+    $name = $statement->fetchColumn();
+
+    return $name !== false && trim((string) $name) !== '' ? (string) $name : $fallback;
+}
+
 function delete_official_resident(int $residentId, int $officialUserId): array
 {
     if ($residentId < 1 || $officialUserId < 1) {

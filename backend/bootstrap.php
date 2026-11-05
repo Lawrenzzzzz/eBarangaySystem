@@ -61,4 +61,5 @@ require_once __DIR__ . '/lib/documents.php';
 require_once __DIR__ . '/lib/payments.php';
 require_once __DIR__ . '/lib/blotter.php';
 require_once __DIR__ . '/lib/residents.php';
+require_once __DIR__ . '/lib/reports.php';
 require_once __DIR__ . '/lib/announcements.php';

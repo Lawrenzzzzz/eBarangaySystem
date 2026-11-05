@@ -104,6 +104,29 @@ function list_official_payments(?string $search = null, int $limit = 200): array
     return array_map('payment_details', $statement->fetchAll());
 }
 
+function list_payments_for_report(): array
+{
+    $sql = official_payment_query() . " ORDER BY p.paid_at ASC, p.id ASC";
+    $statement = db()->query($sql);
+
+    $rows = [];
+    foreach ($statement->fetchAll() as $row) {
+        $payment = payment_details($row);
+        $rows[] = [
+            'reference_no' => $payment['reference_no'],
+            'request_reference' => $payment['request_reference'],
+            'payee' => $payment['payee'],
+            'document_name' => $payment['document_name'],
+            'method_label' => $payment['method_label'],
+            'amount_label' => $payment['amount_label'],
+            'paid_at' => $payment['paid_at'],
+            'status_label' => $payment['status_label'],
+        ];
+    }
+
+    return $rows;
+}
+
 function official_payment_stats(): array
 {
     $statement = db()->query(

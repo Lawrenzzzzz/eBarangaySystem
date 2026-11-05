@@ -136,9 +136,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
       <div class="table-card">
         <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
           <h6 class="mb-0 fw-bold">Payment Transactions</h6>
-          <button class="btn btn-primary fw-semibold btn-sm">
-            <i class="bi bi-download me-1"></i> Export
-          </button>
+          <form method="post" action="reports.php" class="d-inline">
+            <input type="hidden" name="action" value="generate">
+            <input type="hidden" name="report" value="payments">
+            <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
+            <button type="submit" class="btn btn-primary fw-semibold btn-sm">
+              <i class="bi bi-file-earmark-text me-1"></i> Generate Report
+            </button>
+          </form>
         </div>
         
         <div class="table-responsive">

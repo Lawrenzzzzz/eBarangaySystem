@@ -96,9 +96,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
           <input type="search" name="q" value="<?= $esc($residentSearch) ?>" placeholder="Search name, code, email, or address..." aria-label="Search residents">
         </form>
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-primary fw-semibold">
-            <i class="bi bi-file-earmark-text me-1"></i> Generate Report
-          </button>
+          <form method="post" action="reports.php" class="d-inline">
+            <input type="hidden" name="action" value="generate">
+            <input type="hidden" name="report" value="residents">
+            <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
+            <button type="submit" class="btn btn-primary fw-semibold">
+              <i class="bi bi-file-earmark-text me-1"></i> Generate Report
+            </button>
+          </form>
           <button class="btn btn-success fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#addResidentModal">
             <i class="bi bi-plus-lg me-1"></i> Add Resident
           </button>
