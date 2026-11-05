@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,34 +92,44 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Collected</div>
-            <div class="stats-value">₱0</div>
-            <div class="stats-sub text-muted">0 this month</div>
+            <div class="stats-value"><?= $esc($paymentStats['collected_label']) ?></div>
+            <div class="stats-sub text-muted"><?= (int) $paymentStats['month_count'] ?> this month</div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Pending</div>
-            <div class="stats-value text-warning">₱0</div>
-            <div class="stats-sub text-muted">0 transactions</div>
+            <div class="stats-value text-warning"><?= $esc($paymentStats['pending_label']) ?></div>
+            <div class="stats-sub text-muted"><?= (int) $paymentStats['pending_count'] ?> awaiting payment</div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Free Services</div>
-            <div class="stats-value">0</div>
-            <div class="stats-sub text-muted">0 certificates</div>
+            <div class="stats-value"><?= (int) $paymentStats['free_count'] ?></div>
+            <div class="stats-sub text-muted"><?= (int) $paymentStats['free_count'] ?> certificates</div>
           </div>
         </div>
         
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Transactions</div>
-            <div class="stats-value">0</div>
+            <div class="stats-value"><?= (int) $paymentStats['week_count'] ?></div>
             <div class="stats-sub text-muted">this week</div>
           </div>
         </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <form class="search-box" method="get" action="payments.php" role="search">
+          <i class="bi bi-search"></i>
+          <input type="search" name="q" value="<?= $esc($paymentSearch) ?>" placeholder="Search reference, payee, or document..." aria-label="Search payments">
+        </form>
+        <span class="text-muted small">
+          Showing <?= count($payments) ?> <?= count($payments) === 1 ? 'transaction' : 'transactions' ?>
+        </span>
       </div>
 
       <!-- PAYMENTS TABLE -->
@@ -144,15 +154,29 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
               </tr>
             </thead>
             <tbody>
-              <!-- blank rows i2 -->
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr><td style="height: 65px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <?php if ($payments): ?>
+                <?php foreach ($payments as $payment): ?>
+                  <tr>
+                    <td class="fw-semibold"><?= $esc($payment['reference_no']) ?></td>
+                    <td>
+                      <div class="fw-semibold"><?= $esc($payment['payee']) ?></div>
+                      <div class="small text-muted">
+                        <?= $esc($payment['method_label']) ?><?= $payment['request_reference'] !== '' ? ' · Ref ' . $esc($payment['request_reference']) : '' ?>
+                      </div>
+                    </td>
+                    <td><?= $esc($payment['document_name']) ?></td>
+                    <td class="fw-semibold"><?= $esc($payment['amount_label']) ?></td>
+                    <td><?= $esc(date('M j, Y', strtotime($payment['paid_at']))) ?></td>
+                    <td><span class="badge <?= $esc($payment['badge_class']) ?>"><?= $esc($payment['status_label']) ?></span></td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <?= $paymentSearch !== '' ? 'No payments match your search.' : 'No payments recorded yet.' ?>
+                  </td>
+                </tr>
+              <?php endif; ?>
             </tbody>
           </table>
         </div>
