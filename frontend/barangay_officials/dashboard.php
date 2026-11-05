@@ -18,8 +18,20 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
     .table-card { padding: 1.5rem; }
     .table-card .queue-item { padding: 1.15rem 0; border-bottom: 1px solid var(--eb-border); }
     .table-card .queue-item:last-child { border-bottom: none; }
-    .quick-actions .btn { justify-content: flex-start; padding: .7rem 1rem; text-align: left; font-size: .83rem; border-radius: 7px; }
-    .quick-actions .btn:hover { background: #fffbeb; border-color: var(--eb-sidebar-active); }
+
+    .activity-feed { display: flex; flex-direction: column; }
+    .activity-item + .activity-item { border-top: 1px solid var(--eb-border); }
+    .activity-link { display: flex; align-items: flex-start; gap: .8rem; margin: 0 -.6rem; padding: .75rem .6rem; border-radius: 10px; text-decoration: none; transition: background-color .18s ease; }
+    .activity-link:hover { background: var(--eb-surface-muted); }
+    .activity-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; font-size: .95rem; }
+    .activity-icon.kind-document { color: #0d6efd; background: #e7f1ff; }
+    .activity-icon.kind-blotter { color: #dc3545; background: #fdecec; }
+    .activity-icon.kind-payment { color: #198754; background: #e7f6ee; }
+    .activity-icon.kind-announcement { color: #d97706; background: #fef3c7; }
+    .activity-body { flex: 1; min-width: 0; padding-top: .15rem; }
+    .activity-title { font-size: .82rem; font-weight: 600; color: var(--eb-text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-meta { margin-top: .12rem; font-size: .76rem; color: var(--eb-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-time { flex-shrink: 0; padding-top: .2rem; font-size: .7rem; color: var(--eb-text-muted); white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -161,7 +173,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
                       <div class="text-muted"><?= $esc(date('M j, Y', strtotime($request['created_at']))) ?></div>
                     </div>
 
-                    <a href="document-requests.php?q=<?= urlencode($request['reference_no']) ?>" class="btn btn-sm btn-light border fw-semibold">
+                    <a href="document-requests.php?q=<?= urlencode($request['reference_no']) ?>" class="btn btn-sm btn-primary fw-semibold">
                       Review
                     </a>
                   </li>
@@ -174,40 +186,27 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
         </div>
         
         <div class="col-lg-4">
-          <div class="table-card mb-4 quick-actions">
-            <h6 class="fw-bold mb-3">Quick Actions</h6>
-            <div class="d-grid gap-2">
-              
-              <a class="btn btn-light border text-start" href="residents.php">
-                <i class="bi bi-person-plus me-1"></i> New Resident
-              </a>
-              <a class="btn btn-light border text-start" href="document-requests.php?status=ready">
-                <i class="bi bi-patch-check me-1"></i> Stamp Clearance
-              </a>
-              <a class="btn btn-light border text-start" href="document-requests.php">
-                <i class="bi bi-file-earmark-plus me-1"></i> New Document Request
-              </a>
-              <a class="btn btn-light border text-start" href="announcements.php">
-                <i class="bi bi-megaphone me-1"></i> Post Notice
-              </a>
-              
-            </div>
-          </div>
-          
           <div class="table-card">
-            <h6 class="fw-bold mb-3">Recent Activity</h6>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h6 class="fw-bold mb-0">Recent Activity</h6>
+                <small class="text-muted">Latest updates across the barangay</small>
+              </div>
+            </div>
             
             <?php if ($recentActivity): ?>
-              <ul class="list-unstyled mb-0">
+              <ul class="activity-feed list-unstyled mb-0">
                 <?php foreach ($recentActivity as $activity): ?>
-                  <li class="pb-3 mb-3 border-bottom">
-                    <a href="<?= $esc($activity['url']) ?>" class="text-decoration-none d-flex gap-2">
-                      <i class="bi <?= $esc($activity['icon']) ?> text-muted mt-1"></i>
-                      <div style="min-width: 0;">
-                        <div class="small fw-semibold text-dark text-truncate"><?= $esc($activity['title']) ?></div>
-                        <div class="small text-muted text-truncate"><?= $esc($activity['meta']) ?></div>
-                        <div class="text-muted" style="font-size: .72rem;"><?= $esc($relativeTime($activity['at'])) ?></div>
+                  <li class="activity-item">
+                    <a href="<?= $esc($activity['url']) ?>" class="activity-link">
+                      <span class="activity-icon kind-<?= $esc($activity['kind']) ?>">
+                        <i class="bi <?= $esc($activity['icon']) ?>"></i>
+                      </span>
+                      <div class="activity-body">
+                        <div class="activity-title"><?= $esc($activity['title']) ?></div>
+                        <div class="activity-meta"><?= $esc($activity['meta']) ?></div>
                       </div>
+                      <span class="activity-time"><?= $esc($relativeTime($activity['at'])) ?></span>
                     </a>
                   </li>
                 <?php endforeach; ?>

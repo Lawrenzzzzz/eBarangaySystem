@@ -93,7 +93,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/announcements.
         <span class="text-muted fw-semibold" id="announcement-count" style="font-size: .85rem;">
           Showing <?= count($announcements) ?> <?= count($announcements) === 1 ? 'announcement' : 'announcements' ?>
         </span>
-        <button class="btn btn-orange fw-semibold" type="button" data-bs-target="#newAnnouncementModal">
+        <button class="btn btn-success fw-semibold" type="button" data-bs-target="#newAnnouncementModal">
           <i class="bi bi-plus-lg me-1"></i> New Announcement
         </button>
       </div>
@@ -102,7 +102,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/announcements.
       <div id="list" class="table-scrollable pr-2">
         <?php if ($announcements): ?>
           <?php foreach ($announcements as $announcement): ?>
-            <article class="announcement-card">
+            <article class="announcement-card" style="border-left-color: <?= $esc($announcement['accent_color']) ?>;">
               <div class="d-flex justify-content-between align-items-start mb-2 gap-3">
                 <div>
                   <span class="badge <?= $esc($announcement['badge_class']) ?>"><?= $esc($announcement['type_label']) ?></span>
@@ -157,7 +157,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/announcements.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-orange fw-semibold">
+            <button type="submit" class="btn btn-success fw-semibold">
               <i class="bi bi-megaphone me-1"></i> Post announcement
             </button>
           </div>

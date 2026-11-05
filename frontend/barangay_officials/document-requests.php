@@ -229,7 +229,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
 
           <div class="claim-foot">
             <button type="button" class="btn btn-light border" data-claim-close>Cancel</button>
-            <button type="submit" class="btn btn-orange fw-semibold">Submit &amp; archive</button>
+            <button type="submit" class="btn btn-success fw-semibold">Submit &amp; archive</button>
           </div>
         </form>
       </dialog>
@@ -237,9 +237,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
   <?php endforeach; ?>
 
   <?php if ($documentRequestArchived): ?>
-    <a href="document-requests.php" class="btn btn-orange archive-fab"><i class="bi bi-arrow-left"></i> Back to requests</a>
+    <a href="document-requests.php" class="btn btn-primary archive-fab"><i class="bi bi-arrow-left"></i> Back to requests</a>
   <?php else: ?>
-    <a href="document-requests.php?status=archived" class="btn btn-orange archive-fab"><i class="bi bi-archive"></i> Archive (<?= (int) $documentRequestStats['archived'] ?>)</a>
+    <a href="document-requests.php?status=archived" class="btn btn-primary archive-fab"><i class="bi bi-archive"></i> Archive (<?= (int) $documentRequestStats['archived'] ?>)</a>
   <?php endif; ?>
 
   <!-- Bootstrap JS -->

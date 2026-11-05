@@ -96,10 +96,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
           <input type="search" name="q" value="<?= $esc($residentSearch) ?>" placeholder="Search name, code, email, or address..." aria-label="Search residents">
         </form>
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-light border fw-semibold">
+          <button class="btn btn-primary fw-semibold">
             <i class="bi bi-file-earmark-text me-1"></i> Generate Report
           </button>
-          <button class="btn btn-orange fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#addResidentModal">
+          <button class="btn btn-success fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#addResidentModal">
             <i class="bi bi-plus-lg me-1"></i> Add Resident
           </button>
         </div>
@@ -163,7 +163,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
                             <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
                             <input type="hidden" name="resident_id" value="<?= $resident['id'] ?>">
                             <input type="hidden" name="q" value="<?= $esc($residentSearch) ?>">
-                            <button type="submit" class="btn btn-outline-danger btn-sm fw-semibold">
+                            <button type="submit" class="btn btn-danger btn-sm fw-semibold">
                               Delete
                             </button>
                           </form>
@@ -262,7 +262,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-orange fw-semibold" id="add-resident-submit">
+            <button type="submit" class="btn btn-success fw-semibold" id="add-resident-submit">
               <i class="bi bi-person-plus me-1"></i> Save resident
             </button>
           </div>

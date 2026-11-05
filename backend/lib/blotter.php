@@ -150,7 +150,7 @@ function official_blotter_status_label(string $status): string
 function official_blotter_next_action(string $status): ?array
 {
     return match ($status) {
-        'pending' => ['label' => 'Take Action', 'status' => 'under_review', 'class' => 'btn-orange'],
+        'pending' => ['label' => 'Take Action', 'status' => 'under_review', 'class' => 'btn-primary'],
         'under_review' => ['label' => 'Resolved', 'status' => 'resolved', 'class' => 'btn-success'],
         default => null,
     };

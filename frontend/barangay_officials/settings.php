@@ -79,7 +79,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         </div>
       </div>
       <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-orange btn-sm px-3">
+        <button class="btn btn-success btn-sm px-3">
           <i class="bi bi-check-lg me-1"></i> Save All
         </button>
       </div>
@@ -180,7 +180,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <button class="btn btn-light border">
             <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
           </button>
-          <button class="btn btn-orange fw-semibold">
+          <button class="btn btn-success fw-semibold">
             <i class="bi bi-check-lg me-1"></i> Save Changes
           </button>
         </div>

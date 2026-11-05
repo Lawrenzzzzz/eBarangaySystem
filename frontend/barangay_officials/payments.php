@@ -80,7 +80,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
         </div>
       </div>
       <div class="d-flex align-items-center gap-3">
-        <a href="#" class="btn btn-orange btn-sm px-3">
+        <a href="#" class="btn btn-success btn-sm px-3">
           <i class="bi bi-plus-lg me-1"></i> New Request
         </a>
       </div>
@@ -136,7 +136,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
       <div class="table-card">
         <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
           <h6 class="mb-0 fw-bold">Payment Transactions</h6>
-          <button class="btn btn-light border fw-semibold btn-sm">
+          <button class="btn btn-primary fw-semibold btn-sm">
             <i class="bi bi-download me-1"></i> Export
           </button>
         </div>

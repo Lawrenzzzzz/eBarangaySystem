@@ -44,6 +44,18 @@ function announcement_badge_class(string $type): string
     };
 }
 
+function announcement_accent_color(string $type): string
+{
+    return match (strtolower($type)) {
+        'health' => '#0d6efd',
+        'education' => '#0dcaf0',
+        'infrastructure' => '#6c757d',
+        'safety' => '#198754',
+        'notice' => '#ffc107',
+        default => '#6c757d',
+    };
+}
+
 function announcement_details(array $row): array
 {
     $type = strtolower((string) $row['type']);
@@ -54,6 +66,7 @@ function announcement_details(array $row): array
         'type_label' => announcement_type_label($type),
         'type_tone' => announcement_type_tone($type),
         'badge_class' => announcement_badge_class($type),
+        'accent_color' => announcement_accent_color($type),
         'title' => (string) $row['title'],
         'content' => (string) $row['content'],
         'created_by' => (int) $row['created_by'],

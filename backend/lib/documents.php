@@ -229,10 +229,10 @@ function official_document_request_action_label(string $status): string
 function official_document_request_action_class(string $status): string
 {
     return match ($status) {
-        'processing' => 'btn-orange',
+        'processing' => 'btn-primary',
         'ready' => 'btn-success',
         'released' => 'btn-success',
-        'rejected' => 'btn-outline-danger',
+        'rejected' => 'btn-danger',
         default => 'btn-outline-secondary',
     };
 }

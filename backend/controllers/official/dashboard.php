@@ -25,6 +25,7 @@ $recentActivity = [];
 foreach (list_official_document_requests('all', null, 5) as $request) {
     $recentActivity[] = [
         'at' => $request['created_at'],
+        'kind' => 'document',
         'icon' => 'bi-file-earmark-text',
         'title' => 'Document request ' . strtolower($request['status_label']),
         'meta' => $request['full_name'] . ' · ' . $request['document_name'],
@@ -34,6 +35,7 @@ foreach (list_official_document_requests('all', null, 5) as $request) {
 foreach (list_official_blotter_reports(null, 5) as $report) {
     $recentActivity[] = [
         'at' => $report['created_at'],
+        'kind' => 'blotter',
         'icon' => 'bi-shield-exclamation',
         'title' => 'Blotter report ' . strtolower($report['status_label']),
         'meta' => $report['filed_by'] . ' · ' . $report['subject'],
@@ -43,6 +45,7 @@ foreach (list_official_blotter_reports(null, 5) as $report) {
 foreach (list_official_payments(null, 5) as $payment) {
     $recentActivity[] = [
         'at' => $payment['paid_at'],
+        'kind' => 'payment',
         'icon' => 'bi-cash-coin',
         'title' => 'Payment ' . strtolower($payment['status_label']),
         'meta' => $payment['payee'] . ' · ' . $payment['amount_label'],
@@ -52,6 +55,7 @@ foreach (list_official_payments(null, 5) as $payment) {
 foreach (list_announcements(3) as $announcement) {
     $recentActivity[] = [
         'at' => $announcement['created_at'],
+        'kind' => 'announcement',
         'icon' => 'bi-megaphone',
         'title' => 'Announcement posted',
         'meta' => $announcement['type_label'] . ' · ' . $announcement['title'],
@@ -60,7 +64,7 @@ foreach (list_announcements(3) as $announcement) {
 }
 
 usort($recentActivity, static fn (array $a, array $b): int => strtotime($b['at']) <=> strtotime($a['at']));
-$recentActivity = array_slice($recentActivity, 0, 6);
+$recentActivity = array_slice($recentActivity, 0, 5);
 
 $relativeTime = static function (string $timestamp): string {
     $time = strtotime($timestamp);
