@@ -47,21 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ONLY RUN ON BUDGET PAGE
-    if (document.getElementById('budgetHorizontalBarChart')) {
-        new Chart(document.getElementById('budgetHorizontalBarChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Infrastructure', 'Healthcare', 'Education', 'Social Services', 'Disaster & P&O'],
-                datasets: [
-                    { label: 'Allocated', data: [7.8, 5.5, 4.4, 3.8, 3.1], backgroundColor: '#1f4d3a', borderRadius: 4 },
-                    { label: 'Disbursed', data: [7.1, 4.9, 2.7, 2.9, 1.8], backgroundColor: '#c07c3b', borderRadius: 4 }
-                ]
-            },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } } }
-        });
-    }
-
     // ONLY RUN ON RESIDENTS PAGE
     if (document.getElementById('residentsLineChart')) {
         new Chart(document.getElementById('residentsLineChart').getContext('2d'), {

@@ -2,12 +2,34 @@
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
 $currentYear = (int) date('Y');
+$initialBudget = get_budget($currentYear);
+$initialDisbursed = (float) $initialBudget['disbursed_total'];
+$initialRemaining = max((float) $initialBudget['total_budget'] - $initialDisbursed, 0);
+$initialUtilization = (float) $initialBudget['total_budget'] > 0
+    ? ($initialDisbursed / (float) $initialBudget['total_budget']) * 100
+    : 0;
+$sectorAccents = [
+    'Infrastructure' => 'text-success',
+    'Healthcare' => 'text-danger',
+    'Education' => 'text-warning',
+    'Social Services' => 'text-primary',
+    'Disaster and P&O' => 'text-secondary',
+];
+$formatMoney = static fn (float $amount): string => '₱' . number_format($amount, 0);
+$formatShort = static function (float $amount): string {
+    if ($amount >= 1000000) {
+        return '₱' . rtrim(rtrim(number_format($amount / 1000000, 1), '0'), '.') . 'M';
+    }
+
+    return '₱' . number_format($amount, 0);
+};
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title>Budget - Brgy. Bucana</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -53,7 +75,7 @@ $currentYear = (int) date('Y');
                         <option value="<?= $year ?>"<?= $year === $currentYear ? ' selected' : '' ?>><?= $year ?></option>
                     <?php endfor; ?>
                 </select>
-                <button class="btn btn-outline-secondary btn-sm px-3" type="button">Divide Budget</button>
+                <button class="btn btn-outline-secondary btn-sm px-3" type="button" data-bs-toggle="modal" data-bs-target="#divideBudgetModal">Divide Budget</button>
                 <button class="btn btn-primary-green btn-sm px-3" type="button" data-bs-toggle="modal" data-bs-target="#addBudgetModal">Add Budget</button>
             </div>
         </div>
@@ -63,21 +85,21 @@ $currentYear = (int) date('Y');
             <div class="col-md-4">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Total Budget</div>
-                    <div class="kpi-value" id="total-budget-value">₱24,800,000</div>
+                    <div class="kpi-value" id="total-budget-value"><?= $formatMoney((float) $initialBudget['total_budget']) ?></div>
                     <div class="kpi-sub" id="total-budget-sub">FY <?= $currentYear ?> enacted</div>
                 </div></div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Disbursed</div>
-                    <div class="kpi-value" id="disbursed-value">₱0</div>
-                    <div class="kpi-sub" id="disbursed-sub">0.0% utilization</div>
+                    <div class="kpi-value" id="disbursed-value"><?= $formatMoney($initialDisbursed) ?></div>
+                    <div class="kpi-sub" id="disbursed-sub"><?= number_format($initialUtilization, 1) ?>% utilization</div>
                 </div></div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Remaining</div>
-                    <div class="kpi-value text-warning" id="remaining-value">₱0</div>
+                    <div class="kpi-value text-warning" id="remaining-value"><?= $formatMoney($initialRemaining) ?></div>
                     <div class="kpi-sub">Unspent allocation</div>
                 </div></div>
             </div>
@@ -96,22 +118,16 @@ $currentYear = (int) date('Y');
                 <div class="card h-100">
                     <div class="card-header">Sector Breakdown</div>
                     <div class="card-body">
+                        <?php foreach (budget_sectors() as $sector):
+                            $sectorAllocated = (float) ($initialBudget['allocations'][$sector] ?? 0);
+                            $sectorDisbursed = (float) ($initialBudget['disbursed_allocations'][$sector] ?? 0);
+                            $sectorRate = $sectorAllocated > 0 ? ($sectorDisbursed / $sectorAllocated) * 100 : 0;
+                        ?>
                         <div class="d-flex justify-content-between mb-3">
-                            <span><i class="bi bi-circle-fill text-success small"></i> Infrastructure</span>
-                            <span class="text-muted">₱7.8M (91% disb.)</span>
+                            <span><i class="bi bi-circle-fill <?= $sectorAccents[$sector] ?? 'text-secondary' ?> small"></i> <?= htmlspecialchars($sector) ?></span>
+                            <span class="text-muted" data-sector-breakdown="<?= htmlspecialchars($sector) ?>"><?= $formatShort($sectorAllocated) ?> (<?= number_format($sectorRate, 0) ?>% disb.)</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span><i class="bi bi-circle-fill text-danger small"></i> Healthcare</span>
-                            <span class="text-muted">₱5.5M (89% disb.)</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span><i class="bi bi-circle-fill text-warning small"></i> Education</span>
-                            <span class="text-muted">₱4.4M (62% disb.)</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span><i class="bi bi-circle-fill text-primary small"></i> Social Services</span>
-                            <span class="text-muted">₱3.8M (76% disb.)</span>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -156,6 +172,76 @@ $currentYear = (int) date('Y');
     </div>
 </div>
 
+<!-- DIVIDE BUDGET MODAL -->
+<div class="modal fade" id="divideBudgetModal" tabindex="-1" aria-labelledby="divideBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="divideBudgetModalLabel">Divide Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="kpi-title mb-0">Total Budget</div>
+                        <div class="fs-4 fw-bold" id="divide-total-budget">₱0</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="kpi-title mb-0">Remaining</div>
+                        <div class="fs-4 fw-bold text-warning" id="divide-remaining-budget">₱0</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-3">
+                    <span>Allocated: <strong id="divide-allocated-budget">₱0</strong></span>
+                    <span id="divide-status"></span>
+                </div>
+                <hr>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label mb-1">Infrastructure</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control sector-allocation" data-sector="Infrastructure" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label mb-1">Healthcare</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control sector-allocation" data-sector="Healthcare" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label mb-1">Education</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control sector-allocation" data-sector="Education" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label mb-1">Social Services</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control sector-allocation" data-sector="Social Services" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label mb-1">Disaster and P&amp;O</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control sector-allocation" data-sector="Disaster and P&amp;O" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary-green btn-sm px-3" id="divide-save-budget">Save Allocation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/charts.js"></script>
@@ -163,11 +249,12 @@ $currentYear = (int) date('Y');
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const currentYear = <?= $currentYear ?>;
-    const budgets = { [currentYear]: 24800000 };
+    const budgets = { [currentYear]: <?= (float) $initialBudget['total_budget'] ?> };
+    let savedAllocations = <?= json_encode($initialBudget['allocations'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    let savedDisbursements = <?= json_encode($initialBudget['disbursed_allocations'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const disbursed = <?= (float) $initialBudget['disbursed_total'] ?>;
     const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
-
-    const sectorDisbursed = [7.1, 4.9, 2.7, 2.9, 1.8];
-    const disbursed = Math.round(sectorDisbursed.reduce((sum, value) => sum + value, 0) * 1000000);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     const yearFilter = document.getElementById('budget-year-filter');
     const totalValue = document.getElementById('total-budget-value');
@@ -194,7 +281,59 @@ document.addEventListener('DOMContentLoaded', () => {
         remainingValue.textContent = peso.format(remaining);
     };
 
+    const formatShort = (amount) => {
+        if (amount >= 1000000) {
+            return `₱${(amount / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+        }
+        return `₱${Math.round(amount).toLocaleString('en-PH')}`;
+    };
+
+    const renderSectorBreakdown = () => {
+        document.querySelectorAll('[data-sector-breakdown]').forEach((element) => {
+            const sector = element.dataset.sectorBreakdown;
+            const allocated = Number(savedAllocations[sector]) || 0;
+            const spent = Number(savedDisbursements[sector]) || 0;
+            const rate = allocated > 0 ? (spent / allocated) * 100 : 0;
+            element.textContent = `${formatShort(allocated)} (${rate.toFixed(0)}% disb.)`;
+        });
+    };
+
+    const chartCanvas = document.getElementById('budgetHorizontalBarChart');
+    let budgetChart = null;
+
+    const renderChart = () => {
+        if (!chartCanvas) {
+            return;
+        }
+
+        const labels = Object.keys(savedAllocations);
+        const allocated = labels.map((sector) => (Number(savedAllocations[sector]) || 0) / 1000000);
+        const spent = labels.map((sector) => (Number(savedDisbursements[sector]) || 0) / 1000000);
+
+        if (budgetChart) {
+            budgetChart.data.labels = labels;
+            budgetChart.data.datasets[0].data = allocated;
+            budgetChart.data.datasets[1].data = spent;
+            budgetChart.update();
+            return;
+        }
+
+        budgetChart = new Chart(chartCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Allocated', data: allocated, backgroundColor: '#1f4d3a', borderRadius: 4 },
+                    { label: 'Disbursed', data: spent, backgroundColor: '#c07c3b', borderRadius: 4 },
+                ],
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } } },
+        });
+    };
+
     render(currentYear);
+    renderSectorBreakdown();
+    renderChart();
     yearFilter.addEventListener('change', () => render(Number(yearFilter.value)));
 
     modal.addEventListener('show.bs.modal', () => {
@@ -204,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         amountInput.focus();
     });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const amount = Number(amountInput.value);
         if (!Number.isFinite(amount) || amount <= 0) {
@@ -213,13 +352,190 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         amountInput.setCustomValidity('');
-        budgets[currentYear] = (budgets[currentYear] || 0) + amount;
-        yearFilter.value = currentYear;
-        render(currentYear);
-        bootstrap.Modal.getInstance(modal).hide();
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch('../../backend/api/budget.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ year: currentYear, amount }),
+            });
+            const result = await response.json();
+            if (!response.ok || !result.ok) {
+                throw new Error(result.error || 'Unable to add the budget.');
+            }
+
+            budgets[currentYear] = Number(result.budget.total_budget) || 0;
+            yearFilter.value = currentYear;
+            render(currentYear);
+            bootstrap.Modal.getInstance(modal).hide();
+        } catch (error) {
+            amountInput.setCustomValidity(error.message);
+            amountInput.reportValidity();
+        } finally {
+            submitButton.disabled = false;
+        }
     });
 
     amountInput.addEventListener('input', () => amountInput.setCustomValidity(''));
+
+    const divideModal = document.getElementById('divideBudgetModal');
+    const divideTotalValue = document.getElementById('divide-total-budget');
+    const divideRemainingValue = document.getElementById('divide-remaining-budget');
+    const divideAllocatedValue = document.getElementById('divide-allocated-budget');
+    const divideStatus = document.getElementById('divide-status');
+    const divideSaveButton = document.getElementById('divide-save-budget');
+    const allocationInputs = Array.from(divideModal.querySelectorAll('.sector-allocation'));
+
+    let divideTotal = 0;
+    let divideTimer = null;
+    let divideRequest = 0;
+    let divideOverAllocated = false;
+
+    const collectAllocations = () => {
+        const allocations = {};
+        allocationInputs.forEach((input) => {
+            allocations[input.dataset.sector] = Number(input.value) || 0;
+        });
+        return allocations;
+    };
+
+    const applyDivisionTotals = (allocated, remaining, overAllocated) => {
+        divideAllocatedValue.textContent = peso.format(allocated);
+        divideRemainingValue.textContent = peso.format(remaining);
+        divideOverAllocated = overAllocated;
+        divideRemainingValue.className = `fs-4 fw-bold ${overAllocated ? 'text-danger' : 'text-warning'}`;
+        divideStatus.textContent = overAllocated ? 'Amount exceeds the total budget.' : '';
+        divideStatus.className = overAllocated ? 'text-danger' : 'text-muted';
+        divideSaveButton.disabled = overAllocated;
+    };
+
+    const previewDivision = () => {
+        const allocated = Object.values(collectAllocations()).reduce((sum, amount) => sum + amount, 0);
+        applyDivisionTotals(allocated, divideTotal - allocated, allocated > divideTotal);
+    };
+
+    const calculateDivision = async () => {
+        const requestId = ++divideRequest;
+        divideStatus.textContent = 'Calculating...';
+        divideStatus.className = 'text-muted';
+
+        try {
+            const response = await fetch('../../backend/api/budget-division.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    year: currentYear,
+                    allocations: collectAllocations(),
+                }),
+            });
+            const result = await response.json();
+            if (requestId !== divideRequest) {
+                return;
+            }
+            if (!response.ok || !result.ok) {
+                throw new Error(result.error || 'Unable to compute the allocation.');
+            }
+
+            divideTotal = Number(result.total_budget) || 0;
+            divideTotalValue.textContent = peso.format(divideTotal);
+            applyDivisionTotals(result.allocated, result.remaining, result.over_allocated);
+        } catch (error) {
+            if (requestId !== divideRequest) {
+                return;
+            }
+            divideStatus.textContent = error.message;
+            divideStatus.className = 'text-danger';
+            divideSaveButton.disabled = true;
+        }
+    };
+
+    const scheduleDivision = () => {
+        previewDivision();
+        clearTimeout(divideTimer);
+        divideTimer = setTimeout(calculateDivision, 250);
+    };
+
+    allocationInputs.forEach((input) => input.addEventListener('input', scheduleDivision));
+
+    divideModal.addEventListener('show.bs.modal', () => {
+        divideTotal = budgets[currentYear] || 0;
+        divideTotalValue.textContent = peso.format(divideTotal);
+        divideRemainingValue.textContent = peso.format(divideTotal);
+        divideAllocatedValue.textContent = peso.format(0);
+        divideRemainingValue.className = 'fs-4 fw-bold text-warning';
+        divideStatus.textContent = '';
+        divideStatus.className = 'text-muted';
+        divideOverAllocated = false;
+        divideSaveButton.disabled = false;
+        allocationInputs.forEach((input) => {
+            const amount = Number(savedAllocations[input.dataset.sector]) || 0;
+            input.value = amount > 0 ? String(amount) : '';
+        });
+        previewDivision();
+        calculateDivision();
+    });
+
+    divideSaveButton.addEventListener('click', async () => {
+        if (divideOverAllocated) {
+            return;
+        }
+
+        divideSaveButton.disabled = true;
+        divideStatus.textContent = 'Saving...';
+        divideStatus.className = 'text-muted';
+
+        try {
+            const response = await fetch('../../backend/api/budget-division.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    year: currentYear,
+                    allocations: collectAllocations(),
+                    save: true,
+                }),
+            });
+            const result = await response.json();
+            if (!response.ok || !result.ok) {
+                throw new Error(result.error || 'Unable to save the allocation.');
+            }
+
+            savedAllocations = result.allocations || collectAllocations();
+            divideTotal = Number(result.total_budget) || divideTotal;
+            budgets[currentYear] = divideTotal;
+            yearFilter.value = currentYear;
+            divideTotalValue.textContent = peso.format(divideTotal);
+            applyDivisionTotals(result.allocated, result.remaining, result.over_allocated);
+            render(currentYear);
+            renderSectorBreakdown();
+            renderChart();
+
+            if (!result.over_allocated) {
+                bootstrap.Modal.getInstance(divideModal).hide();
+            }
+        } catch (error) {
+            divideStatus.textContent = error.message;
+            divideStatus.className = 'text-danger';
+            divideSaveButton.disabled = false;
+        }
+    });
 });
 </script>
 </body>

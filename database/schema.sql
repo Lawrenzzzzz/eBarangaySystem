@@ -276,6 +276,58 @@ CREATE TABLE IF NOT EXISTS reports (
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS budgets (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  fiscal_year SMALLINT UNSIGNED NOT NULL,
+  total_budget DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_budgets_year (fiscal_year),
+  KEY idx_budgets_created_by (created_by),
+  CONSTRAINT fk_budgets_created_by
+    FOREIGN KEY (created_by) REFERENCES users (id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS budget_allocations (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  budget_id BIGINT UNSIGNED NOT NULL,
+  sector ENUM('Infrastructure', 'Healthcare', 'Education', 'Social Services', 'Disaster and P&O') NOT NULL,
+  amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  disbursed_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_budget_allocations_sector (budget_id, sector),
+  KEY idx_budget_allocations_budget (budget_id),
+  CONSTRAINT fk_budget_allocations_budget
+    FOREIGN KEY (budget_id) REFERENCES budgets (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO budgets (fiscal_year, total_budget)
+SELECT YEAR(CURDATE()), 24800000.00
+WHERE NOT EXISTS (
+  SELECT 1 FROM budgets WHERE fiscal_year = YEAR(CURDATE())
+);
+
+INSERT INTO budget_allocations (budget_id, sector, amount, disbursed_amount)
+SELECT b.id, seed.sector, seed.amount, seed.disbursed_amount
+FROM budgets b
+JOIN (
+  SELECT 'Infrastructure' AS sector, 7800000.00 AS amount, 7100000.00 AS disbursed_amount
+  UNION ALL SELECT 'Healthcare', 5500000.00, 4900000.00
+  UNION ALL SELECT 'Education', 4400000.00, 2700000.00
+  UNION ALL SELECT 'Social Services', 3800000.00, 2900000.00
+  UNION ALL SELECT 'Disaster and P&O', 3100000.00, 1800000.00
+) AS seed
+WHERE b.fiscal_year = YEAR(CURDATE())
+  AND NOT EXISTS (
+    SELECT 1 FROM budget_allocations ba WHERE ba.budget_id = b.id
+  );
+
 CREATE OR REPLACE VIEW v_user_accounts AS
 SELECT
   u.id AS user_id,

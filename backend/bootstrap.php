@@ -63,3 +63,4 @@ require_once __DIR__ . '/lib/blotter.php';
 require_once __DIR__ . '/lib/residents.php';
 require_once __DIR__ . '/lib/reports.php';
 require_once __DIR__ . '/lib/announcements.php';
+require_once __DIR__ . '/lib/budgets.php';
