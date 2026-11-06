@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
+$projects = list_projects();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title>Projects - Brgy. Bucana</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -56,70 +58,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
         </div>
 
         <!-- PROJECTS SPECIFIC CONTENT -->
-        <div class="row g-3 mb-4" id="project-grid">
-            <div class="col-md-4 project-item" data-status="ongoing" data-sector="Infrastructure" data-budget="1250000" data-start="Jun 2026" data-target="Oct 2026" data-search="drainage rehabilitation infrastructure purok 2">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0">Drainage Rehabilitation</h5>
-                            <span class="status-pill status-pending">Ongoing</span>
-                        </div>
-                        <div class="small text-muted mb-2"><i class="bi bi-tag"></i> Infrastructure</div>
-                        <p class="text-muted small mb-3">Concrete drainage upgrade along Purok 2 main road to reduce flooding during the rainy season.</p>
-                        <div class="d-flex justify-content-between small mb-1"><span>Budget</span><strong>₱1,250,000</strong></div>
-                        <div class="progress mb-3" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 65%"></div>
-                        </div>
-                        <div class="d-flex justify-content-between small text-muted">
-                            <span class="project-timeline">Jun 2026 - Oct 2026</span>
-                            <span>65%</span>
-                        </div>
-                        <button type="button" class="btn btn-primary-green btn-sm mt-3 align-self-start project-status-btn">Complete</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 project-item" data-status="completed" data-sector="Health" data-budget="820000" data-start="Jan 2026" data-target="Mar 2026" data-search="health center medical equipment healthcare">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0">Health Center Equipment</h5>
-                            <span class="status-pill status-completed">Completed</span>
-                        </div>
-                        <div class="small text-muted mb-2"><i class="bi bi-tag"></i> Health</div>
-                        <p class="text-muted small mb-3">Procurement of basic medical equipment and supplies for the barangay health center.</p>
-                        <div class="d-flex justify-content-between small mb-1"><span>Budget</span><strong>₱820,000</strong></div>
-                        <div class="progress mb-3" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 100%"></div>
-                        </div>
-                        <div class="d-flex justify-content-between small text-muted">
-                            <span class="project-timeline">Jan 2026 - Mar 2026</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 project-item" data-status="planned" data-sector="Infrastructure" data-budget="2100000" data-start="Nov 2026" data-target="Feb 2027" data-search="street lighting solar infrastructure purok 5">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0">Solar Street Lighting</h5>
-                            <span class="status-pill status-released">Planned</span>
-                        </div>
-                        <div class="small text-muted mb-2"><i class="bi bi-tag"></i> Infrastructure</div>
-                        <p class="text-muted small mb-3">Installation of solar-powered street lights along Purok 5 and the barangay hall access road.</p>
-                        <div class="d-flex justify-content-between small mb-1"><span>Budget</span><strong>₱2,100,000</strong></div>
-                        <div class="progress mb-3" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 10%"></div>
-                        </div>
-                        <div class="d-flex justify-content-between small text-muted">
-                            <span class="project-timeline">Nov 2026 - Feb 2027</span>
-                            <span>10%</span>
-                        </div>
-                        <button type="button" class="btn btn-primary-green btn-sm mt-3 align-self-start project-status-btn">Start Project</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row g-3 mb-4" id="project-grid"></div>
 
         <p class="text-muted small d-none" id="project-empty">No projects match your search.</p>
     </div>
@@ -311,11 +250,15 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/main.js"></script>
 <script>
+window.__initialProjects = <?= json_encode($projects, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
     const grid = document.getElementById('project-grid');
     const search = document.getElementById('project-search');
     const empty = document.getElementById('project-empty');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     const modal = document.getElementById('createProjectModal');
     const form = document.getElementById('create-project-form');
@@ -333,103 +276,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportProvinceInput = document.getElementById('report-province');
     const reportMunicipalityInput = document.getElementById('report-municipality');
     const reportBarangayInput = document.getElementById('report-barangay');
+
+    let projects = Array.isArray(window.__initialProjects) ? window.__initialProjects : [];
     let pendingProject = null;
 
-    const statusMap = {
-        planned: { label: 'Planned', className: 'status-released' },
-        ongoing: { label: 'Ongoing', className: 'status-pending' },
-        completed: { label: 'Completed', className: 'status-completed' }
-    };
-
-    const setProjectStatus = (item, statusKey) => {
-        const status = statusMap[statusKey];
-        item.dataset.status = statusKey;
-
-        const pill = item.querySelector('.status-pill');
-        pill.textContent = status.label;
-        pill.className = `status-pill ${status.className}`;
-
-        const button = item.querySelector('.project-status-btn');
-        if (!button) {
-            return;
-        }
-        if (statusKey === 'planned') {
-            button.textContent = 'Start Project';
-        } else if (statusKey === 'ongoing') {
-            button.textContent = 'Complete';
-        } else {
-            button.remove();
-        }
-    };
-
-    const syncReportHeader = () => {
-        document.getElementById('report-province-label').textContent = reportProvinceInput.value.trim() || '[PROVINCE]';
-        document.getElementById('report-municipality-label').textContent = reportMunicipalityInput.value.trim() || '[MUNICIPALITY]';
-        document.getElementById('report-barangay-label').textContent = reportBarangayInput.value.trim() || '[BARANGAY NAME]';
-    };
-
-    const openProjectReport = (item) => {
-        reportForm.reset();
-        reportTitleInput.value = item.querySelector('h5').textContent.trim();
-        reportBudgetInput.value = item.dataset.budget || '';
-        reportStartInput.value = item.dataset.start || '';
-        reportTargetInput.value = item.dataset.target || '';
-        syncReportHeader();
-        bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
-    };
-
-    reportProvinceInput.addEventListener('input', syncReportHeader);
-    reportMunicipalityInput.addEventListener('input', syncReportHeader);
-    reportBarangayInput.addEventListener('input', syncReportHeader);
-
-    reportModalEl.addEventListener('hidden.bs.modal', () => {
-        pendingProject = null;
-    });
-
-    reportForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (!pendingProject) {
-            return;
-        }
-        const item = pendingProject;
-        const start = reportStartInput.value.trim();
-        const target = reportTargetInput.value.trim();
-
-        item.dataset.start = start;
-        item.dataset.target = target;
-        const timeline = item.querySelector('.project-timeline');
-        if (timeline) {
-            timeline.textContent = start && target ? `${start} - ${target}` : (start || target || 'Not set');
-        }
-
-        setProjectStatus(item, 'ongoing');
-        pendingProject = null;
-        filterProjects();
-        bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
-    });
-
-    grid.addEventListener('click', (event) => {
-        const button = event.target.closest('.project-status-btn');
-        if (!button) {
-            return;
-        }
-        const item = button.closest('.project-item');
-        if (item.dataset.status === 'planned') {
-            if ((item.dataset.sector || '').toLowerCase() === 'infrastructure') {
-                pendingProject = item;
-                openProjectReport(item);
-            } else {
-                setProjectStatus(item, 'ongoing');
-            }
-        } else if (item.dataset.status === 'ongoing') {
-            setProjectStatus(item, 'completed');
-        }
-        filterProjects();
-    });
-
-    const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[char]));
+
+    const fieldValue = (id) => {
+        const element = document.getElementById(id);
+        return element ? element.value.trim() : '';
+    };
 
     const filterProjects = () => {
         const term = search.value.trim().toLowerCase();
@@ -445,50 +303,199 @@ document.addEventListener('DOMContentLoaded', () => {
         empty.classList.toggle('d-none', visible !== 0);
     };
 
-    search.addEventListener('input', filterProjects);
-
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const name = nameInput.value.trim();
-        const sector = sectorInput.value;
-        const description = descInput.value.trim();
-        const budget = Number(budgetInput.value) || 0;
-        const status = statusMap.planned;
-
+    const buildCard = (project) => {
         const column = document.createElement('div');
         column.className = 'col-md-4 project-item';
-        column.dataset.status = 'planned';
-        column.dataset.sector = sector;
-        column.dataset.budget = String(budget);
-        column.dataset.start = '';
-        column.dataset.target = '';
-        column.dataset.search = `${name} ${sector} ${description}`.toLowerCase();
+        column.dataset.id = String(project.id);
+        column.dataset.status = project.status;
+        column.dataset.sector = project.sector;
+        column.dataset.budget = String(project.budget);
+        column.dataset.search = `${project.title} ${project.sector} ${project.description}`.toLowerCase();
+
+        const actionButton = project.action_label
+            ? `<button type="button" class="btn btn-primary-green btn-sm mt-3 align-self-start project-status-btn">${escapeHtml(project.action_label)}</button>`
+            : '';
+
         column.innerHTML = `
             <div class="card h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0">${escapeHtml(name)}</h5>
-                        <span class="status-pill ${status.className}">${status.label}</span>
+                        <h5 class="fw-bold mb-0">${escapeHtml(project.title)}</h5>
+                        <span class="status-pill ${project.status_class}">${escapeHtml(project.status_label)}</span>
                     </div>
-                    <div class="small text-muted mb-2"><i class="bi bi-tag"></i> ${escapeHtml(sector)}</div>
-                    <p class="text-muted small mb-3">${escapeHtml(description) || 'No description provided.'}</p>
-                    <div class="d-flex justify-content-between small mb-1"><span>Budget</span><strong>${peso.format(budget)}</strong></div>
+                    <div class="small text-muted mb-2"><i class="bi bi-tag"></i> ${escapeHtml(project.sector)}</div>
+                    <p class="text-muted small mb-3">${escapeHtml(project.description) || 'No description provided.'}</p>
+                    <div class="d-flex justify-content-between small mb-1"><span>Budget</span><strong>${peso.format(project.budget)}</strong></div>
                     <div class="progress mb-3" style="height: 8px;">
-                        <div class="progress-bar bg-success" style="width: 0%"></div>
+                        <div class="progress-bar bg-success" style="width: ${project.progress}%"></div>
                     </div>
                     <div class="d-flex justify-content-between small text-muted">
-                        <span class="project-timeline">Not set</span>
-                        <span>0%</span>
+                        <span class="project-timeline">${escapeHtml(project.timeline)}</span>
+                        <span>${project.progress}%</span>
                     </div>
-                    <button type="button" class="btn btn-primary-green btn-sm mt-3 align-self-start project-status-btn">Start Project</button>
+                    ${actionButton}
                 </div>
             </div>`;
 
-        grid.prepend(column);
-        form.reset();
-        bootstrap.Modal.getInstance(modal).hide();
+        return column;
+    };
+
+    const renderGrid = () => {
+        grid.innerHTML = '';
+        projects.forEach((project) => grid.appendChild(buildCard(project)));
         filterProjects();
+    };
+
+    const findProject = (id) => projects.find((project) => String(project.id) === String(id)) || null;
+
+    const replaceProject = (updated) => {
+        projects = projects.map((project) => (String(project.id) === String(updated.id) ? updated : project));
+    };
+
+    const postProject = async (payload) => {
+        const response = await fetch('../../backend/api/projects.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-Token': csrfToken,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+            throw new Error(result.error || 'Unable to save the project.');
+        }
+        return result.project;
+    };
+
+    const syncReportHeader = () => {
+        document.getElementById('report-province-label').textContent = reportProvinceInput.value.trim() || '[PROVINCE]';
+        document.getElementById('report-municipality-label').textContent = reportMunicipalityInput.value.trim() || '[MUNICIPALITY]';
+        document.getElementById('report-barangay-label').textContent = reportBarangayInput.value.trim() || '[BARANGAY NAME]';
+    };
+
+    const openProjectReport = (project) => {
+        reportForm.reset();
+        reportTitleInput.value = project.title;
+        reportBudgetInput.value = project.budget || '';
+        reportStartInput.value = project.start_date || '';
+        reportTargetInput.value = project.target_date || '';
+        syncReportHeader();
+        bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
+    };
+
+    reportProvinceInput.addEventListener('input', syncReportHeader);
+    reportMunicipalityInput.addEventListener('input', syncReportHeader);
+    reportBarangayInput.addEventListener('input', syncReportHeader);
+
+    reportModalEl.addEventListener('hidden.bs.modal', () => {
+        pendingProject = null;
     });
+
+    reportForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!pendingProject) {
+            return;
+        }
+
+        const submitButton = reportForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const updated = await postProject({
+                id: pendingProject.id,
+                status: 'ongoing',
+                start_date: reportStartInput.value.trim(),
+                target_date: reportTargetInput.value.trim(),
+                report: {
+                    province: fieldValue('report-province'),
+                    municipality: fieldValue('report-municipality'),
+                    barangay: fieldValue('report-barangay'),
+                    location: fieldValue('report-location'),
+                    category: fieldValue('report-category'),
+                    contractor: fieldValue('report-contractor'),
+                    description: fieldValue('report-description'),
+                    objectives: fieldValue('report-objectives'),
+                    total_budget: fieldValue('report-total-budget'),
+                    fund_source: fieldValue('report-fund-source'),
+                    challenges: fieldValue('report-challenges'),
+                    actions: fieldValue('report-actions'),
+                    recommendations: fieldValue('report-recommendations'),
+                    prepared_by: fieldValue('report-prepared-by'),
+                    reviewed_by: fieldValue('report-reviewed-by'),
+                    approved_by: fieldValue('report-approved-by'),
+                    date: fieldValue('report-date'),
+                },
+            });
+            replaceProject(updated);
+            pendingProject = null;
+            bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
+            renderGrid();
+        } catch (error) {
+            window.alert(error.message);
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+
+    grid.addEventListener('click', async (event) => {
+        const button = event.target.closest('.project-status-btn');
+        if (!button) {
+            return;
+        }
+
+        const item = button.closest('.project-item');
+        const project = findProject(item.dataset.id);
+        if (!project) {
+            return;
+        }
+
+        if (project.status === 'planned' && project.sector.toLowerCase() === 'infrastructure') {
+            pendingProject = project;
+            openProjectReport(project);
+            return;
+        }
+
+        const nextStatus = project.status === 'planned' ? 'ongoing' : 'completed';
+        button.disabled = true;
+        try {
+            const updated = await postProject({ id: project.id, status: nextStatus });
+            replaceProject(updated);
+            renderGrid();
+        } catch (error) {
+            window.alert(error.message);
+            button.disabled = false;
+        }
+    });
+
+    search.addEventListener('input', filterProjects);
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const project = await postProject({
+                title: nameInput.value.trim(),
+                sector: sectorInput.value,
+                description: descInput.value.trim(),
+                budget: Number(budgetInput.value) || 0,
+            });
+            projects.unshift(project);
+            form.reset();
+            bootstrap.Modal.getInstance(modal).hide();
+            renderGrid();
+        } catch (error) {
+            window.alert(error.message);
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+
+    renderGrid();
 });
 </script>
 </body>
