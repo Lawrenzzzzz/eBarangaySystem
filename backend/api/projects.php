@@ -23,7 +23,7 @@ try {
         $input = json_input();
 
         if (isset($input['id'])) {
-            respond_result(update_project($input));
+            respond_result(update_project($input, $userId));
         }
 
         respond_result(create_project($input, $userId));

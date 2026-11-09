@@ -84,6 +84,35 @@ function find_project(int $projectId): ?array
     return $row === false ? null : project_details($row);
 }
 
+function project_budget_sector(string $sector): ?string
+{
+    return match ($sector) {
+        'Health' => 'Healthcare',
+        'Disaster & P&O' => 'Disaster and P&O',
+        default => in_array($sector, budget_sectors(), true) ? $sector : null,
+    };
+}
+
+function adjust_project_disbursement(array $project, float $delta, ?int $userId = null): void
+{
+    if (abs($delta) < 0.001) {
+        return;
+    }
+
+    $sector = project_budget_sector((string) $project['sector']);
+    if ($sector === null) {
+        return;
+    }
+
+    $budget = ensure_budget((int) date('Y'), $userId);
+    $statement = db()->prepare(
+        'INSERT INTO budget_allocations (budget_id, sector, amount, disbursed_amount)
+         VALUES (?, ?, 0, ?)
+         ON DUPLICATE KEY UPDATE disbursed_amount = GREATEST(disbursed_amount + VALUES(disbursed_amount), 0)'
+    );
+    $statement->execute([(int) $budget['id'], $sector, $delta]);
+}
+
 function create_project(array $input, int $userId): array
 {
     $title = trim((string) ($input['title'] ?? ''));
@@ -122,7 +151,7 @@ function create_project(array $input, int $userId): array
     ];
 }
 
-function update_project(array $input): array
+function update_project(array $input, ?int $userId = null): array
 {
     $projectId = (int) ($input['id'] ?? 0);
     $project = find_project($projectId);
@@ -152,13 +181,31 @@ function update_project(array $input): array
 
     $progress = max((int) $project['progress'], project_status_meta($status)['progress']);
 
-    $statement = db()->prepare(
-        'UPDATE projects
-         SET status = ?, progress = ?, start_date = ?, target_date = ?,
-             report_data = COALESCE(?, report_data)
-         WHERE id = ?'
-    );
-    $statement->execute([$status, $progress, $start !== '' ? $start : null, $target !== '' ? $target : null, $reportJson, $projectId]);
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $statement = $pdo->prepare(
+            'UPDATE projects
+             SET status = ?, progress = ?, start_date = ?, target_date = ?,
+                 report_data = COALESCE(?, report_data)
+             WHERE id = ?'
+        );
+        $statement->execute([$status, $progress, $start !== '' ? $start : null, $target !== '' ? $target : null, $reportJson, $projectId]);
+
+        if ($status === 'completed' && $project['status'] !== 'completed') {
+            adjust_project_disbursement($project, (float) $project['budget'], $userId);
+        } elseif ($status !== 'completed' && $project['status'] === 'completed') {
+            adjust_project_disbursement($project, -(float) $project['budget'], $userId);
+        }
+
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
 
     $updated = find_project($projectId);
     if ($updated === null) {

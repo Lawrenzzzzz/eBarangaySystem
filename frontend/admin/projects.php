@@ -2,6 +2,22 @@
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/backend/controllers/admin/guard.php';
 $projects = list_projects();
+$currentYear = (int) date('Y');
+$budgetSummary = get_budget($currentYear);
+$sectorBudgetSources = [
+    'Infrastructure' => 'Infrastructure',
+    'Education' => 'Education',
+    'Health' => 'Healthcare',
+    'Social Services' => 'Social Services',
+    'Disaster & P&O' => 'Disaster and P&O',
+];
+$sectorAllocations = [];
+foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
+    $sectorAllocations[$projectSector] = [
+        'allocated' => (float) ($budgetSummary['allocations'][$budgetSector] ?? 0),
+        'disbursed' => (float) ($budgetSummary['disbursed_allocations'][$budgetSector] ?? 0),
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -88,6 +104,18 @@ $projects = list_projects();
                             <option value="Social Services">Social Services</option>
                             <option value="Disaster &amp; P&amp;O">Disaster &amp; P&amp;O</option>
                         </select>
+                    </div>
+                    <div class="mb-3 d-none" id="project-sector-budget">
+                        <div class="border rounded-3 bg-light p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted text-uppercase fw-semibold">Sector Allocation - FY <?= $currentYear ?></span>
+                                <strong id="project-sector-allocated">₱0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                <span class="small text-muted">Remaining for this sector</span>
+                                <span class="fs-5 fw-bold text-success" id="project-sector-remaining">₱0</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="project-description" class="form-label">Description</label>
@@ -251,6 +279,7 @@ $projects = list_projects();
 <script src="js/main.js"></script>
 <script>
 window.__initialProjects = <?= json_encode($projects, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+window.__sectorAllocations = <?= json_encode($sectorAllocations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -277,8 +306,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportMunicipalityInput = document.getElementById('report-municipality');
     const reportBarangayInput = document.getElementById('report-barangay');
 
+    const sectorBudgetPanel = document.getElementById('project-sector-budget');
+    const sectorAllocatedEl = document.getElementById('project-sector-allocated');
+    const sectorRemainingEl = document.getElementById('project-sector-remaining');
+
     let projects = Array.isArray(window.__initialProjects) ? window.__initialProjects : [];
     let pendingProject = null;
+    const sectorAllocations = window.__sectorAllocations && typeof window.__sectorAllocations === 'object' ? window.__sectorAllocations : {};
+
+    const syncSectorAllocation = () => {
+        const allocation = sectorAllocations[sectorInput.value];
+        if (!allocation) {
+            sectorBudgetPanel.classList.add('d-none');
+            return;
+        }
+
+        const committed = projects
+            .filter((project) => project.sector === sectorInput.value)
+            .reduce((total, project) => total + Number(project.budget || 0), 0);
+        const remaining = Number(allocation.allocated || 0) - committed;
+
+        sectorAllocatedEl.textContent = peso.format(Number(allocation.allocated || 0));
+        sectorRemainingEl.textContent = peso.format(remaining);
+        sectorRemainingEl.classList.toggle('text-danger', remaining < 0);
+        sectorRemainingEl.classList.toggle('text-success', remaining >= 0);
+        sectorBudgetPanel.classList.remove('d-none');
+    };
+
+    sectorInput.addEventListener('change', syncSectorAllocation);
 
     const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -344,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = '';
         projects.forEach((project) => grid.appendChild(buildCard(project)));
         filterProjects();
+        syncSectorAllocation();
     };
 
     const findProject = (id) => projects.find((project) => String(project.id) === String(id)) || null;

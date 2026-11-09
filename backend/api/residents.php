@@ -15,7 +15,13 @@ try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
     if ($method === 'GET') {
-        if (($_GET['action'] ?? '') !== 'next-code') {
+        $action = (string) ($_GET['action'] ?? '');
+
+        if ($action === 'stats') {
+            json_response(['ok' => true, 'stats' => official_resident_demographics()]);
+        }
+
+        if ($action !== 'next-code') {
             json_error('Unknown action.', 400);
         }
 

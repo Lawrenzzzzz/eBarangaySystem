@@ -513,3 +513,87 @@ function official_resident_stats(): array
         'new_this_month' => (int) ($row['new_this_month'] ?? 0),
     ];
 }
+
+function official_resident_demographics(): array
+{
+    $statement = db()->query(
+        "SELECT
+            COUNT(*) AS total,
+            COUNT(DISTINCT CASE WHEN r.household_number IS NOT NULL AND r.household_number <> '' THEN r.household_number END) AS households,
+            COALESCE(SUM(r.created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')), 0) AS new_this_month,
+            COALESCE(SUM(CASE WHEN r.sex = 'male' THEN 1 ELSE 0 END), 0) AS male,
+            COALESCE(SUM(CASE WHEN r.sex = 'female' THEN 1 ELSE 0 END), 0) AS female,
+            COALESCE(SUM(CASE WHEN r.birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, r.birth_date, CURDATE()) BETWEEN 0 AND 17 THEN 1 ELSE 0 END), 0) AS age_0_17,
+            COALESCE(SUM(CASE WHEN r.birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, r.birth_date, CURDATE()) BETWEEN 18 AND 34 THEN 1 ELSE 0 END), 0) AS age_18_34,
+            COALESCE(SUM(CASE WHEN r.birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, r.birth_date, CURDATE()) BETWEEN 35 AND 59 THEN 1 ELSE 0 END), 0) AS age_35_59,
+            COALESCE(SUM(CASE WHEN r.birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, r.birth_date, CURDATE()) >= 60 THEN 1 ELSE 0 END), 0) AS age_60_plus,
+            COALESCE(SUM(CASE WHEN r.birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, r.birth_date, CURDATE()) >= 18 THEN 1 ELSE 0 END), 0) AS voters
+         FROM residents r
+         JOIN users u ON u.id = r.user_id
+         WHERE u.deleted_at IS NULL"
+    );
+    $row = $statement->fetch() ?: [];
+
+    $total = (int) ($row['total'] ?? 0);
+    $households = (int) ($row['households'] ?? 0);
+    $voters = (int) ($row['voters'] ?? 0);
+    $male = (int) ($row['male'] ?? 0);
+    $female = (int) ($row['female'] ?? 0);
+    $genderTotal = $male + $female;
+    $malePct = $genderTotal > 0 ? (int) round(($male / $genderTotal) * 100) : 0;
+
+    return [
+        'total' => $total,
+        'households' => $households,
+        'avg_household_size' => $households > 0 ? round($total / $households, 1) : 0.0,
+        'new_this_month' => (int) ($row['new_this_month'] ?? 0),
+        'voters' => $voters,
+        'voter_pct' => $total > 0 ? round(($voters / $total) * 100, 1) : 0.0,
+        'male' => $male,
+        'female' => $female,
+        'male_pct' => $malePct,
+        'female_pct' => $genderTotal > 0 ? 100 - $malePct : 0,
+        'age_0_17' => (int) ($row['age_0_17'] ?? 0),
+        'age_18_34' => (int) ($row['age_18_34'] ?? 0),
+        'age_35_59' => (int) ($row['age_35_59'] ?? 0),
+        'age_60_plus' => (int) ($row['age_60_plus'] ?? 0),
+    ];
+}
+
+function official_resident_population_trend(int $years = 6): array
+{
+    $years = max(2, min($years, 10));
+    $currentYear = (int) date('Y');
+    $startYear = $currentYear - ($years - 1);
+
+    $statement = db()->query(
+        "SELECT YEAR(r.created_at) AS year_created, COUNT(*) AS total
+         FROM residents r
+         JOIN users u ON u.id = r.user_id
+         WHERE u.deleted_at IS NULL
+         GROUP BY YEAR(r.created_at)"
+    );
+    $byYear = [];
+    foreach ($statement->fetchAll() as $row) {
+        $byYear[(int) $row['year_created']] = (int) $row['total'];
+    }
+
+    $before = db()->prepare(
+        "SELECT COUNT(*)
+         FROM residents r
+         JOIN users u ON u.id = r.user_id
+         WHERE u.deleted_at IS NULL AND YEAR(r.created_at) < ?"
+    );
+    $before->execute([$startYear]);
+    $running = (int) $before->fetchColumn();
+
+    $labels = [];
+    $data = [];
+    for ($year = $startYear; $year <= $currentYear; $year++) {
+        $running += $byYear[$year] ?? 0;
+        $labels[] = (string) $year;
+        $data[] = $running;
+    }
+
+    return ['labels' => $labels, 'data' => $data];
+}

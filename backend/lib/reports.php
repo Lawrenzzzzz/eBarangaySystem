@@ -24,19 +24,25 @@ function save_generated_report(array $report): int
     return (int) db()->lastInsertId();
 }
 
-function list_generated_reports(int $year): array
+function list_generated_reports(?int $year = null): array
 {
-    $statement = db()->prepare(
-        "SELECT r.id, r.report_type, r.title, r.report_year, r.barangay_name, r.municipality,
+    $sql = "SELECT r.id, r.report_type, r.title, r.report_year, r.barangay_name, r.municipality,
                 r.chairman_name, r.generated_by, r.generated_at,
                 COALESCE(JSON_LENGTH(r.data), 0) AS record_count,
                 COALESCE(ua.full_name, ua.email, 'Barangay Official') AS generated_by_name
          FROM reports r
-         LEFT JOIN v_user_accounts ua ON ua.user_id = r.generated_by
-         WHERE r.report_year = ?
-         ORDER BY r.generated_at DESC, r.id DESC"
-    );
-    $statement->execute([$year]);
+         LEFT JOIN v_user_accounts ua ON ua.user_id = r.generated_by";
+    $params = [];
+
+    if ($year !== null) {
+        $sql .= " WHERE r.report_year = ?";
+        $params[] = $year;
+    }
+
+    $sql .= " ORDER BY r.generated_at DESC, r.id DESC";
+
+    $statement = db()->prepare($sql);
+    $statement->execute($params);
 
     return array_map(static function (array $row): array {
         return [
@@ -53,6 +59,13 @@ function list_generated_reports(int $year): array
             'record_count' => (int) ($row['record_count'] ?? 0),
         ];
     }, $statement->fetchAll());
+}
+
+function list_report_years(): array
+{
+    $statement = db()->query("SELECT DISTINCT report_year FROM reports ORDER BY report_year DESC");
+
+    return array_map(static fn (array $row): int => (int) $row['report_year'], $statement->fetchAll());
 }
 
 function find_generated_report(int $reportId): ?array

@@ -49,11 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ONLY RUN ON RESIDENTS PAGE
     if (document.getElementById('residentsLineChart')) {
+        const trend = window.RESIDENT_TREND || { labels: [], data: [] };
         new Chart(document.getElementById('residentsLineChart').getContext('2d'), {
             type: 'line',
             data: {
-                labels: ['2016', '2017', '2018', '2019', '2020', '2021'],
-                datasets: [{ label: 'Registered Residents', data: [9800, 10560, 11310, 11800, 12100, 12480], borderColor: '#1f4d3a', backgroundColor: 'rgba(31, 77, 58, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }]
+                labels: trend.labels,
+                datasets: [{ label: 'Registered Residents', data: trend.data, borderColor: '#1f4d3a', backgroundColor: 'rgba(31, 77, 58, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#f1f1f1' } }, x: { grid: { display: false } } } }
         });
