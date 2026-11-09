@@ -309,11 +309,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = Object.keys(savedAllocations);
         const allocated = labels.map((sector) => (Number(savedAllocations[sector]) || 0) / 1000000);
         const spent = labels.map((sector) => (Number(savedDisbursements[sector]) || 0) / 1000000);
+        const sectorColors = labels.map((_, index) => dashboardPieColors[index % dashboardPieColors.length]);
+        const allocatedColors = sectorColors;
+        const disbursedColors = sectorColors.map((color) => dashboardColorWithAlpha(color, 0.45));
 
         if (budgetChart) {
             budgetChart.data.labels = labels;
             budgetChart.data.datasets[0].data = allocated;
+            budgetChart.data.datasets[0].backgroundColor = allocatedColors;
             budgetChart.data.datasets[1].data = spent;
+            budgetChart.data.datasets[1].backgroundColor = disbursedColors;
             budgetChart.update();
             return;
         }
@@ -323,11 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels,
                 datasets: [
-                    { label: 'Allocated', data: allocated, backgroundColor: '#1f4d3a', borderRadius: 4 },
-                    { label: 'Disbursed', data: spent, backgroundColor: '#c07c3b', borderRadius: 4 },
+                    { label: 'Allocated', data: allocated, backgroundColor: allocatedColors, borderRadius: 4 },
+                    { label: 'Disbursed', data: spent, backgroundColor: disbursedColors, borderRadius: 4 },
                 ],
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } } },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { generateLabels: (chart) => chart.data.datasets.map((dataset, index) => ({ text: dataset.label, fillStyle: index === 0 ? dashboardPieColors[0] : dashboardColorWithAlpha(dashboardPieColors[0], 0.45), strokeStyle: 'transparent', lineWidth: 0, hidden: !chart.isDatasetVisible(index), datasetIndex: index })) } } }, scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } } },
         });
     };
 
