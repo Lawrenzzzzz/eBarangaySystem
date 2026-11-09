@@ -11,7 +11,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body id="top">
@@ -95,13 +95,18 @@
 
     <main>
         <section class="hero">
-            <img src="assets/barangay-hall.jpg" alt="Barangay hall and community plaza" width="1600" height="1000">
+            <img class="hero-bg" src="assets/barangay-hall.jpg" alt="Barangay hall and community plaza" width="1600" height="1000">
             <div class="hero-overlay"></div>
+            <span class="hero-figure" aria-hidden="true">eB</span>
             <div class="container hero-in">
                 <div class="hero-copy">
-                    <p class="hero-kicker"><span></span>Malasakit. Aksyon. Pag-unlad.</p>
-                    <h1>Serbisyong barangay, mas malapit sa iyo.</h1>
-                    <p>Access essential services, receive community updates, and connect with your barangay�wherever you are.</p>
+                    <p class="hero-kicker"><span class="hero-rule"></span>Malasakit &middot; Aksyon &middot; Pag-unlad</p>
+                    <h1 class="hero-title">
+                        <span class="hero-line"><span>Serbisyong barangay,</span></span>
+                        <span class="hero-line hero-line-accent"><span>mas malapit</span></span>
+                        <span class="hero-line"><span>sa iyo.</span></span>
+                    </h1>
+                    <p class="hero-standfirst">Access essential services, receive community updates, and connect with your barangay &mdash; wherever you are.</p>
                     <div class="hero-btns">
                         <a class="btn btn-lg btn-gold" href="signup.php">
                             Create resident account
@@ -123,7 +128,7 @@
             </div>
         </section>
 
-        <section id="services" class="section">
+        <section id="services" class="section" data-reveal>
             <div class="container">
                 <div class="sec-head">
                     <div>
@@ -183,7 +188,7 @@
             </div>
         </section>
 
-        <section id="announcements" class="section soft">
+        <section id="announcements" class="section soft" data-reveal>
             <div class="container ann-grid">
                 <div>
                     <p class="kicker">Community board</p>
@@ -216,7 +221,7 @@
             </div>
         </section>
 
-        <section id="about" class="section">
+        <section id="about" class="section" data-reveal>
             <div class="container about">
                 <div>
                     <p class="kicker">Our commitment</p>
@@ -239,7 +244,7 @@
             </div>
         </section>
 
-        <section id="contact" class="contact">
+        <section id="contact" class="contact" data-reveal>
             <div class="container">
                 <div class="ct">
                     <span>

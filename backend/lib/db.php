@@ -24,3 +24,4 @@ function db(): PDO
 
     return $pdo;
 }
+ 

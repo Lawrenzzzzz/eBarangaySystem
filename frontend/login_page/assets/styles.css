@@ -15,6 +15,7 @@
   --civic-soft: oklch(0.965 0.02 110);
   --civic-gold: oklch(0.84 0.16 91);
   --civic-ink: oklch(0.19 0.03 157);
+  --poster-red: oklch(0.64 0.19 27);
   --success: oklch(0.43 0.12 152);
   --font-sans: "Manrope", sans-serif;
   --font-display: "Fraunces", serif;
@@ -326,8 +327,9 @@ svg.i {
   isolation: isolate;
   min-height: 680px;
   overflow: hidden;
+  background: var(--civic-ink);
 }
-.hero > img {
+.hero-bg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -337,20 +339,41 @@ svg.i {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--civic-ink) 95%, transparent) 0%,
-    color-mix(in oklab, var(--civic-ink) 78%, transparent) 43%,
-    color-mix(in oklab, var(--civic-ink) 8%, transparent) 78%
-  );
+  background:
+    radial-gradient(
+      120% 120% at 100% 0%,
+      color-mix(in oklab, var(--civic-ink) 45%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      96deg,
+      color-mix(in oklab, var(--civic-ink) 96%, transparent) 0%,
+      color-mix(in oklab, var(--civic-ink) 82%, transparent) 44%,
+      color-mix(in oklab, var(--civic-ink) 12%, transparent) 80%
+    );
+}
+.hero-figure {
+  position: absolute;
+  top: 50%;
+  right: clamp(-3rem, 2vw, 2rem);
+  z-index: 1;
+  font: 600 clamp(12rem, 27vw, 22rem) / 0.8 var(--font-display);
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 2px
+    color-mix(in oklab, var(--civic-gold) 34%, transparent);
+  transform-origin: 70% 80%;
+  pointer-events: none;
+  user-select: none;
 }
 .hero-in {
   position: relative;
+  z-index: 2;
   display: flex;
   min-height: 680px;
   align-items: center;
   padding-top: 5rem;
-  padding-bottom: 5rem;
+  padding-bottom: 6.5rem;
 }
 .hero-copy {
   max-width: 42rem;
@@ -359,27 +382,44 @@ svg.i {
 .hero-kicker {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.22em;
+  color: color-mix(in oklab, var(--primary-foreground) 84%, transparent);
 }
-.hero-kicker span {
-  width: 2rem;
-  height: 1px;
-  background: var(--civic-gold);
+.hero-rule {
+  width: 3rem;
+  height: 3px;
+  flex: none;
+  background: var(--poster-red);
+  transform-origin: left center;
 }
-.hero h1 {
-  font: 600 3rem/1.04 var(--font-display);
+.hero-title {
+  font: 600 clamp(2.75rem, 5.4vw, 4.5rem) / 1.02 var(--font-display);
+  letter-spacing: -0.02em;
 }
-.hero-copy > p {
+.hero-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.hero-line > span {
+  display: inline-block;
+  will-change: transform;
+}
+.hero-line-accent > span {
+  color: var(--poster-red);
+  font-style: italic;
+}
+.hero-standfirst {
   margin-top: 1.5rem;
-  max-width: 36rem;
-  font-size: 1rem;
-  line-height: 1.75;
-  color: color-mix(in oklab, var(--primary-foreground) 82%, transparent);
+  max-width: 34rem;
+  font: italic 400 clamp(1.25rem, 1.6vw, 1.5rem) / 1.5 var(--font-display);
+  color: color-mix(in oklab, var(--primary-foreground) 85%, transparent);
 }
 .hero-btns {
   margin-top: 2.25rem;
@@ -392,6 +432,7 @@ svg.i {
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 3;
   border-top: 1px solid
     color-mix(in oklab, var(--primary-foreground) 20%, transparent);
   background: color-mix(in oklab, var(--primary) 88%, transparent);
@@ -423,18 +464,97 @@ svg.i {
   letter-spacing: 0.1em;
   color: color-mix(in oklab, var(--primary-foreground) 65%, transparent);
 }
+/* poster motion — rule draws, kicker lifts, figure drops,
+   headline rises line-by-line, standfirst fades, actions settle */
+.hero-rule {
+  animation: poster-rule 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s both;
+}
+.hero-kicker {
+  animation: poster-fade 0.5s ease-out 0.1s both;
+}
+.hero-figure {
+  animation: poster-figure 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+.hero-line > span {
+  animation: poster-line 0.62s cubic-bezier(0.22, 0.68, 0.16, 1) both;
+}
+.hero-line:nth-child(1) > span {
+  animation-delay: 0.16s;
+}
+.hero-line:nth-child(2) > span {
+  animation-delay: 0.24s;
+}
+.hero-line:nth-child(3) > span {
+  animation-delay: 0.32s;
+}
+.hero-standfirst {
+  animation: poster-fade 0.55s ease-out 0.44s both;
+}
+.hero-btns {
+  animation: poster-fade 0.55s ease-out 0.54s both;
+}
+@keyframes poster-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes poster-line {
+  from {
+    transform: translateY(112%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes poster-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes poster-figure {
+  0% {
+    opacity: 0;
+    transform: translateY(-128%) rotate(-26deg);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) rotate(-12deg);
+  }
+}
+/* scroll reveal for below-the-fold sections */
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s ease-out;
+}
+html.reveal-ready [data-reveal].reveal-in {
+  opacity: 1;
+  transform: none;
+}
+@media (max-width: 767px) {
+  .hero-figure {
+    display: none;
+  }
+}
 @media (min-width: 640px) {
   .hero {
     min-height: 720px;
   }
   .hero-in {
     min-height: 720px;
-  }
-  .hero h1 {
-    font-size: 4.5rem;
-  }
-  .hero-copy > p {
-    font-size: 1.125rem;
   }
   .hero-btns {
     flex-direction: row;

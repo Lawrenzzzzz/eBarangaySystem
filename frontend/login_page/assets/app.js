@@ -53,6 +53,27 @@
     return data;
   }
 
+  const revealEls = $$("[data-reveal]");
+  if (revealEls.length) {
+    document.documentElement.classList.add("reveal-ready");
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("reveal-in");
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+      );
+      revealEls.forEach((el) => io.observe(el));
+    } else {
+      revealEls.forEach((el) => el.classList.add("reveal-in"));
+    }
+  }
+
   const dr = $("#open-drawer");
   if (dr) {
     const b = document.body,
