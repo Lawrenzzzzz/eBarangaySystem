@@ -16,27 +16,28 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/auth.css">
 </head>
 <body>
-<main class="reset-page">
+<main class="auth-plain">
     <section class="reset-card">
         <span class="ico">
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M2.59 17.41A2 2 0 0 0 2 18.83V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.17a2 2 0 0 0 1.42-.59l.81-.81a6.5 6.5 0 1 0-4-4z"/>
                 <circle cx="16.5" cy="7.5" r=".5"/>
             </svg>
         </span>
         <h1>Choose a new password</h1>
-        <p>Use at least 8 characters that you don�t use elsewhere.</p>
+        <p>Use at least 8 characters that you don&rsquo;t use elsewhere.</p>
         <form id="r-form" class="stack hidden" style="margin-top:1.75rem" novalidate>
-            <label class="field"><span class="label">New password</span><input class="input" id="r-pass" type="password" minlength="8"></label>
-            <label class="field"><span class="label">Confirm password</span><input class="input" id="r-conf" type="password" minlength="8"></label>
-            <p class="err hidden" id="r-err"></p>
-            <button class="btn btn-primary btn-full" style="height:2.5rem">Update password</button>
+            <label class="field"><span class="label">New password</span><input class="input" id="r-pass" type="password" minlength="8" autocomplete="new-password"></label>
+            <label class="field"><span class="label">Confirm password</span><input class="input" id="r-conf" type="password" minlength="8" autocomplete="new-password"></label>
+            <p class="err hidden" id="r-err" role="alert"></p>
+            <button class="btn btn-primary btn-full" id="r-submit" style="height:50px">Update password</button>
         </form>
-        <p class="notice" id="r-msg">Checking your recovery link�</p>
+        <p class="notice" id="r-msg">Checking your recovery link&hellip;</p>
     </section>
 </main>
 <div id="toasts" aria-live="polite"></div>

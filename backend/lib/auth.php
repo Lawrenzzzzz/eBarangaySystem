@@ -135,9 +135,6 @@ function register_account(array $input): array
     $address = trim((string) ($input['address'] ?? ''));
     $householdNumber = trim((string) ($input['householdNumber'] ?? ''));
     $password = (string) ($input['password'] ?? '');
-    $accountType = ($input['accountType'] ?? 'resident') === 'official' ? 'official' : 'resident';
-    $position = trim((string) ($input['position'] ?? ''));
-    $employeeNumber = trim((string) ($input['employeeNumber'] ?? ''));
     $emailProof = trim((string) ($input['emailProof'] ?? ''));
     $phone = normalize_phone((string) ($input['phone'] ?? ''));
 
@@ -163,14 +160,6 @@ function register_account(array $input): array
     if ($emailProof === '') {
         return ['ok' => false, 'status' => 422, 'error' => 'Verify your email address before creating your account.'];
     }
-    if ($accountType === 'official') {
-        if (strlen($position) < 2 || strlen($position) > 80) {
-            return ['ok' => false, 'status' => 422, 'error' => 'Enter your barangay position.'];
-        }
-        if (strlen($employeeNumber) < 2 || strlen($employeeNumber) > 40) {
-            return ['ok' => false, 'status' => 422, 'error' => 'Enter your employee or official ID number.'];
-        }
-    }
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -193,8 +182,8 @@ function register_account(array $input): array
             return ['ok' => false, 'status' => 422, 'error' => 'Email verification has expired. Please verify your email address again.'];
         }
 
-        $insertUser = $pdo->prepare("INSERT INTO users (role_id, email, phone, password_hash, account_type, status, email_verified_at, password_changed_at) VALUES (1, ?, ?, ?, ?, 'active', NOW(), NOW())");
-        $insertUser->execute([$email, $phone, password_hash($password, PASSWORD_BCRYPT), $accountType]);
+        $insertUser = $pdo->prepare("INSERT INTO users (role_id, email, phone, password_hash, account_type, status, email_verified_at, password_changed_at) VALUES (1, ?, ?, ?, 'resident', 'active', NOW(), NOW())");
+        $insertUser->execute([$email, $phone, password_hash($password, PASSWORD_BCRYPT)]);
         $userId = (int) $pdo->lastInsertId();
         $residentCode = 'BSG-' . str_pad((string) $userId, 5, '0', STR_PAD_LEFT);
 
@@ -213,11 +202,6 @@ function register_account(array $input): array
             $address,
         ]);
 
-        if ($accountType === 'official') {
-            $insertApplication = $pdo->prepare("INSERT INTO official_applications (user_id, requested_position, employee_number, status) VALUES (?, ?, ?, 'pending')");
-            $insertApplication->execute([$userId, $position, $employeeNumber]);
-        }
-
         $pdo->prepare("UPDATE auth_tokens SET used_at = NOW() WHERE id = ?")->execute([(int) $proof['id']]);
         $pdo->commit();
 
@@ -225,11 +209,9 @@ function register_account(array $input): array
             'ok' => true,
             'user_id' => $userId,
             'email' => $email,
-            'account_type' => $accountType,
+            'account_type' => 'resident',
             'resident_code' => $residentCode,
-            'message' => $accountType === 'official'
-                ? 'Account created. Your official access request is pending review.'
-                : 'Account created. You can now sign in.',
+            'message' => 'Account created. You can now sign in.',
         ];
     } catch (Throwable $exception) {
         if ($pdo->inTransaction()) {

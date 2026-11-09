@@ -75,7 +75,6 @@
       err = $("#a-err"),
       submit = $("#a-submit");
     let mode = A.dataset.initial,
-      type = "resident",
       verifiedEmail = "",
       emailProof = "",
       emailVerificationId = null,
@@ -92,7 +91,7 @@
       ],
       signup: [
         "Create your account",
-        "Register as a resident or submit an official access request.",
+        "Register as a resident to access barangay services.",
         null,
         "Already registered?",
         "login.php",
@@ -124,16 +123,7 @@
           !el.dataset.modes.split(" ").includes(mode),
         ),
       );
-      $("#official-fields").classList.toggle(
-        "hidden",
-        !(mode === "signup" && type === "official"),
-      );
-      submit.textContent =
-        mode === "signup"
-          ? type === "official"
-            ? "Submit official request"
-            : "Create resident account"
-          : t[2];
+      submit.textContent = mode === "signup" ? "Create resident account" : t[2];
       $("#a-foot").textContent = t[3];
       const l = $("#a-link"),
         b = $("#a-back");
@@ -152,16 +142,6 @@
     };
     $$("[data-mode]", A).forEach(
       (b) => (b.onclick = () => setMode(b.dataset.mode)),
-    );
-    $$("[data-type]", A).forEach(
-      (b) =>
-        (b.onclick = () => {
-          type = b.dataset.type;
-          $$("[data-type]", A).forEach((x) =>
-            x.classList.toggle("on", x === b),
-          );
-          render();
-        }),
     );
     $("#pw-toggle").onclick = () => {
       const p = $("#password"),
@@ -371,9 +351,6 @@
           "Please complete all required fields with valid information.",
         );
       }
-      if (type === "official" && (!f("position") || !f("employeeNumber"))) {
-        return fail("Position and employee number are required for officials.");
-      }
       if (verifiedEmail !== em || !emailProof) {
         openEmail();
         return fail("Please verify your email address first.");
@@ -389,25 +366,14 @@
             address: ad,
             householdNumber: f("householdNumber"),
             password: pw,
-            accountType: type === "official" ? "official" : "resident",
-            position: f("position"),
-            employeeNumber: f("employeeNumber"),
             emailProof,
           },
         });
         lastKind = "signup";
-        lastMsg =
-          data.message ||
-          (type === "official"
-            ? "Account created. Your official access request is pending review."
-            : "Account created. You can now sign in.");
-        if (type === "official") {
-          setMode("success");
-        } else {
-          toast(lastMsg, "ok");
-          location.href =
-            "login.php?registered=1&email=" + encodeURIComponent(em);
-        }
+        lastMsg = data.message || "Account created. You can now sign in.";
+        toast(lastMsg, "ok");
+        location.href =
+          "login.php?registered=1&email=" + encodeURIComponent(em);
       } catch (e) {
         fail(e.message);
         submit.disabled = false;
