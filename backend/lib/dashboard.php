@@ -6,6 +6,97 @@ function admin_dashboard_money_label(float $amount): string
     return '₱' . number_format($amount, 0);
 }
 
+function admin_dashboard_relative_time(?string $datetime): string
+{
+    if ($datetime === null || trim($datetime) === '') {
+        return 'Never';
+    }
+
+    $timestamp = strtotime($datetime);
+    if ($timestamp === false) {
+        return 'Never';
+    }
+
+    $elapsed = time() - $timestamp;
+    if ($elapsed < 60) {
+        return 'Just now';
+    }
+    if ($elapsed < 3600) {
+        $minutes = (int) floor($elapsed / 60);
+        return $minutes . ' min' . ($minutes === 1 ? '' : 's') . ' ago';
+    }
+    if ($elapsed < 86400) {
+        $hours = (int) floor($elapsed / 3600);
+        return $hours . ' hr' . ($hours === 1 ? '' : 's') . ' ago';
+    }
+    if ($elapsed < 604800) {
+        $days = (int) floor($elapsed / 86400);
+        return $days . ' day' . ($days === 1 ? '' : 's') . ' ago';
+    }
+
+    return date('M j, Y', $timestamp);
+}
+
+function admin_recent_official_logins(int $limit = 8): array
+{
+    $limit = max(1, min($limit, 25));
+
+    $statement = db()->prepare(
+        "SELECT
+            u.id AS user_id,
+            u.email,
+            u.full_name AS account_name,
+            u.last_login_at,
+            r.name AS role_name,
+            r.code AS role_code,
+            res.full_name AS resident_name,
+            oa.requested_position,
+            oa.employee_number
+         FROM users u
+         JOIN roles r ON r.id = u.role_id
+         LEFT JOIN residents res ON res.user_id = u.id
+         LEFT JOIN official_applications oa ON oa.id = (
+             SELECT MAX(latest.id) FROM official_applications latest WHERE latest.user_id = u.id
+         )
+         WHERE u.account_type = 'official'
+           AND u.deleted_at IS NULL
+           AND u.last_login_at IS NOT NULL
+         ORDER BY u.last_login_at DESC
+         LIMIT {$limit}"
+    );
+    $statement->execute();
+
+    return array_map(static function (array $row): array {
+        $name = trim((string) ($row['account_name'] ?? ''));
+        if ($name === '') {
+            $name = trim((string) ($row['resident_name'] ?? ''));
+        }
+        if ($name === '') {
+            $name = (string) $row['email'];
+        }
+
+        $position = trim((string) ($row['requested_position'] ?? ''));
+        if ($position === '') {
+            $position = trim((string) ($row['role_name'] ?? '')) ?: 'Barangay Official';
+        }
+
+        $lastLoginAt = (string) $row['last_login_at'];
+        $lastLoginTimestamp = strtotime($lastLoginAt);
+
+        return [
+            'user_id' => (int) $row['user_id'],
+            'name' => $name,
+            'email' => (string) $row['email'],
+            'position' => $position,
+            'role_code' => (string) ($row['role_code'] ?? ''),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'last_login_at' => $lastLoginAt,
+            'last_login_label' => $lastLoginTimestamp !== false ? date('M j, Y g:i A', $lastLoginTimestamp) : '',
+            'last_login_relative' => admin_dashboard_relative_time($lastLoginAt),
+        ];
+    }, $statement->fetchAll());
+}
+
 function admin_dashboard_data(): array
 {
     $year = (int) date('Y');
@@ -16,6 +107,7 @@ function admin_dashboard_data(): array
     $payments = official_payment_stats();
     $projects = list_projects();
     $announcements = list_announcements();
+    $recentOfficialLogins = admin_recent_official_logins();
 
     $totalBudget = (float) $budget['total_budget'];
     $disbursed = (float) $budget['disbursed_total'];
@@ -89,5 +181,6 @@ function admin_dashboard_data(): array
             'latest_title' => $announcements[0]['title'] ?? '',
             'latest_at' => $announcements[0]['created_at'] ?? null,
         ],
+        'recent_official_logins' => $recentOfficialLogins,
     ];
 }

@@ -8,12 +8,12 @@ $initialRemaining = max((float) $initialBudget['total_budget'] - $initialDisburs
 $initialUtilization = (float) $initialBudget['total_budget'] > 0
     ? ($initialDisbursed / (float) $initialBudget['total_budget']) * 100
     : 0;
-$sectorAccents = [
-    'Infrastructure' => 'text-success',
-    'Healthcare' => 'text-danger',
-    'Education' => 'text-warning',
-    'Social Services' => 'text-primary',
-    'Disaster and P&O' => 'text-secondary',
+$sectorColors = [
+    'Infrastructure' => '#198754',
+    'Healthcare' => '#dc3545',
+    'Education' => '#ffc107',
+    'Social Services' => '#0d6efd',
+    'Disaster and P&O' => '#6c757d',
 ];
 $formatMoney = static fn (float $amount): string => '₱' . number_format($amount, 0);
 $formatShort = static function (float $amount): string {
@@ -30,7 +30,7 @@ $formatShort = static function (float $amount): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title>Budget - Brgy. Bucana</title>
+    <title>Budget - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
@@ -41,7 +41,7 @@ $formatShort = static function (float $amount): string {
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="logo-circle">M</div>
-            <div><h6 class="mb-0 fw-bold">Brgy. Bucana</h6><small class="text-muted">Office of the Chairman</small></div>
+            <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
             <li class="nav-item"><a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
@@ -55,8 +55,8 @@ $formatShort = static function (float $amount): string {
         <div class="sidebar-footer">
             <div class="user-card">
                 <small class="text-muted d-block mb-1">SIGNED IN AS</small>
-                <strong class="d-block">Capt. Choi Seungcheol Batumbakal</strong>
-                <small class="text-muted">Chairman - Term 2022-2025</small>
+                <strong class="d-block"><?= $esc($settingsChairmanName) ?></strong>
+                <small class="text-muted">Chairman - Term <?= $esc($settingsTerm) ?></small>
             </div>
             <button class="btn btn-outline btn-sm w-100 mt-2" id="admin-signout" type="button">Sign out</button>
         </div>
@@ -124,7 +124,7 @@ $formatShort = static function (float $amount): string {
                             $sectorRate = $sectorAllocated > 0 ? ($sectorDisbursed / $sectorAllocated) * 100 : 0;
                         ?>
                         <div class="d-flex justify-content-between mb-3">
-                            <span><i class="bi bi-circle-fill <?= $sectorAccents[$sector] ?? 'text-secondary' ?> small"></i> <?= htmlspecialchars($sector) ?></span>
+                            <span><i class="bi bi-circle-fill small" style="color: <?= $sectorColors[$sector] ?? '#6c757d' ?>"></i> <?= htmlspecialchars($sector) ?></span>
                             <span class="text-muted" data-sector-breakdown="<?= htmlspecialchars($sector) ?>"><?= $formatShort($sectorAllocated) ?> (<?= number_format($sectorRate, 0) ?>% disb.)</span>
                         </div>
                         <?php endforeach; ?>
@@ -181,6 +181,9 @@ $formatShort = static function (float $amount): string {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-warning py-2 px-3 small d-none" id="divide-lock-notice">
+                    <i class="bi bi-lock-fill me-1"></i>This year's allocation has already been saved and is locked. It can no longer be edited.
+                </div>
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <div class="kpi-title mb-0">Total Budget</div>
@@ -252,7 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const budgets = { [currentYear]: <?= (float) $initialBudget['total_budget'] ?> };
     let savedAllocations = <?= json_encode($initialBudget['allocations'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     let savedDisbursements = <?= json_encode($initialBudget['disbursed_allocations'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    let allocationLocked = <?= !empty($initialBudget['allocation_locked']) ? 'true' : 'false' ?>;
     const disbursed = <?= (float) $initialBudget['disbursed_total'] ?>;
+    const sectorColorMap = <?= json_encode($sectorColors, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -309,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = Object.keys(savedAllocations);
         const allocated = labels.map((sector) => (Number(savedAllocations[sector]) || 0) / 1000000);
         const spent = labels.map((sector) => (Number(savedDisbursements[sector]) || 0) / 1000000);
-        const sectorColors = labels.map((_, index) => dashboardPieColors[index % dashboardPieColors.length]);
+        const sectorColors = labels.map((label, index) => sectorColorMap[label] || dashboardPieColors[index % dashboardPieColors.length]);
         const allocatedColors = sectorColors;
         const disbursedColors = sectorColors.map((color) => dashboardColorWithAlpha(color, 0.45));
 
@@ -396,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const divideRemainingValue = document.getElementById('divide-remaining-budget');
     const divideAllocatedValue = document.getElementById('divide-allocated-budget');
     const divideStatus = document.getElementById('divide-status');
+    const divideLockNotice = document.getElementById('divide-lock-notice');
     const divideSaveButton = document.getElementById('divide-save-budget');
     const allocationInputs = Array.from(divideModal.querySelectorAll('.sector-allocation'));
 
@@ -419,7 +425,15 @@ document.addEventListener('DOMContentLoaded', () => {
         divideRemainingValue.className = `fs-4 fw-bold ${overAllocated ? 'text-danger' : 'text-warning'}`;
         divideStatus.textContent = overAllocated ? 'Amount exceeds the total budget.' : '';
         divideStatus.className = overAllocated ? 'text-danger' : 'text-muted';
-        divideSaveButton.disabled = overAllocated;
+        divideSaveButton.disabled = overAllocated || allocationLocked;
+    };
+
+    const applyAllocationLock = () => {
+        allocationInputs.forEach((input) => {
+            input.disabled = allocationLocked;
+        });
+        divideLockNotice.classList.toggle('d-none', !allocationLocked);
+        divideSaveButton.disabled = allocationLocked || divideOverAllocated;
     };
 
     const previewDivision = () => {
@@ -456,7 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             divideTotal = Number(result.total_budget) || 0;
             divideTotalValue.textContent = peso.format(divideTotal);
+            allocationLocked = Boolean(result.allocation_locked);
             applyDivisionTotals(result.allocated, result.remaining, result.over_allocated);
+            applyAllocationLock();
         } catch (error) {
             if (requestId !== divideRequest) {
                 return;
@@ -484,17 +500,22 @@ document.addEventListener('DOMContentLoaded', () => {
         divideStatus.textContent = '';
         divideStatus.className = 'text-muted';
         divideOverAllocated = false;
-        divideSaveButton.disabled = false;
         allocationInputs.forEach((input) => {
             const amount = Number(savedAllocations[input.dataset.sector]) || 0;
             input.value = amount > 0 ? String(amount) : '';
         });
+        applyAllocationLock();
         previewDivision();
+        if (allocationLocked) {
+            divideStatus.textContent = 'Saved allocation is locked.';
+            divideStatus.className = 'text-muted';
+            return;
+        }
         calculateDivision();
     });
 
     divideSaveButton.addEventListener('click', async () => {
-        if (divideOverAllocated) {
+        if (allocationLocked || divideOverAllocated) {
             return;
         }
 
@@ -524,10 +545,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             savedAllocations = result.allocations || collectAllocations();
             divideTotal = Number(result.total_budget) || divideTotal;
+            allocationLocked = Boolean(result.allocation_locked);
             budgets[currentYear] = divideTotal;
             yearFilter.value = currentYear;
             divideTotalValue.textContent = peso.format(divideTotal);
             applyDivisionTotals(result.allocated, result.remaining, result.over_allocated);
+            applyAllocationLock();
             render(currentYear);
             renderSectorBreakdown();
             renderChart();
@@ -538,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             divideStatus.textContent = error.message;
             divideStatus.className = 'text-danger';
-            divideSaveButton.disabled = false;
+            applyAllocationLock();
         }
     });
 });

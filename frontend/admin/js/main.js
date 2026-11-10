@@ -25,6 +25,75 @@ const initAdminDashboard = (root) => {
     };
     const money = (value) => currencyFormat.format(Number(value) || 0);
 
+    const buildOfficialLoginRow = (login) => {
+        const row = document.createElement("tr");
+
+        const officialCell = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "d-flex align-items-center gap-2";
+
+        const avatar = document.createElement("span");
+        avatar.className = "official-avatar";
+        const nameParts = String(login.name || "").trim().split(/\s+/).filter(Boolean);
+        avatar.textContent = nameParts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "O";
+
+        const info = document.createElement("div");
+        const name = document.createElement("strong");
+        name.className = "d-block";
+        name.textContent = login.name || login.email || "Official";
+        const meta = document.createElement("small");
+        meta.className = "text-muted";
+        meta.textContent = login.employee_number || "Official account";
+        info.append(name, meta);
+        wrap.append(avatar, info);
+        officialCell.appendChild(wrap);
+
+        const positionCell = document.createElement("td");
+        const pill = document.createElement("span");
+        pill.className = "status-pill status-completed";
+        pill.textContent = login.position || "Barangay Official";
+        positionCell.appendChild(pill);
+
+        const emailCell = document.createElement("td");
+        emailCell.className = "text-muted";
+        emailCell.textContent = login.email || "";
+
+        const loginCell = document.createElement("td");
+        loginCell.className = "text-end";
+        const relative = document.createElement("div");
+        relative.className = "fw-semibold";
+        relative.textContent = login.last_login_relative || "Never";
+        const label = document.createElement("small");
+        label.className = "text-muted";
+        label.textContent = login.last_login_label || "";
+        loginCell.append(relative, label);
+
+        row.append(officialCell, positionCell, emailCell, loginCell);
+        return row;
+    };
+
+    const renderRecentOfficialLogins = (logins) => {
+        const tbody = document.getElementById("official-login-rows");
+        if (!tbody) {
+            return;
+        }
+
+        const list = Array.isArray(logins) ? logins : [];
+        tbody.replaceChildren();
+        if (list.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 4;
+            cell.className = "text-center text-muted py-4";
+            cell.textContent = "No official logins recorded yet.";
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            return;
+        }
+
+        list.forEach((login) => tbody.appendChild(buildOfficialLoginRow(login)));
+    };
+
     const applyDashboard = (data) => {
         if (!data) {
             return;
@@ -53,6 +122,8 @@ const initAdminDashboard = (root) => {
         if (typeof window.renderDashboardCharts === "function") {
             window.renderDashboardCharts(data);
         }
+
+        renderRecentOfficialLogins(data.recent_official_logins || []);
     };
 
     const refreshDashboard = async () => {

@@ -14,7 +14,7 @@ function budget_sectors(): array
 
 function budget_row(int $year): ?array
 {
-    $statement = db()->prepare('SELECT id, fiscal_year, total_budget FROM budgets WHERE fiscal_year = ? LIMIT 1');
+    $statement = db()->prepare('SELECT id, fiscal_year, total_budget, allocation_locked_at FROM budgets WHERE fiscal_year = ? LIMIT 1');
     $statement->execute([$year]);
     $row = $statement->fetch();
 
@@ -64,6 +64,8 @@ function get_budget(int $year): array
     return [
         'year' => $year,
         'saved' => $budget !== null,
+        'allocation_locked' => $budget !== null && !empty($budget['allocation_locked_at']),
+        'allocation_locked_at' => $budget['allocation_locked_at'] ?? null,
         'total_budget' => $total,
         'allocations' => $allocations,
         'disbursed_allocations' => $disbursements,
@@ -108,6 +110,10 @@ function save_budget_allocations(int $year, array $allocations, ?int $userId = n
 {
     $allocations = normalize_budget_allocations($allocations);
     $budget = ensure_budget($year, $userId);
+    if (!empty($budget['allocation_locked_at'])) {
+        throw new InvalidArgumentException('The budget allocation for this year has already been saved and can no longer be edited.');
+    }
+
     $total = (float) $budget['total_budget'];
     $allocated = array_sum($allocations);
 
@@ -119,6 +125,13 @@ function save_budget_allocations(int $year, array $allocations, ?int $userId = n
     $pdo->beginTransaction();
 
     try {
+        $lockCheck = $pdo->prepare('SELECT allocation_locked_at FROM budgets WHERE id = ? FOR UPDATE');
+        $lockCheck->execute([(int) $budget['id']]);
+        if (!empty($lockCheck->fetchColumn())) {
+            $pdo->rollBack();
+            throw new InvalidArgumentException('The budget allocation for this year has already been saved and can no longer be edited.');
+        }
+
         $statement = $pdo->prepare(
             'INSERT INTO budget_allocations (budget_id, sector, amount)
              VALUES (?, ?, ?)
@@ -128,6 +141,8 @@ function save_budget_allocations(int $year, array $allocations, ?int $userId = n
         foreach ($allocations as $sector => $amount) {
             $statement->execute([(int) $budget['id'], $sector, $amount]);
         }
+
+        $pdo->prepare('UPDATE budgets SET allocation_locked_at = NOW() WHERE id = ?')->execute([(int) $budget['id']]);
 
         $pdo->commit();
     } catch (Throwable $exception) {

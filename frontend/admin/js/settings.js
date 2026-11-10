@@ -70,8 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 province: profileForm.province.value.trim(),
                 chairman: profileForm.chairman.value.trim(),
                 term: profileForm.term.value.trim(),
-                puroks: profileForm.puroks.value.trim(),
-                sitios: profileForm.sitios.value.trim(),
             };
 
             if (payload.barangay_name === "") {
@@ -82,6 +80,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const button = profileForm.querySelector('button[type="submit"]');
             try {
                 const data = await withButtonState(button, "Saving\u2026", () => send("profile", payload));
+                if (data.profile) {
+                    const headerName = document.querySelector(".sidebar-header h6");
+                    if (headerName) {
+                        headerName.textContent = data.profile.barangay_name;
+                    }
+                    const cardName = document.querySelector(".user-card strong");
+                    if (cardName) {
+                        cardName.textContent = data.profile.chairman;
+                    }
+                    const cardTerm = document.querySelector(".user-card small:last-of-type");
+                    if (cardTerm) {
+                        cardTerm.textContent = `Chairman - Term ${data.profile.term}`;
+                    }
+                    document.title = `Barangay Profile - ${data.profile.barangay_name}`;
+                }
                 showAlert("profile-alert", "success", data.message || "Barangay profile saved.");
             } catch (error) {
                 showAlert("profile-alert", "danger", error.message);

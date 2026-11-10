@@ -5,14 +5,29 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/dashboard.php';
 $budget = $dashboardData['budget'];
 $residents = $dashboardData['residents'];
 $blotter = $dashboardData['blotter'];
+$recentOfficialLogins = $dashboardData['recent_official_logins'] ?? [];
 $number = static fn (int|float $value): string => number_format((float) $value);
+$initials = static function (string $name): string {
+    $parts = preg_split('/\s+/', trim($name)) ?: [];
+    $letters = '';
+    foreach ($parts as $part) {
+        if ($part === '') {
+            continue;
+        }
+        $letters .= strtoupper(substr($part, 0, 1));
+        if (strlen($letters) >= 2) {
+            break;
+        }
+    }
+    return $letters !== '' ? $letters : 'O';
+};
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Brgy. Bucana</title>
+    <title>Dashboard - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
@@ -23,7 +38,7 @@ $number = static fn (int|float $value): string => number_format((float) $value);
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="logo-circle">M</div>
-            <div><h6 class="mb-0 fw-bold">Brgy. Bucana</h6><small class="text-muted">Office of the Chairman</small></div>
+            <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
             <!-- NOTICE: The active class is on Dashboard -->
@@ -37,8 +52,8 @@ $number = static fn (int|float $value): string => number_format((float) $value);
         <div class="sidebar-footer">
             <div class="user-card">
                 <small class="text-muted d-block mb-1">SIGNED IN AS</small>
-                <strong class="d-block">Capt. Choi Seungcheol Batumbakal</strong>
-                <small class="text-muted">Chairman - Term 2022-2025</small>
+                <strong class="d-block"><?= $esc($settingsChairmanName) ?></strong>
+                <small class="text-muted">Chairman - Term <?= $esc($settingsTerm) ?></small>
             </div>
             <button class="btn btn-outline btn-sm w-100 mt-2" id="admin-signout" type="button">Sign out</button>
         </div>
@@ -108,6 +123,56 @@ $number = static fn (int|float $value): string => number_format((float) $value);
                         <div class="d-flex justify-content-between mt-3 small text-muted">
                             <span><?= $number($blotter['total']) ?> blotter reports</span>
                             <span><?= $number($blotter['resolved']) ?> resolved (<?= number_format((float) $blotter['resolved_rate'], 0) ?>%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clock-history me-2"></i>Recent Official Logins</span>
+                        <small class="text-muted fw-normal">Official accounts only</small>
+                    </div>
+                    <div class="card-body pt-2">
+                        <div class="table-responsive">
+                            <table class="table table-custom align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Official</th>
+                                        <th>Position</th>
+                                        <th>Email</th>
+                                        <th class="text-end">Last Login</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="official-login-rows">
+                                <?php if ($recentOfficialLogins === []): ?>
+                                    <tr><td colspan="4" class="text-center text-muted py-4">No official logins recorded yet.</td></tr>
+                                <?php else: ?>
+                                    <?php foreach ($recentOfficialLogins as $login): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="official-avatar"><?= $esc($initials($login['name'])) ?></span>
+                                                <div>
+                                                    <strong class="d-block"><?= $esc($login['name']) ?></strong>
+                                                    <small class="text-muted"><?= $esc($login['employee_number'] !== '' ? $login['employee_number'] : 'Official account') ?></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="status-pill status-completed"><?= $esc($login['position']) ?></span></td>
+                                        <td class="text-muted"><?= $esc($login['email']) ?></td>
+                                        <td class="text-end">
+                                            <div class="fw-semibold"><?= $esc($login['last_login_relative']) ?></div>
+                                            <small class="text-muted"><?= $esc($login['last_login_label']) ?></small>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

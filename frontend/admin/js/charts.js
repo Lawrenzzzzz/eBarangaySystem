@@ -9,6 +9,14 @@ const dashboardPeso = new Intl.NumberFormat('en-PH', {
 
 const dashboardPieColors = ['#1f4d3a', '#2e7d5b', '#c07c3b', '#e0a458', '#8aa89a'];
 
+const sectorChartColors = {
+    'Infrastructure': '#198754',
+    'Healthcare': '#dc3545',
+    'Education': '#ffc107',
+    'Social Services': '#0d6efd',
+    'Disaster and P&O': '#6c757d',
+};
+
 const dashboardColorWithAlpha = (hex, alpha) => {
     const value = hex.replace('#', '');
     const r = parseInt(value.substring(0, 2), 16);
@@ -34,7 +42,7 @@ window.renderDashboardCharts = (data) => {
     const allocatedMillions = allocated.map((value) => value / 1000000);
     const disbursedMillions = disbursed.map((value) => value / 1000000);
 
-    const sectorColors = sectors.map((_, index) => dashboardPieColors[index % dashboardPieColors.length]);
+    const sectorColors = labels.map((label, index) => sectorChartColors[label] || dashboardPieColors[index % dashboardPieColors.length]);
     const allocatedColors = sectorColors;
     const disbursedColors = sectorColors.map((color) => dashboardColorWithAlpha(color, 0.45));
 
@@ -97,7 +105,7 @@ window.renderDashboardCharts = (data) => {
                 labels,
                 datasets: [{
                     data: allocated,
-                    backgroundColor: dashboardPieColors,
+                    backgroundColor: sectorColors,
                     borderColor: '#ffffff',
                     borderWidth: 2
                 }]
@@ -122,6 +130,7 @@ window.renderDashboardCharts = (data) => {
     } else {
         dashboardPieChart.data.labels = labels;
         dashboardPieChart.data.datasets[0].data = allocated;
+        dashboardPieChart.data.datasets[0].backgroundColor = sectorColors;
         dashboardPieChart.update();
     }
 };

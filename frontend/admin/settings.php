@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/settings.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= $esc($settingsCsrf) ?>">
-    <title>Barangay Profile - Brgy. Bucana</title>
+    <title>Barangay Profile - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
@@ -19,7 +19,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/settings.php';
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="logo-circle">M</div>
-            <div><h6 class="mb-0 fw-bold">Brgy. Bucana</h6><small class="text-muted">Office of the Chairman</small></div>
+            <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
             <li class="nav-item"><a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
@@ -58,8 +58,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/settings.php';
         <div class="sidebar-footer">
             <div class="user-card">
                 <small class="text-muted d-block mb-1">SIGNED IN AS</small>
-                <strong class="d-block">Capt. Choi Seungcheol Batumbakal</strong>
-                <small class="text-muted">Chairman - Term 2022-2025</small>
+                <strong class="d-block"><?= $esc($settingsChairmanName) ?></strong>
+                <small class="text-muted">Chairman - Term <?= $esc($settingsTerm) ?></small>
             </div>
             <button class="btn btn-outline btn-sm w-100 mt-2" id="admin-signout" type="button">Sign out</button>
         </div>
@@ -104,14 +104,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/settings.php';
                                 <div class="col-md-6">
                                     <label class="form-label text-muted small fw-bold" for="profile-term">Terms</label>
                                     <input type="text" class="form-control" id="profile-term" name="term" value="<?= $esc($settingsProfile['term']) ?>" maxlength="60">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-bold" for="profile-puroks">Puroks</label>
-                                    <input type="number" class="form-control" id="profile-puroks" name="puroks" value="<?= (int) $settingsProfile['puroks'] ?>" min="0" max="9999">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-muted small fw-bold" for="profile-sitios">Sitios</label>
-                                    <input type="number" class="form-control" id="profile-sitios" name="sitios" value="<?= (int) $settingsProfile['sitios'] ?>" min="0" max="9999">
                                 </div>
                             </div>
                             <button class="btn btn-primary-green px-4 mt-4" type="submit">

@@ -9,3 +9,14 @@ if ($currentUser === null || !in_array($currentUser['role_code'] ?? '', $adminRo
     header('Location: ../login_page/login.php');
     exit;
 }
+
+$settingsProfile = barangay_profile_record();
+$settingsBarangayName = $settingsProfile['barangay_name'] !== '' ? $settingsProfile['barangay_name'] : 'Barangay Bucana';
+$settingsChairmanName = $settingsProfile['chairman'] !== '' ? $settingsProfile['chairman'] : 'Barangay Chairman';
+$settingsTerm = (string) $settingsProfile['term'];
+
+if (!isset($esc)) {
+    $esc = static function ($value): string {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    };
+}

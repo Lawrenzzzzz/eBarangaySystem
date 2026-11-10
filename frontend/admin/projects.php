@@ -25,7 +25,7 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
-    <title>Projects - Brgy. Bucana</title>
+    <title>Projects - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
@@ -36,7 +36,7 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="logo-circle">M</div>
-            <div><h6 class="mb-0 fw-bold">Brgy. Bucana</h6><small class="text-muted">Office of the Chairman</small></div>
+            <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
             <li class="nav-item"><a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
@@ -50,8 +50,8 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
         <div class="sidebar-footer">
             <div class="user-card">
                 <small class="text-muted d-block mb-1">SIGNED IN AS</small>
-                <strong class="d-block">Capt. Choi Seungcheol Batumbakal</strong>
-                <small class="text-muted">Chairman - Term 2022-2025</small>
+                <strong class="d-block"><?= $esc($settingsChairmanName) ?></strong>
+                <small class="text-muted">Chairman - Term <?= $esc($settingsTerm) ?></small>
             </div>
             <button class="btn btn-outline btn-sm w-100 mt-2" id="admin-signout" type="button">Sign out</button>
         </div>
@@ -156,15 +156,15 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
                             <label for="report-province" class="form-label">Province</label>
-                            <input type="text" class="form-control" id="report-province" placeholder="Province" required>
+                            <input type="text" class="form-control" id="report-province" value="<?= $esc($settingsProfile['province']) ?>" placeholder="Province" required>
                         </div>
                         <div class="col-md-4">
                             <label for="report-municipality" class="form-label">Municipality</label>
-                            <input type="text" class="form-control" id="report-municipality" placeholder="Municipality" required>
+                            <input type="text" class="form-control" id="report-municipality" value="<?= $esc($settingsProfile['municipality']) ?>" placeholder="Municipality" required>
                         </div>
                         <div class="col-md-4">
                             <label for="report-barangay" class="form-label">Barangay</label>
-                            <input type="text" class="form-control" id="report-barangay" value="Bucana" required>
+                            <input type="text" class="form-control" id="report-barangay" value="<?= $esc($settingsProfile['barangay_name']) ?>" required>
                         </div>
                     </div>
 

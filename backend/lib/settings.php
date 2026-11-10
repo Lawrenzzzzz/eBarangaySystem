@@ -88,7 +88,6 @@ function save_barangay_profile(int $userId, array $input): array
 function official_position_options(): array
 {
     return [
-        'captain' => 'Barangay Captain',
         'secretary' => 'Barangay Secretary',
         'treasurer' => 'Barangay Treasurer',
         'kagawad' => 'Kagawad',

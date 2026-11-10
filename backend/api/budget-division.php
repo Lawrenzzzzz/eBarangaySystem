@@ -25,6 +25,8 @@ try {
         json_response([
             'ok' => true,
             'saved' => true,
+            'allocation_locked' => $saved['allocation_locked'],
+            'allocation_locked_at' => $saved['allocation_locked_at'],
             'total_budget' => $saved['total_budget'],
             'allocated' => $saved['allocated'],
             'remaining' => $saved['remaining'],
@@ -36,6 +38,8 @@ try {
     json_response([
         'ok' => true,
         'saved' => false,
+        'allocation_locked' => $budget['allocation_locked'],
+        'allocation_locked_at' => $budget['allocation_locked_at'],
         'total_budget' => $total,
         'allocated' => $allocated,
         'remaining' => $remaining,
