@@ -906,6 +906,163 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--eb-surface-muted);
 }
 
+/* Settings sub-options (sidebar) ------------------------------------------ */
+
+.settings-parent {
+  display: flex;
+  align-items: center;
+}
+
+.settings-parent .nav-link {
+  flex: 1 1 auto;
+}
+
+.settings-parent.active .nav-link {
+  color: #fff;
+  background: transparent;
+  border-left-color: var(--eb-sidebar-active);
+}
+
+.settings-parent.active .nav-link:hover {
+  background: transparent;
+}
+
+.settings-caret-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.1rem;
+  padding: 0.4rem 0.25rem;
+  color: var(--eb-sidebar-text);
+  background: transparent;
+  border: 0;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.settings-caret-btn:hover {
+  color: var(--eb-sidebar-active);
+}
+
+.settings-caret-btn i {
+  display: inline-block;
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.settings-caret-btn.collapsed i {
+  transform: rotate(-90deg);
+}
+
+.settings-submenu .nav-link {
+  padding: 0.55rem 1.5rem 0.55rem 2.4rem;
+  font-size: 0.8rem;
+  color: var(--eb-sidebar-muted);
+}
+
+.settings-submenu .nav-link:hover {
+  color: #fff;
+  background: var(--eb-sidebar-hover);
+  border-left-color: transparent;
+}
+
+.settings-submenu .nav-link.active {
+  color: var(--eb-sidebar-active);
+  background: var(--eb-sidebar-hover);
+  border-left-color: var(--eb-sidebar-active);
+}
+
+.settings-submenu .nav-link .sub-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  background-color: #475569;
+  border-radius: 50%;
+  transition: background-color 0.18s ease;
+}
+
+.settings-submenu .nav-link:hover .sub-dot {
+  background-color: var(--eb-sidebar-muted);
+}
+
+.settings-submenu .nav-link.active .sub-dot {
+  background-color: var(--eb-sidebar-active);
+}
+
+.settings-subparent {
+  display: flex;
+  align-items: center;
+}
+
+.settings-subparent .nav-link {
+  flex: 1 1 auto;
+}
+
+.settings-subparent .settings-caret-btn {
+  margin-right: 1.15rem;
+  padding: 0.3rem 0.25rem;
+}
+
+.settings-subparent .settings-caret-btn i {
+  font-size: 0.7rem;
+}
+
+.settings-subsubmenu .nav-link {
+  padding: 0.45rem 1.5rem 0.45rem 3.2rem;
+  font-size: 0.75rem;
+  color: var(--eb-sidebar-muted);
+}
+
+.settings-subsubmenu .nav-link:hover {
+  color: #fff;
+  background: var(--eb-sidebar-hover);
+  border-left-color: transparent;
+}
+
+.settings-subsubmenu .nav-link.active {
+  color: var(--eb-sidebar-active);
+  background: var(--eb-sidebar-hover);
+  border-left-color: var(--eb-sidebar-active);
+}
+
+.settings-subsubmenu .nav-link .sub-dot {
+  width: 4px;
+  height: 4px;
+}
+
+.settings-subsubmenu .nav-link.active .sub-dot {
+  background-color: var(--eb-sidebar-active);
+}
+
+/* Settings anchors & profile blocks --------------------------------------- */
+
+#documents-fees,
+#change-password,
+#profile-information,
+#add-photo,
+#change-email,
+#edit-name,
+#change-phone {
+  scroll-margin-top: 1.5rem;
+}
+
+.settings-avatar {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--eb-border);
+  flex-shrink: 0;
+}
+
+.profile-block + .profile-block {
+  padding-top: 1rem;
+  border-top: 1px solid var(--eb-border);
+}
+
 .save-bar {
   display: flex;
   flex-wrap: wrap;

@@ -49,10 +49,30 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       
-      <!-- ACTIVE HIGHLIGHT I2 SA SETTINGS (wow last na) -->
-      <a class="nav-link active" href="settings.php">
-        <span class="nav-dot"></span><span>Settings</span>
-      </a>
+      <!-- SETTINGS WITH SUB-OPTIONS -->
+      <div class="settings-parent">
+        <a class="nav-link" href="document-fees.php">
+          <span class="nav-dot"></span><span>Settings</span>
+        </a>
+        <button class="settings-caret-btn" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="true" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
+          <i class="bi bi-chevron-down"></i>
+        </button>
+      </div>
+
+      <div class="collapse show" id="officialSettingsSubmenu">
+        <div class="settings-submenu">
+          <a class="nav-link" href="document-fees.php">
+            <span class="sub-dot"></span><span>Documents Fees</span>
+          </a>
+          <a class="nav-link" href="change-password.php">
+            <span class="sub-dot"></span><span>Change Password</span>
+          </a>
+
+          <a class="nav-link active" href="#profile-information">
+            <span class="sub-dot"></span><span>Profile Information</span>
+          </a>
+        </div>
+      </div>
     </div>
     
     <div class="user-profile">
@@ -86,85 +106,42 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
     </div>
 
     <div class="eb-content">
-      <div class="row g-4">
-        
-        <!-- BARANGAY INFORMATION -->
-        <div class="col-lg-7">
+      <div class="row g-4 justify-content-center">
+
+        <!-- PROFILE INFORMATION -->
+        <div class="col-lg-8" id="profile-information">
           <div class="settings-card">
-            <h6>Barangay Information</h6>
-            <p class="subtitle">Official barangay details displayed on documents and announcements.</p>
+            <h6>Profile Information</h6>
+            <p class="subtitle">Manage your profile photo and personal contact details.</p>
 
-            <div class="mb-3">
-              <label class="form-label">Barangay Name</label>
-              <input type="text" class="form-control" placeholder="">
+            <!-- ADD PHOTO -->
+            <div class="profile-block" id="add-photo">
+              <label class="form-label d-block" for="profile-photo">Add Photo</label>
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="settings-avatar">
+                <div class="flex-grow-1">
+                  <input type="file" class="form-control" id="profile-photo" accept="image/*">
+                  <small class="d-block mt-1" style="font-size: .72rem; color: var(--eb-sidebar-muted);">JPG or PNG, up to 2 MB.</small>
+                </div>
+              </div>
             </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Municipality</label>
-              <input type="text" class="form-control" placeholder="">
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Province</label>
-              <input type="text" class="form-control" placeholder="">
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Barangay Captain</label>
-              <input type="text" class="form-control" placeholder="">
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Contact Number</label>
-              <input type="text" class="form-control" placeholder="">
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" placeholder="">
-            </div>
-            
-            <div class="mb-0">
-              <label class="form-label">Office Address</label>
-              <input type="text" class="form-control" placeholder="">
-            </div>
-          </div>
-        </div>
 
-        <!-- DOCUMENT FEES -->
-        <div class="col-lg-5">
-          <div class="settings-card">
-            <h6>Document Fees</h6>
-            <p class="subtitle">Standard fees for barangay-issued documents.</p>
+            <!-- CHANGE EMAIL -->
+            <div class="profile-block" id="change-email">
+              <label class="form-label" for="profile-email">Change Email</label>
+              <input type="email" class="form-control mb-3" id="profile-email" placeholder="official@barangay.gov.ph">
+            </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Barangay Clearance</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
+            <!-- EDIT NAME -->
+            <div class="profile-block" id="edit-name">
+              <label class="form-label" for="profile-name">Edit Name</label>
+              <input type="text" class="form-control mb-3" id="profile-name" value="<?= $esc($officialFullName) ?>">
             </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Certificate of Residency</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Indigency Certificate</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Barangay ID</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Business Permit</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-0">
-              <span style="font-size: .88rem;">Barangay ID (Senior)</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
+
+            <!-- CHANGE PHONE NUMBER -->
+            <div class="profile-block mb-0" id="change-phone">
+              <label class="form-label" for="profile-phone">Change Phone Number</label>
+              <input type="tel" class="form-control" id="profile-phone" placeholder="+63 9XX XXX XXXX">
             </div>
           </div>
         </div>

@@ -68,9 +68,22 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
       <a class="nav-link" href="reports.php">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
-      <a class="nav-link" href="settings.php">
-        <span class="nav-dot"></span><span>Settings</span>
-      </a>
+      <div class="settings-parent">
+        <a class="nav-link" href="document-fees.php">
+          <span class="nav-dot"></span><span>Settings</span>
+        </a>
+        <button class="settings-caret-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="false" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
+          <i class="bi bi-chevron-down"></i>
+        </button>
+      </div>
+
+      <div class="collapse" id="officialSettingsSubmenu">
+        <div class="settings-submenu">
+          <a class="nav-link" href="document-fees.php"><span class="sub-dot"></span><span>Documents Fees</span></a>
+          <a class="nav-link" href="change-password.php"><span class="sub-dot"></span><span>Change Password</span></a>
+          <a class="nav-link" href="settings.php#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
+        </div>
+      </div>
     </div>
     
     <div class="user-profile">
