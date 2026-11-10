@@ -70,12 +70,19 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
         }
 
         .report-table tr.report-section-row td {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: #1e293b;
-            background: #eef2ff !important;
+            letter-spacing: 0.06em;
+            color: #ffffff;
+            background: var(--primary-green) !important;
+            border-color: var(--primary-green);
+        }
+
+        .report-table.report-field-table tbody tr:not(.report-section-row) td:first-child {
+            font-weight: 700;
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
 
         .table-card {
@@ -437,7 +444,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                             $projectBudgetValue = $projectReport['total_budget'] ?? null;
                             $projectBudget = is_numeric($projectBudgetValue) ? '₱' . number_format((float) $projectBudgetValue, 2) : '—';
                         ?>
-                        <table class="report-table" id="reportDataTable">
+                        <table class="report-table report-field-table" id="reportDataTable">
                             <thead>
                                 <tr>
                                     <th style="width: 28%;">Field</th>
@@ -573,63 +580,71 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const downloadBtn = document.getElementById("download-report-pdf");
-        const reportTable = document.getElementById("reportDataTable");
+        const reportSheet = document.getElementById("reportSheet");
 
-        if (!downloadBtn || !reportTable) {
+        if (!downloadBtn || !reportSheet) {
             return;
         }
 
-        const reportTitle = (downloadBtn.dataset.title || "Report").toUpperCase();
-
-        downloadBtn.addEventListener("click", function () {
-            if (!window.jspdf || !window.jspdf.jsPDF) {
+        downloadBtn.addEventListener("click", async function () {
+            if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
                 window.print();
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-            const pageWidth = doc.internal.pageSize.getWidth();
+            const originalMarkup = downloadBtn.innerHTML;
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Preparing...';
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text(downloadBtn.dataset.barangay || "", pageWidth / 2, 15, { align: "center" });
+            try {
+                const canvas = await html2canvas(reportSheet, {
+                    scale: 2,
+                    backgroundColor: "#ffffff",
+                    useCORS: true,
+                });
+                const imgData = canvas.toDataURL("image/png");
+                const { jsPDF } = window.jspdf;
+                const orientation = canvas.width > canvas.height ? "landscape" : "portrait";
+                const doc = new jsPDF({ orientation, unit: "mm", format: "a4" });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 8;
+                const contentWidth = pageWidth - margin * 2;
+                const contentHeight = pageHeight - margin * 2;
+                const imgWidth = contentWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text("Municipality of " + (downloadBtn.dataset.municipality || ""), pageWidth / 2, 21, { align: "center" });
+                let heightLeft = imgHeight;
+                let position = margin;
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.text("OFFICIAL " + reportTitle, pageWidth / 2, 29, { align: "center" });
+                doc.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+                heightLeft -= contentHeight;
 
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text("Barangay Chairman: " + (downloadBtn.dataset.chairman || ""), pageWidth / 2, 35, { align: "center" });
-            doc.text("Date: " + (downloadBtn.dataset.date || ""), pageWidth / 2, 40, { align: "center" });
+                while (heightLeft > 0) {
+                    position = margin - (imgHeight - heightLeft);
+                    doc.addPage();
+                    doc.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+                    heightLeft -= contentHeight;
+                }
 
-            doc.autoTable({
-                html: "#reportDataTable",
-                startY: 46,
-                theme: "grid",
-                styles: { fontSize: 7, cellPadding: 1.6, overflow: "linebreak", valign: "top" },
-                headStyles: { fillColor: [248, 250, 252], textColor: [51, 65, 85], fontStyle: "bold" },
-                alternateRowStyles: { fillColor: [248, 250, 252] },
-                margin: { left: 10, right: 10 },
-            });
-
-            doc.save(
-                (downloadBtn.dataset.title || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
-                    "-" +
-                    (downloadBtn.dataset.reportId || "export") +
-                    "-" +
-                    new Date().toISOString().slice(0, 10) +
-                    ".pdf"
-            );
+                doc.save(
+                    (downloadBtn.dataset.title || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+                        "-" +
+                        (downloadBtn.dataset.reportId || "export") +
+                        "-" +
+                        new Date().toISOString().slice(0, 10) +
+                        ".pdf"
+                );
+            } catch (error) {
+                window.print();
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalMarkup;
+            }
         });
     });
 </script>

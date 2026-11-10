@@ -188,11 +188,11 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
                         </div>
                         <div class="col-md-4">
                             <label for="report-start" class="form-label">Project Start Date</label>
-                            <input type="text" class="form-control" id="report-start" placeholder="MM/DD/YYYY" required>
+                            <input type="date" class="form-control" id="report-start" required>
                         </div>
                         <div class="col-md-4">
                             <label for="report-target" class="form-label">Target Completion Date</label>
-                            <input type="text" class="form-control" id="report-target" placeholder="MM/DD/YYYY" required>
+                            <input type="date" class="form-control" id="report-target" required>
                         </div>
                     </div>
 
@@ -299,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportModalEl = document.getElementById('projectReportModal');
     const reportForm = document.getElementById('project-report-form');
     const reportTitleInput = document.getElementById('report-title');
+    const reportCategoryInput = document.getElementById('report-category');
     const reportBudgetInput = document.getElementById('report-total-budget');
     const reportStartInput = document.getElementById('report-start');
     const reportTargetInput = document.getElementById('report-target');
@@ -432,12 +433,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('report-barangay-label').textContent = reportBarangayInput.value.trim() || '[BARANGAY NAME]';
     };
 
+    const toDateInputValue = (value) => {
+        const text = String(value || '').trim();
+        const slash = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
+        if (slash) {
+            return `${slash[3]}-${slash[1].padStart(2, '0')}-${slash[2].padStart(2, '0')}`;
+        }
+        return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : '';
+    };
+
+    const fromDateInputValue = (value) => {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || '').trim());
+        return match ? `${match[2]}/${match[3]}/${match[1]}` : '';
+    };
+
+    const reportCategoryBySector = {
+        'Infrastructure': 'Infrastructure Development',
+        'Education': 'Education',
+        'Health': 'Health',
+        'Social Services': 'Social Services',
+        'Disaster & P&O': 'Disaster Preparedness and Order',
+    };
+
     const openProjectReport = (project) => {
         reportForm.reset();
         reportTitleInput.value = project.title;
+        reportCategoryInput.value = reportCategoryBySector[project.sector] || project.sector;
         reportBudgetInput.value = project.budget || '';
-        reportStartInput.value = project.start_date || '';
-        reportTargetInput.value = project.target_date || '';
+        reportStartInput.value = toDateInputValue(project.start_date);
+        reportTargetInput.value = toDateInputValue(project.target_date);
+        reportTargetInput.min = reportStartInput.value;
         syncReportHeader();
         bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
     };
@@ -445,6 +470,20 @@ document.addEventListener('DOMContentLoaded', () => {
     reportProvinceInput.addEventListener('input', syncReportHeader);
     reportMunicipalityInput.addEventListener('input', syncReportHeader);
     reportBarangayInput.addEventListener('input', syncReportHeader);
+
+    reportStartInput.addEventListener('input', () => {
+        reportStartInput.setCustomValidity('');
+        reportTargetInput.min = reportStartInput.value;
+        if (reportTargetInput.value !== '' && reportTargetInput.value < reportStartInput.value) {
+            reportTargetInput.setCustomValidity('Target completion date cannot be earlier than the project start date.');
+        } else {
+            reportTargetInput.setCustomValidity('');
+        }
+    });
+
+    reportTargetInput.addEventListener('input', () => {
+        reportTargetInput.setCustomValidity('');
+    });
 
     reportModalEl.addEventListener('hidden.bs.modal', () => {
         pendingProject = null;
@@ -456,6 +495,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!reportForm.reportValidity()) {
+            return;
+        }
+
         const submitButton = reportForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
 
@@ -463,8 +506,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const updated = await postProject({
                 id: pendingProject.id,
                 status: 'ongoing',
-                start_date: reportStartInput.value.trim(),
-                target_date: reportTargetInput.value.trim(),
+                start_date: fromDateInputValue(reportStartInput.value),
+                target_date: fromDateInputValue(reportTargetInput.value),
                 report: {
                     province: fieldValue('report-province'),
                     municipality: fieldValue('report-municipality'),
@@ -508,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (project.status === 'planned' && project.sector.toLowerCase() === 'infrastructure') {
+        if (project.status === 'planned') {
             pendingProject = project;
             openProjectReport(project);
             return;
