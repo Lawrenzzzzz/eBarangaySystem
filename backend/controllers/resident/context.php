@@ -48,6 +48,12 @@ function resident_page_context(string $loginPath = '../login_page/login.php'): a
     $userHousehold = trim((string) ($currentUser['household_number'] ?? ''));
     $userAddress = trim((string) ($currentUser['address_line'] ?? ''));
     $userEmail = trim((string) ($currentUser['email'] ?? ''));
+
+    $userAvatarFile = trim((string) ($currentUser['avatar_filename'] ?? ''));
+    $userAvatarUrl = $userAvatarFile !== ''
+        ? '../assets/uploads/avatars/' . rawurlencode($userAvatarFile)
+        : '';
+
     $csrf = csrf_token();
 
     return compact(
@@ -60,6 +66,7 @@ function resident_page_context(string $loginPath = '../login_page/login.php'): a
         'userResidentCode',
         'userHousehold',
         'userAddress',
-        'userEmail'
+        'userEmail',
+        'userAvatarUrl'
     );
 }

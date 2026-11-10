@@ -51,7 +51,8 @@ a { color: inherit; text-decoration: none; }
 
 .avatar { display: grid; place-items: center; color: #fff; font: 600 13px var(--head); }
 .avatar.sq { width: 38px; height: 38px; border-radius: 12px; background: var(--blue); font-size: 17px; }
-.avatar.round { width: 38px; height: 38px; border-radius: 50%; background: #2f4f9a; }
+.avatar.round { width: 38px; height: 38px; border-radius: 50%; background: #2f4f9a; overflow: hidden; }
+.avatar.round img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .nav { display: flex; gap: 30px; }
 .nav a { font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 6px 0; transition: color .15s, background-color .2s; }
@@ -892,4 +893,54 @@ small.warn { color: var(--orange); }
 @media (prefers-reduced-motion: reduce) {
   .onb-modal { animation: none; }
   .onb-toast { transition: none; }
+}
+
+/* ==========================================================
+   Settings page
+   ========================================================== */
+.settings-page .col-main { gap: 18px; }
+.settings-card { padding: 24px; }
+.settings-card h2 { font: 600 18px/1.3 var(--head); margin-bottom: 4px; }
+.settings-card .desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+.alert {
+  margin: 0 0 18px; padding: 11px 14px; border-radius: 12px;
+  font-size: 12.5px; font-weight: 500; line-height: 1.5;
+}
+.alert[hidden] { display: none !important; }
+.alert-danger { background: #fff5f5; border: 1px solid #fecaca; color: #b91c1c; }
+.alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+
+.avatar-row {
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 20px; padding-bottom: 20px;
+  border-bottom: 1px solid #e6ebf5;
+}
+.settings-avatar {
+  flex: none; width: 76px; height: 76px; border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden;
+  background: #2f4f9a; color: #fff;
+  font: 600 26px/1 var(--head);
+  box-shadow: 0 6px 16px rgba(37, 70, 140, .18);
+}
+.settings-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-row .photo-field { flex: 1; min-width: 0; }
+.photo-field small {
+  display: block; margin-top: 6px;
+  font-size: 11.5px; color: var(--muted);
+}
+.photo-field input[type="file"] { font-size: 12px; cursor: pointer; }
+.photo-field input[type="file"]::file-selector-button {
+  margin-right: 10px; padding: 6px 12px; border: 0; border-radius: 9px;
+  background: var(--blue-bg); color: var(--blue);
+  font: 600 12px var(--head); cursor: pointer;
+}
+
+.settings-card .form-foot { margin-top: 22px; }
+.settings-card .btn-primary:disabled { opacity: .7; cursor: default; }
+
+@media (max-width: 560px) {
+  .settings-card { padding: 18px; }
+  .avatar-row { flex-direction: column; align-items: flex-start; }
+  .avatar-row .photo-field { width: 100%; }
 }
