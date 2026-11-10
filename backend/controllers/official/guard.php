@@ -20,3 +20,8 @@ if ($officialFullName === '') {
     $officialFullName = trim((string) ($currentUser['email'] ?? '')) ?: 'Barangay Official';
 }
 $officialRoleName = trim((string) ($currentUser['role_name'] ?? '')) ?: 'Barangay Official';
+
+$officialAvatarFile = trim((string) ($currentUser['avatar_filename'] ?? ''));
+$officialAvatarUrl = $officialAvatarFile !== ''
+    ? '../assets/uploads/avatars/' . rawurlencode($officialAvatarFile)
+    : 'img/captain.jpg';

@@ -44,6 +44,10 @@ try {
             respond_result(create_official_account($userId, $input));
         }
 
+        if ($action === 'account_profile') {
+            respond_result(update_account_profile($userId, $input));
+        }
+
         if ($action === 'password') {
             respond_result(change_account_password($userId, $input));
         }

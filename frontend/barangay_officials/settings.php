@@ -7,6 +7,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Settings - E-Barangay Official</title>
   
   <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
@@ -76,7 +77,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
     </div>
     
     <div class="user-profile">
-      <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="avatar">
+      <img src="<?= $esc($officialAvatarUrl) ?>" alt="<?= $esc($officialFullName) ?>" class="avatar">
       <div>
         <div class="name"><?= $esc($officialFullName) ?></div>
         <div class="role"><?= $esc($officialRoleName) ?></div>
@@ -98,75 +99,75 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-success btn-sm px-3">
-          <i class="bi bi-check-lg me-1"></i> Save All
-        </button>
-      </div>
     </div>
 
     <div class="eb-content">
-      <div class="row g-4 justify-content-center">
+      <form id="profile-form" novalidate>
+        <div class="row g-4 justify-content-center">
 
-        <!-- PROFILE INFORMATION -->
-        <div class="col-lg-8" id="profile-information">
-          <div class="settings-card">
-            <h6>Profile Information</h6>
-            <p class="subtitle">Manage your profile photo and personal contact details.</p>
+          <!-- PROFILE INFORMATION -->
+          <div class="col-lg-8" id="profile-information">
+            <div class="settings-card">
+              <h6>Profile Information</h6>
+              <p class="subtitle">Manage your profile photo and personal contact details.</p>
 
-            <!-- ADD PHOTO -->
-            <div class="profile-block" id="add-photo">
-              <label class="form-label d-block" for="profile-photo">Add Photo</label>
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="settings-avatar">
-                <div class="flex-grow-1">
-                  <input type="file" class="form-control" id="profile-photo" accept="image/*">
-                  <small class="d-block mt-1" style="font-size: .72rem; color: var(--eb-sidebar-muted);">JPG or PNG, up to 2 MB.</small>
+              <div class="alert py-2 d-none" id="profile-alert" role="alert"></div>
+
+              <!-- ADD PHOTO -->
+              <div class="profile-block" id="add-photo">
+                <label class="form-label d-block" for="profile-photo">Profile Photo</label>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <img src="<?= $esc($officialAvatarUrl) ?>" alt="<?= $esc($officialFullName) ?>" class="settings-avatar" id="profile-photo-preview">
+                  <div class="flex-grow-1">
+                    <input type="file" class="form-control" id="profile-photo" name="photo" accept="image/png,image/jpeg,image/webp">
+                    <small class="d-block mt-1" style="font-size: .72rem; color: var(--eb-sidebar-muted);">JPG, PNG, or WebP, up to 2 MB.</small>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- CHANGE EMAIL -->
-            <div class="profile-block" id="change-email">
-              <label class="form-label" for="profile-email">Change Email</label>
-              <input type="email" class="form-control mb-3" id="profile-email" placeholder="official@barangay.gov.ph">
-            </div>
+              <!-- CHANGE EMAIL -->
+              <div class="profile-block" id="change-email">
+                <label class="form-label" for="profile-email">Email Address</label>
+                <input type="email" class="form-control mb-3" id="profile-email" name="email" value="<?= $esc($currentUser['email'] ?? '') ?>" placeholder="official@barangay.gov.ph">
+              </div>
 
-            <!-- EDIT NAME -->
-            <div class="profile-block" id="edit-name">
-              <label class="form-label" for="profile-name">Edit Name</label>
-              <input type="text" class="form-control mb-3" id="profile-name" value="<?= $esc($officialFullName) ?>">
-            </div>
+              <!-- EDIT NAME -->
+              <div class="profile-block" id="edit-name">
+                <label class="form-label" for="profile-name">Full Name</label>
+                <input type="text" class="form-control mb-3" id="profile-name" name="full_name" value="<?= $esc($currentUser['full_name'] ?? '') ?>" placeholder="Enter your full name">
+              </div>
 
-            <!-- CHANGE PHONE NUMBER -->
-            <div class="profile-block mb-0" id="change-phone">
-              <label class="form-label" for="profile-phone">Change Phone Number</label>
-              <input type="tel" class="form-control" id="profile-phone" placeholder="+63 9XX XXX XXXX">
+              <!-- CHANGE PHONE NUMBER -->
+              <div class="profile-block mb-0" id="change-phone">
+                <label class="form-label" for="profile-phone">Phone Number</label>
+                <input type="tel" class="form-control" id="profile-phone" name="phone" value="<?= $esc($currentUser['phone'] ?? '') ?>" placeholder="09XX XXX XXXX">
+              </div>
             </div>
           </div>
+
         </div>
 
-      </div>
-
-      <!-- SAVE BAR -->
-      <div class="save-bar">
-        <span class="text-muted" style="font-size: .82rem;">
-          <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
-        </span>
-        <div class="d-flex gap-2">
-          <button class="btn btn-light border">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-          </button>
-          <button class="btn btn-success fw-semibold">
-            <i class="bi bi-check-lg me-1"></i> Save Changes
-          </button>
+        <!-- SAVE BAR -->
+        <div class="save-bar">
+          <span class="text-muted" style="font-size: .82rem;">
+            <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
+          </span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light border" type="reset">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </button>
+            <button class="btn btn-success fw-semibold" type="submit">
+              <i class="bi bi-check-lg me-1"></i> Save Changes
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/profile.js"></script>
 </body>
 </html>

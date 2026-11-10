@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-fees.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Document Fees - E-Barangay Official</title>
   
   <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
@@ -76,7 +77,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
     </div>
     
     <div class="user-profile">
-      <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="avatar">
+      <img src="<?= $esc($officialAvatarUrl) ?>" alt="<?= $esc($officialFullName) ?>" class="avatar">
       <div>
         <div class="name"><?= $esc($officialFullName) ?></div>
         <div class="role"><?= $esc($officialRoleName) ?></div>
@@ -98,11 +99,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-success btn-sm px-3">
-          <i class="bi bi-check-lg me-1"></i> Save All
-        </button>
-      </div>
     </div>
 
     <div class="eb-content">
@@ -112,67 +108,64 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         </p>
       </div>
 
-      <div class="row g-4 justify-content-center">
+      <form id="document-fees-form" novalidate>
+        <div class="row g-4 justify-content-center">
 
-        <!-- DOCUMENT FEES -->
-        <div class="col-lg-6" id="documents-fees">
-          <div class="settings-card">
-            <h6>Document Fees</h6>
-            <p class="subtitle">Standard fees for barangay-issued documents.</p>
+          <!-- DOCUMENT FEES -->
+          <div class="col-lg-6" id="documents-fees">
+            <div class="settings-card">
+              <h6>Document Fees</h6>
+              <p class="subtitle">Standard fees for barangay-issued documents.</p>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Barangay Clearance</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Certificate of Residency</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Indigency Certificate</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Barangay ID</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span style="font-size: .88rem;">Business Permit</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-0">
-              <span style="font-size: .88rem;">Barangay ID (Senior)</span>
-              <input type="text" class="form-control" style="width: 120px;" value="₱0" readonly>
+              <div class="alert py-2 d-none" id="document-fees-alert" role="alert"></div>
+
+              <?php if ($documentFees === []): ?>
+                <p class="text-muted mb-0" style="font-size: .85rem;">No document types are configured yet.</p>
+              <?php else: ?>
+                <?php $lastIndex = count($documentFees) - 1; ?>
+                <?php foreach ($documentFees as $index => $document): ?>
+                  <div class="d-flex justify-content-between align-items-center <?= $index === $lastIndex ? 'mb-0' : 'mb-3' ?>">
+                    <label class="mb-0" style="font-size: .88rem;" for="fee-<?= $esc($document['code']) ?>"><?= $esc($document['name']) ?></label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fee-<?= $esc($document['code']) ?>"
+                      data-fee-code="<?= $esc($document['code']) ?>"
+                      style="width: 120px;"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value="<?= number_format((float) $document['fee'], 2, '.', '') ?>"
+                    >
+                  </div>
+                <?php endforeach; ?>
+              <?php endif; ?>
             </div>
           </div>
+
         </div>
 
-      </div>
-
-      <!-- SAVE BAR -->
-      <div class="save-bar">
-        <span class="text-muted" style="font-size: .82rem;">
-          <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
-        </span>
-        <div class="d-flex gap-2">
-          <button class="btn btn-light border">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-          </button>
-          <button class="btn btn-success fw-semibold">
-            <i class="bi bi-check-lg me-1"></i> Save Changes
-          </button>
+        <!-- SAVE BAR -->
+        <div class="save-bar">
+          <span class="text-muted" style="font-size: .82rem;">
+            <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
+          </span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light border" type="reset">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </button>
+            <button class="btn btn-success fw-semibold" type="submit">
+              <i class="bi bi-check-lg me-1"></i> Save Changes
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/document-fees.js"></script>
 </body>
 </html>

@@ -51,6 +51,82 @@ function document_type_details(array $row): array
     ];
 }
 
+function document_fee_records(): array
+{
+    $statement = db()->query(
+        "SELECT id, code, name, fee
+         FROM document_types
+         WHERE is_active = 1
+         ORDER BY sort_order, id"
+    );
+
+    return array_map(
+        static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'code' => (string) $row['code'],
+            'name' => (string) $row['name'],
+            'fee' => (float) $row['fee'],
+        ],
+        $statement->fetchAll()
+    );
+}
+
+function save_document_fees(array $fees): array
+{
+    $records = document_fee_records();
+    if ($records === []) {
+        return ['ok' => false, 'status' => 422, 'error' => 'No document types are configured yet.'];
+    }
+
+    $knownCodes = array_column($records, 'code');
+    $updates = [];
+
+    foreach ($fees as $code => $value) {
+        $code = strtolower(trim((string) $code));
+        if (!in_array($code, $knownCodes, true)) {
+            return ['ok' => false, 'status' => 422, 'error' => 'One of the document types is not recognized.'];
+        }
+
+        $raw = trim((string) $value);
+        if ($raw === '' || !is_numeric($raw)) {
+            return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid fee amount for every document.'];
+        }
+
+        $fee = (float) $raw;
+        if ($fee < 0 || $fee > 99999999.99) {
+            return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid fee amount for every document.'];
+        }
+
+        $updates[$code] = round($fee, 2);
+    }
+
+    if ($updates === []) {
+        return ['ok' => false, 'status' => 422, 'error' => 'Enter a fee for at least one document.'];
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $statement = $pdo->prepare("UPDATE document_types SET fee = ? WHERE code = ? AND is_active = 1");
+        foreach ($updates as $code => $fee) {
+            $statement->execute([$fee, $code]);
+        }
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
+
+    return [
+        'ok' => true,
+        'message' => 'Document fees saved.',
+        'fees' => document_fee_records(),
+    ];
+}
+
 function document_request_status_label(string $status): string
 {
     return match ($status) {

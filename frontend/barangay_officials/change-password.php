@@ -7,6 +7,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Change Password - E-Barangay Official</title>
   
   <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
@@ -76,7 +77,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
     </div>
     
     <div class="user-profile">
-      <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="avatar">
+      <img src="<?= $esc($officialAvatarUrl) ?>" alt="<?= $esc($officialFullName) ?>" class="avatar">
       <div>
         <div class="name"><?= $esc($officialFullName) ?></div>
         <div class="role"><?= $esc($officialRoleName) ?></div>
@@ -98,11 +99,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-success btn-sm px-3">
-          <i class="bi bi-check-lg me-1"></i> Save All
-        </button>
-      </div>
     </div>
 
     <div class="eb-content">
@@ -112,52 +108,57 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
         </p>
       </div>
 
-      <div class="row g-4 justify-content-center">
+      <form id="change-password-form" novalidate>
+        <div class="row g-4 justify-content-center">
 
-        <!-- CHANGE PASSWORD -->
-        <div class="col-lg-6" id="change-password">
-          <div class="settings-card">
-            <h6>Change Password</h6>
-            <p class="subtitle">Update the password used to sign in to your official account.</p>
+          <!-- CHANGE PASSWORD -->
+          <div class="col-lg-6" id="change-password">
+            <div class="settings-card">
+              <h6>Change Password</h6>
+              <p class="subtitle">Update the password used to sign in to your official account.</p>
 
-            <div class="mb-3">
-              <label class="form-label" for="current-password">Current Password</label>
-              <input type="password" class="form-control" id="current-password" placeholder="Enter current password" autocomplete="current-password">
-            </div>
+              <div class="alert py-2 d-none" id="change-password-alert" role="alert"></div>
 
-            <div class="mb-3">
-              <label class="form-label" for="new-password">New Password</label>
-              <input type="password" class="form-control" id="new-password" placeholder="Enter new password" autocomplete="new-password">
-            </div>
+              <div class="mb-3">
+                <label class="form-label" for="current-password">Current Password</label>
+                <input type="password" class="form-control" id="current-password" name="current_password" placeholder="Enter current password" autocomplete="current-password">
+              </div>
 
-            <div class="mb-0">
-              <label class="form-label" for="confirm-password">Confirm New Password</label>
-              <input type="password" class="form-control" id="confirm-password" placeholder="Re-enter new password" autocomplete="new-password">
+              <div class="mb-3">
+                <label class="form-label" for="new-password">New Password</label>
+                <input type="password" class="form-control" id="new-password" name="new_password" placeholder="Enter new password" autocomplete="new-password">
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label" for="confirm-password">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password">
+              </div>
             </div>
           </div>
+
         </div>
 
-      </div>
-
-      <!-- SAVE BAR -->
-      <div class="save-bar">
-        <span class="text-muted" style="font-size: .82rem;">
-          <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
-        </span>
-        <div class="d-flex gap-2">
-          <button class="btn btn-light border">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-          </button>
-          <button class="btn btn-success fw-semibold">
-            <i class="bi bi-check-lg me-1"></i> Save Changes
-          </button>
+        <!-- SAVE BAR -->
+        <div class="save-bar">
+          <span class="text-muted" style="font-size: .82rem;">
+            <i class="bi bi-info-circle me-1"></i> Make changes and click Save.
+          </span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light border" type="reset">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </button>
+            <button class="btn btn-success fw-semibold" type="submit">
+              <i class="bi bi-check-lg me-1"></i> Save Changes
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/change-password.js"></script>
 </body>
 </html>

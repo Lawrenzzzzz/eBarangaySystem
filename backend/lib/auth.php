@@ -308,24 +308,34 @@ function sign_out_user(): void
 
 function account_details(int $userId): ?array
 {
-    $statement = db()->prepare("SELECT * FROM v_user_accounts WHERE user_id = ? LIMIT 1");
+    $statement = db()->prepare(
+        "SELECT v.*, u.full_name AS account_full_name, u.avatar_filename
+         FROM v_user_accounts v
+         JOIN users u ON u.id = v.user_id
+         WHERE v.user_id = ?
+         LIMIT 1"
+    );
     $statement->execute([$userId]);
     $row = $statement->fetch();
     if (!$row) {
         return null;
     }
 
+    $viewFullName = trim((string) ($row['full_name'] ?? ''));
+    $accountFullName = trim((string) ($row['account_full_name'] ?? ''));
+
     return [
         'user_id' => (int) $row['user_id'],
         'email' => $row['email'],
         'phone' => $row['phone'],
+        'avatar_filename' => (string) ($row['avatar_filename'] ?? ''),
         'account_type' => $row['account_type'],
         'account_status' => $row['account_status'],
         'last_login_at' => $row['last_login_at'],
         'role_code' => $row['role_code'],
         'role_name' => $row['role_name'],
         'resident_code' => $row['resident_code'],
-        'full_name' => $row['full_name'],
+        'full_name' => $viewFullName !== '' ? $viewFullName : $accountFullName,
         'household_number' => $row['household_number'],
         'address_line' => $row['address_line'],
         'requested_position' => $row['requested_position'],

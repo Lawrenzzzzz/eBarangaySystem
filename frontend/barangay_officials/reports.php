@@ -254,7 +254,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
     </div>
     
     <div class="user-profile">
-      <img src="img/captain.jpg" alt="<?= $esc($officialFullName) ?>" class="avatar">
+      <img src="<?= $esc($officialAvatarUrl) ?>" alt="<?= $esc($officialFullName) ?>" class="avatar">
       <div>
         <div class="name"><?= $esc($officialFullName) ?></div>
         <div class="role"><?= $esc($officialRoleName) ?></div>
