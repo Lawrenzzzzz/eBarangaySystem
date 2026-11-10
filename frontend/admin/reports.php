@@ -69,6 +69,15 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
             background: #f8fafc;
         }
 
+        .report-table tr.report-section-row td {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #1e293b;
+            background: #eef2ff !important;
+        }
+
         .table-card {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -415,6 +424,60 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                    <?php elseif ($selectedReport['report_type'] === 'projects'): ?>
+                        <?php
+                            $projectReport = is_array($reportRows) && isset($reportRows[0]) && is_array($reportRows[0]) ? $reportRows[0] : [];
+                            $projectText = static function (string $key, string $fallback = '—') use ($projectReport): string {
+                                $value = $projectReport[$key] ?? '';
+                                if (!is_scalar($value) || trim((string) $value) === '') {
+                                    return $fallback;
+                                }
+                                return nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
+                            };
+                            $projectBudgetValue = $projectReport['total_budget'] ?? null;
+                            $projectBudget = is_numeric($projectBudgetValue) ? '₱' . number_format((float) $projectBudgetValue, 2) : '—';
+                        ?>
+                        <table class="report-table" id="reportDataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 28%;">Field</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="report-section-row"><td colspan="2">I. Project Information</td></tr>
+                                <tr><td>Project Title</td><td class="fw-semibold"><?= $projectText('project_title') ?></td></tr>
+                                <tr><td>Sector</td><td><?= $projectText('sector') ?></td></tr>
+                                <tr><td>Project Location</td><td><?= $projectText('location') ?></td></tr>
+                                <tr><td>Project Category</td><td><?= $projectText('category') ?></td></tr>
+                                <tr><td>Project Contractor</td><td><?= $projectText('contractor') ?></td></tr>
+                                <tr><td>Project Start Date</td><td><?= $projectText('start_date') ?></td></tr>
+                                <tr><td>Target Completion Date</td><td><?= $projectText('target_date') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">II. Project Description</td></tr>
+                                <tr><td>Description</td><td><?= $projectText('description') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">III. Project Objectives</td></tr>
+                                <tr><td>Objectives</td><td><?= $projectText('objectives') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">IV. Project Budget and Funding</td></tr>
+                                <tr><td>Total Approved Budget</td><td class="fw-semibold"><?= $esc($projectBudget) ?></td></tr>
+                                <tr><td>Source of Funds</td><td><?= $projectText('fund_source') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">V. Project Challenges and Issues</td></tr>
+                                <tr><td>Challenges and Issues Encountered</td><td><?= $projectText('challenges') ?></td></tr>
+                                <tr><td>Actions Taken</td><td><?= $projectText('actions') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">VI. Recommendations</td></tr>
+                                <tr><td>Recommendations</td><td><?= $projectText('recommendations') ?></td></tr>
+
+                                <tr class="report-section-row"><td colspan="2">VII. Certification and Approval</td></tr>
+                                <tr><td>Prepared by</td><td><?= $projectText('prepared_by') ?></td></tr>
+                                <tr><td>Reviewed by</td><td><?= $projectText('reviewed_by') ?></td></tr>
+                                <tr><td>Approved by</td><td><?= $projectText('approved_by') ?></td></tr>
+                                <tr><td>Date</td><td><?= $projectText('report_date') ?></td></tr>
+                            </tbody>
+                        </table>
                     <?php else: ?>
                         <?php if ($reportRows): ?>
                             <?php $firstRow = reset($reportRows); ?>
@@ -499,7 +562,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                         <div class="report-card text-center py-5">
                             <div class="report-icon mx-auto"><i class="bi bi-file-earmark-text"></i></div>
                             <div class="report-title mb-2">No reports available<?= $reportYear !== null ? ' for ' . $reportYear : '' ?></div>
-                            <p class="text-muted small mb-0">Generate a report from the Residents or Payments page to see it here.</p>
+                            <p class="text-muted small mb-0">Generate a report from the Residents, Payments, or Projects page to see it here.</p>
                         </div>
                     </div>
                 <?php endif; ?>

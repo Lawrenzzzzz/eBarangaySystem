@@ -171,9 +171,10 @@ function update_project(array $input, ?int $userId = null): array
         ? trim((string) $input['target_date'])
         : (string) $project['target_date'];
 
+    $reportData = isset($input['report']) && is_array($input['report']) ? $input['report'] : null;
     $reportJson = null;
-    if (isset($input['report']) && is_array($input['report'])) {
-        $reportJson = json_encode($input['report'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($reportData !== null) {
+        $reportJson = json_encode($reportData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($reportJson === false) {
             $reportJson = null;
         }
@@ -199,6 +200,10 @@ function update_project(array $input, ?int $userId = null): array
             adjust_project_disbursement($project, -(float) $project['budget'], $userId);
         }
 
+        if ($reportData !== null) {
+            save_project_implementation_report($project, $reportData, $start, $target, $userId);
+        }
+
         $pdo->commit();
     } catch (Throwable $exception) {
         if ($pdo->inTransaction()) {
@@ -217,4 +222,82 @@ function update_project(array $input, ?int $userId = null): array
         'project' => $updated,
         'message' => 'Project updated successfully.',
     ];
+}
+
+function save_project_implementation_report(array $project, array $report, string $start, string $target, ?int $userId = null): int
+{
+    $profile = barangay_profile_record();
+    $account = $userId !== null && $userId > 0 ? account_details($userId) : null;
+
+    $text = static function (string $key, string $fallback = '') use ($report): string {
+        $value = $report[$key] ?? $fallback;
+        return is_scalar($value) ? trim((string) $value) : $fallback;
+    };
+
+    $barangay = $text('barangay');
+    if ($barangay === '') {
+        $barangay = trim((string) $profile['barangay_name']) !== '' ? (string) $profile['barangay_name'] : 'Barangay';
+    }
+    $municipality = $text('municipality');
+    if ($municipality === '') {
+        $municipality = (string) $profile['municipality'];
+    }
+    $province = $text('province');
+    if ($province === '') {
+        $province = (string) $profile['province'];
+    }
+
+    $approvedBy = $text('approved_by');
+    $chairman = $approvedBy;
+    if ($chairman === '') {
+        $chairman = trim((string) $profile['chairman']);
+    }
+    if ($chairman === '') {
+        $chairman = trim((string) ($account['full_name'] ?? ''));
+    }
+    if ($chairman === '') {
+        $chairman = 'Barangay Chairman';
+    }
+
+    $generatedAt = new DateTimeImmutable('now');
+    $title = 'Project Implementation Report: ' . (string) $project['title'];
+    if (mb_strlen($title) > 160) {
+        $title = mb_substr($title, 0, 157) . '...';
+    }
+
+    $row = [
+        'project_title' => (string) $project['title'],
+        'sector' => (string) $project['sector'],
+        'province' => $province,
+        'municipality' => $municipality,
+        'barangay' => $barangay,
+        'location' => $text('location'),
+        'category' => $text('category'),
+        'contractor' => $text('contractor'),
+        'start_date' => $start,
+        'target_date' => $target,
+        'description' => $text('description'),
+        'objectives' => $text('objectives'),
+        'total_budget' => is_numeric($report['total_budget'] ?? null) ? (float) $report['total_budget'] : (float) $project['budget'],
+        'fund_source' => $text('fund_source'),
+        'challenges' => $text('challenges'),
+        'actions' => $text('actions'),
+        'recommendations' => $text('recommendations'),
+        'prepared_by' => $text('prepared_by'),
+        'reviewed_by' => $text('reviewed_by'),
+        'approved_by' => $approvedBy,
+        'report_date' => $text('date'),
+    ];
+
+    return save_generated_report([
+        'report_type' => 'projects',
+        'title' => $title,
+        'report_year' => (int) $generatedAt->format('Y'),
+        'barangay_name' => $barangay,
+        'municipality' => $municipality,
+        'chairman_name' => $chairman,
+        'generated_by' => $userId,
+        'generated_at' => $generatedAt->format('Y-m-d H:i:s'),
+        'data' => [$row],
+    ]);
 }
