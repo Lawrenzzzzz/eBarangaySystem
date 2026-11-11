@@ -159,7 +159,7 @@
     }
     const setMode = (m) => {
       mode = m;
-      submit.disabled = false;
+      submit.disabled = m === "signup" && !(!!verifiedEmail && verifiedEmail === email.value.trim());
       render();
     };
     $$("[data-mode]", A).forEach(
@@ -197,6 +197,7 @@
       evb.classList.toggle("btn-secondary", ok);
       evb.classList.toggle("btn-outline", !ok);
       evb.disabled = !emailOk(v);
+      if (mode === "signup") submit.disabled = !ok;
     };
     email.oninput = syncEmailVerify;
     function emTick() {
