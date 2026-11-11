@@ -76,6 +76,15 @@ body {
     font-weight: 700; font-size: 0.8rem;
 }
 
+/* Attendance hours */
+.attendance-hours-badge {
+    padding: 4px 12px; border-radius: 50px; font-size: 0.8rem;
+    font-weight: 700; display: inline-block;
+}
+.attendance-hours-good { background-color: #d1e7dd; color: #0f5132; }
+.attendance-hours-low { background-color: #f8d7da; color: #842029; }
+.attendance-hours-none { background-color: #f1f3f5; color: var(--text-muted); }
+
 /* Settings sub-options */
 .settings-parent { display: flex; align-items: center; }
 .settings-parent .nav-link { flex: 1 1 auto; border-left: 0; }

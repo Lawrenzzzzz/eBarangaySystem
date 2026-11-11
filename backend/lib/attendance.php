@@ -145,6 +145,100 @@ function attendance_hours(?string $timeIn, ?string $timeOut): ?string
     return $hours > 0 ? $hours . 'h ' . $minutes . 'm' : $minutes . 'm';
 }
 
+function attendance_normalize_date(?string $date): string
+{
+    $date = trim((string) $date);
+    $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+    if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+        return date('Y-m-d');
+    }
+    return $date;
+}
+
+function attendance_official_accounts(): array
+{
+    $operatorPlaceholders = implode(', ', array_fill(0, count(ATTENDANCE_OPERATOR_ROLES), '?'));
+
+    $statement = db()->prepare(
+        "SELECT v.user_id, v.role_code, v.role_name, v.requested_position, v.employee_number,
+                COALESCE(NULLIF(v.full_name, ''), NULLIF(u.full_name, ''), u.email) AS display_name
+         FROM v_user_accounts v
+         JOIN users u ON u.id = v.user_id
+         WHERE v.account_type = 'official'
+           AND v.account_status = 'active'
+           AND v.role_code NOT IN ({$operatorPlaceholders})
+         ORDER BY display_name ASC"
+    );
+    $statement->execute(ATTENDANCE_OPERATOR_ROLES);
+
+    return array_map(static function (array $row): array {
+        return [
+            'user_id' => (int) $row['user_id'],
+            'name' => (string) $row['display_name'],
+            'position' => attendance_position_label($row),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+        ];
+    }, $statement->fetchAll());
+}
+
+function attendance_officials_for_date(string $date, ?int $officialId = null): array
+{
+    $date = attendance_normalize_date($date);
+    $operatorPlaceholders = implode(', ', array_fill(0, count(ATTENDANCE_OPERATOR_ROLES), '?'));
+
+    $conditions = [
+        "v.account_type = 'official'",
+        "v.account_status = 'active'",
+        "v.role_code NOT IN ({$operatorPlaceholders})",
+    ];
+    $params = array_merge([$date], ATTENDANCE_OPERATOR_ROLES);
+
+    if ($officialId !== null && $officialId > 0) {
+        $conditions[] = 'v.user_id = ?';
+        $params[] = $officialId;
+    } else {
+        $conditions[] = 'ar.time_in IS NOT NULL';
+    }
+
+    $where = implode(' AND ', $conditions);
+
+    $statement = db()->prepare(
+        "SELECT v.user_id, v.role_code, v.role_name, v.requested_position, v.employee_number,
+                COALESCE(NULLIF(v.full_name, ''), NULLIF(u.full_name, ''), u.email) AS display_name,
+                ar.time_in, ar.time_out
+         FROM v_user_accounts v
+         JOIN users u ON u.id = v.user_id
+         LEFT JOIN attendance_records ar ON ar.user_id = v.user_id AND ar.work_date = ?
+         WHERE {$where}
+         ORDER BY display_name ASC"
+    );
+    $statement->execute($params);
+
+    $officials = [];
+    foreach ($statement->fetchAll() as $row) {
+        $timeIn = $row['time_in'] !== null ? (string) $row['time_in'] : null;
+        $timeOut = $row['time_out'] !== null ? (string) $row['time_out'] : null;
+        $hours = null;
+        if ($timeIn !== null && $timeOut !== null) {
+            $seconds = max(strtotime($timeOut) - strtotime($timeIn), 0);
+            $hours = round($seconds / 3600, 2);
+        }
+
+        $officials[] = [
+            'user_id' => (int) $row['user_id'],
+            'name' => (string) $row['display_name'],
+            'position' => attendance_position_label($row),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'time_in' => $timeIn !== null ? date('g:i A', strtotime($timeIn)) : null,
+            'time_out' => $timeOut !== null ? date('g:i A', strtotime($timeOut)) : null,
+            'hours' => $hours,
+            'hours_label' => attendance_hours($timeIn, $timeOut),
+        ];
+    }
+
+    return $officials;
+}
+
 function attendance_today(): array
 {
     $statement = db()->prepare(
