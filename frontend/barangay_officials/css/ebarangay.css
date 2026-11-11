@@ -1058,6 +1058,24 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
 }
 
+.att-qr-box {
+  display: grid;
+  place-items: center;
+  width: 168px;
+  height: 168px;
+  flex-shrink: 0;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--eb-border);
+  border-radius: var(--eb-radius);
+}
+
+.att-qr-box svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .profile-block + .profile-block {
   padding-top: 1rem;
   border-top: 1px solid var(--eb-border);

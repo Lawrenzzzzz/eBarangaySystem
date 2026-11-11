@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
+
+$officialAttendanceQr = attendance_account_eligible($currentUser)
+    ? attendance_payload((int) $currentUser['user_id'])
+    : null;
+$officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay_name'] ?? ''))
+    ?: 'Barangay San Isidro';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -138,10 +144,33 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
               </div>
 
               <!-- CHANGE PHONE NUMBER -->
-              <div class="profile-block mb-0" id="change-phone">
+              <div class="profile-block <?= $officialAttendanceQr === null ? 'mb-0' : '' ?>" id="change-phone">
                 <label class="form-label" for="profile-phone">Phone Number</label>
-                <input type="tel" class="form-control" id="profile-phone" name="phone" value="<?= $esc($currentUser['phone'] ?? '') ?>" placeholder="09XX XXX XXXX">
+                <input type="tel" class="form-control mb-3" id="profile-phone" name="phone" value="<?= $esc($currentUser['phone'] ?? '') ?>" placeholder="09XX XXX XXXX">
               </div>
+
+              <?php if ($officialAttendanceQr !== null): ?>
+              <!-- ATTENDANCE QR CODE -->
+              <div class="profile-block mb-0" id="attendance-qr">
+                <label class="form-label d-block" for="att-qr-code">Attendance QR Code</label>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="att-qr-box" id="att-qr-code"
+                       data-payload="<?= $esc($officialAttendanceQr) ?>"
+                       data-name="<?= $esc($officialFullName) ?>"
+                       data-position="<?= $esc(attendance_position_label($currentUser)) ?>"
+                       data-barangay="<?= $esc($officialAttendanceBarangay) ?>"
+                       role="img" aria-label="Your attendance QR code"></div>
+                  <div class="flex-grow-1">
+                    <p class="text-muted mb-2" style="font-size: .8rem;">
+                      Present this code to the QR scanner at the barangay hall to record your daily time in and time out.
+                    </p>
+                    <button class="btn btn-success btn-sm fw-semibold" type="button" id="att-qr-print">
+                      <i class="bi bi-printer me-1"></i> Print badge
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
             </div>
           </div>
 
@@ -167,7 +196,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/guard.php';
 
   <!-- Bootstrap JS -->
   <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="libs/qrcode/qrcode.js"></script>
   <script src="js/app.js"></script>
   <script src="js/profile.js"></script>
+  <script src="js/attendance-qr.js"></script>
 </body>
 </html>

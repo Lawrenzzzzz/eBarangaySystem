@@ -67,3 +67,4 @@ require_once __DIR__ . '/lib/budgets.php';
 require_once __DIR__ . '/lib/projects.php';
 require_once __DIR__ . '/lib/dashboard.php';
 require_once __DIR__ . '/lib/settings.php';
+require_once __DIR__ . '/lib/attendance.php';

@@ -188,4 +188,206 @@
       form.elements.email.value = prefillEmail;
     }
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Attendance scanner dashboard                                        */
+  /* ------------------------------------------------------------------ */
+
+  const reader = $("#att-reader");
+  if (reader && typeof Html5Qrcode !== "undefined") {
+    const camHint = $("#att-cam-hint"),
+      camError = $("#att-cam-error"),
+      startBtn = $("#att-cam-start"),
+      stopBtn = $("#att-cam-stop"),
+      result = $("#att-result"),
+      resultBadge = $("#att-result-badge"),
+      resultName = $("#att-result-name"),
+      resultTime = $("#att-result-time"),
+      logRows = $("#att-log-rows"),
+      modal = $("#att-modal"),
+      modalBadge = $("#att-modal-badge"),
+      modalName = $("#att-modal-name"),
+      modalSub = $("#att-modal-sub"),
+      modalIco = $("#att-modal-ico"),
+      modalOk = $("#att-modal-ok"),
+      modalClose = $("#att-modal-close");
+
+    let scanner = null;
+    let cameraOn = false;
+    let busy = false;
+    let hideTimer = 0;
+    let modalTimer = 0;
+    let activeText = "";
+    let lastHandled = { text: "", at: 0 };
+
+    function setCameraState(on) {
+      cameraOn = on;
+      reader.classList.toggle("hidden", !on);
+      camHint.classList.toggle("hidden", on);
+      startBtn.classList.toggle("hidden", on);
+      stopBtn.classList.toggle("hidden", !on);
+    }
+
+    function showCameraError(message) {
+      camError.textContent = message;
+      camError.classList.remove("hidden");
+    }
+
+    function showResult(data, message) {
+      result.classList.remove("hidden", "in", "out", "err");
+      if (data === null) {
+        result.classList.add("err");
+        resultBadge.textContent = "NOT RECORDED";
+        resultName.textContent = "";
+        resultTime.textContent = message;
+      } else {
+        result.classList.add(data.action);
+        resultBadge.textContent = data.action === "in" ? "TIME IN" : "TIME OUT";
+        resultName.textContent = data.name;
+        resultTime.textContent = data.message;
+      }
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => result.classList.add("hidden"), 8000);
+    }
+
+    function closeModal() {
+      clearTimeout(modalTimer);
+      if (modal) modal.classList.remove("open");
+    }
+
+    function showModal(data) {
+      if (!modal) return;
+      modalBadge.textContent = data.action === "in" ? "TIME IN" : "TIME OUT";
+      modalBadge.classList.toggle("out", data.action === "out");
+      modalIco.classList.toggle("out", data.action === "out");
+      modalName.textContent = data.name;
+      modalSub.textContent = data.message;
+      modal.classList.add("open");
+      clearTimeout(modalTimer);
+      modalTimer = setTimeout(closeModal, 6000);
+    }
+
+    if (modal) {
+      modalOk.onclick = closeModal;
+      modalClose.onclick = closeModal;
+      modal.addEventListener("click", (ev) => {
+        if (ev.target === modal) closeModal();
+      });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") closeModal();
+      });
+    }
+
+    function renderLog(records) {
+      if (!logRows) return;
+      logRows.textContent = "";
+      if (!records.length) {
+        const tr = document.createElement("tr");
+        tr.className = "att-empty";
+        const td = document.createElement("td");
+        td.colSpan = 5;
+        td.textContent = "No one has timed in yet today.";
+        tr.appendChild(td);
+        logRows.appendChild(tr);
+        return;
+      }
+      for (const record of records) {
+        const tr = document.createElement("tr");
+        const cells = [
+          { text: record.name },
+          { text: record.position },
+          { text: record.time_in, pill: "att-pill-in" },
+          {
+            text: record.time_out || "—",
+            pill: record.time_out ? "att-pill-out" : null,
+            muted: !record.time_out,
+          },
+          { text: record.hours || "—" },
+        ];
+        for (const cell of cells) {
+          const td = document.createElement("td");
+          const span = document.createElement("span");
+          if (cell.pill) span.className = "att-pill " + cell.pill;
+          else if (cell.muted) span.className = "att-muted";
+          span.textContent = cell.text;
+          td.appendChild(span);
+          tr.appendChild(td);
+        }
+        logRows.appendChild(tr);
+      }
+    }
+
+    async function refreshLog() {
+      try {
+        const data = await api("/attendance-scan.php");
+        renderLog(data.records || []);
+      } catch (e) {}
+    }
+
+    async function record(body) {
+      if (busy) return;
+      busy = true;
+      try {
+        const data = await api("/attendance-scan.php", {
+          method: "POST",
+          body,
+        });
+        showResult(data, null);
+        showModal(data);
+        toast(data.message, "ok");
+        await refreshLog();
+      } catch (e) {
+        showResult(null, e.message);
+        toast(e.message, "bad");
+      } finally {
+        busy = false;
+      }
+    }
+
+    function onDecoded(text) {
+      if (text === activeText) return;
+      activeText = text;
+      const now = Date.now();
+      if (text === lastHandled.text && now - lastHandled.at < 3000) return;
+      lastHandled = { text, at: now };
+      record({ payload: text });
+    }
+
+    function onDecodeFailure() {
+      activeText = "";
+    }
+
+    async function startCamera() {
+      if (cameraOn) return;
+      camError.classList.add("hidden");
+      try {
+        scanner = scanner || new Html5Qrcode("att-reader");
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onDecoded,
+          onDecodeFailure
+        );
+        setCameraState(true);
+      } catch (e) {
+        showCameraError(
+          "Unable to start the camera. Allow camera access for this page (cameras work on localhost or HTTPS), then try again."
+        );
+      }
+    }
+
+    async function stopCamera() {
+      if (!scanner || !cameraOn) return;
+      try {
+        await scanner.stop();
+        scanner.clear();
+      } catch (e) {}
+      setCameraState(false);
+    }
+
+    startBtn.onclick = startCamera;
+    stopBtn.onclick = stopCamera;
+
+    startCamera();
+  }
 })();
