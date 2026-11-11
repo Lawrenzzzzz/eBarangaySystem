@@ -29,12 +29,12 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/documents.php'
       <a href="documents.php" class="active" aria-current="page">Documents</a>
       <a href="blotter.php">Blotter</a>
       <a href="announcements.php">Announcements</a>
+      <a href="projects.php">Projects</a>
       <a href="track.php">Track</a>
       <a href="settings.php">Settings</a>
     </nav>
 
     <div class="nav-right">
-      <span class="status"><i class="dot"></i> Logged in</span>
       <span class="avatar round" aria-label="Your profile">
         <?php if ($userAvatarUrl !== ''): ?>
           <img src="<?= $esc($userAvatarUrl) ?>" alt="<?= $esc($userFullName) ?>">

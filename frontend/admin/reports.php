@@ -580,71 +580,112 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const downloadBtn = document.getElementById("download-report-pdf");
-        const reportSheet = document.getElementById("reportSheet");
+        const reportTable = document.getElementById("reportDataTable");
 
-        if (!downloadBtn || !reportSheet) {
+        if (!downloadBtn || !reportTable) {
             return;
         }
 
-        downloadBtn.addEventListener("click", async function () {
-            if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+        const sectionGreen = [31, 77, 58];
+
+        const pdfText = (value) => String(value)
+            .replace(/₱/g, "PHP ")
+            .replace(/\u00a0/g, " ")
+            .replace(/[ \t]+/g, " ")
+            .trim();
+
+        const cellText = (element) => {
+            const clone = element.cloneNode(true);
+            clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+            return pdfText(clone.textContent)
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line !== "")
+                .join("\n");
+        };
+
+        const headRows = Array.from(reportTable.querySelectorAll("thead tr")).map((tr) =>
+            Array.from(tr.querySelectorAll("th")).map((th) => pdfText(th.textContent))
+        );
+
+        const bodyRows = Array.from(reportTable.querySelectorAll("tbody tr")).map((tr) => {
+            if (tr.classList.contains("report-section-row")) {
+                return [{
+                    content: pdfText(tr.textContent),
+                    colSpan: 2,
+                    styles: {
+                        fillColor: sectionGreen,
+                        textColor: [255, 255, 255],
+                        fontStyle: "bold",
+                        fontSize: 8,
+                    },
+                }];
+            }
+            return Array.from(tr.querySelectorAll("td")).map((td) => cellText(td));
+        });
+
+        downloadBtn.addEventListener("click", function () {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
                 window.print();
                 return;
             }
 
-            const originalMarkup = downloadBtn.innerHTML;
-            downloadBtn.disabled = true;
-            downloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Preparing...';
+            const isFieldTable = reportTable.classList.contains("report-field-table");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: isFieldTable ? "portrait" : "landscape",
+                unit: "mm",
+                format: "a4",
+            });
 
-            try {
-                const canvas = await html2canvas(reportSheet, {
-                    scale: 2,
-                    backgroundColor: "#ffffff",
-                    useCORS: true,
-                });
-                const imgData = canvas.toDataURL("image/png");
-                const { jsPDF } = window.jspdf;
-                const orientation = canvas.width > canvas.height ? "landscape" : "portrait";
-                const doc = new jsPDF({ orientation, unit: "mm", format: "a4" });
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 8;
-                const contentWidth = pageWidth - margin * 2;
-                const contentHeight = pageHeight - margin * 2;
-                const imgWidth = contentWidth;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                let heightLeft = imgHeight;
-                let position = margin;
-
-                doc.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-                heightLeft -= contentHeight;
-
-                while (heightLeft > 0) {
-                    position = margin - (imgHeight - heightLeft);
-                    doc.addPage();
-                    doc.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-                    heightLeft -= contentHeight;
-                }
-
-                doc.save(
-                    (downloadBtn.dataset.title || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
-                        "-" +
-                        (downloadBtn.dataset.reportId || "export") +
-                        "-" +
-                        new Date().toISOString().slice(0, 10) +
-                        ".pdf"
-                );
-            } catch (error) {
+            if (typeof doc.autoTable !== "function") {
                 window.print();
-            } finally {
-                downloadBtn.disabled = false;
-                downloadBtn.innerHTML = originalMarkup;
+                return;
             }
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text(pdfText(downloadBtn.dataset.barangay || ""), pageWidth / 2, 15, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Municipality of " + pdfText(downloadBtn.dataset.municipality || ""), pageWidth / 2, 21, { align: "center" });
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text("OFFICIAL " + pdfText(downloadBtn.dataset.title || "REPORT"), pageWidth / 2, 29, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("Barangay Chairman: " + pdfText(downloadBtn.dataset.chairman || ""), pageWidth / 2, 35, { align: "center" });
+            doc.text("Date: " + pdfText(downloadBtn.dataset.date || ""), pageWidth / 2, 40, { align: "center" });
+
+            doc.autoTable({
+                head: headRows.length > 0 ? headRows : undefined,
+                body: bodyRows,
+                startY: 46,
+                theme: "grid",
+                styles: { fontSize: 7.5, cellPadding: 1.8, overflow: "linebreak", valign: "top" },
+                headStyles: { fillColor: [248, 250, 252], textColor: [51, 65, 85], fontStyle: "bold" },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { left: 10, right: 10 },
+                columnStyles: isFieldTable ? { 0: { cellWidth: 55, fontStyle: "bold" } } : undefined,
+            });
+
+            doc.save(
+                (downloadBtn.dataset.title || "report").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+                    "-" +
+                    (downloadBtn.dataset.reportId || "export") +
+                    "-" +
+                    new Date().toISOString().slice(0, 10) +
+                    ".pdf"
+            );
         });
     });
 </script>
