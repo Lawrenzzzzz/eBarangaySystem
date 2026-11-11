@@ -336,6 +336,7 @@ function account_details(int $userId): ?array
         'role_name' => $row['role_name'],
         'resident_code' => $row['resident_code'],
         'full_name' => $viewFullName !== '' ? $viewFullName : $accountFullName,
+        'account_full_name' => $accountFullName,
         'household_number' => $row['household_number'],
         'address_line' => $row['address_line'],
         'requested_position' => $row['requested_position'],

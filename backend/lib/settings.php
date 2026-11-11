@@ -63,20 +63,42 @@ function save_barangay_profile(int $userId, array $input): array
         return ['ok' => false, 'status' => 422, 'error' => 'Enter a valid number of puroks and sitios.'];
     }
 
-    $statement = db()->prepare(
-        "INSERT INTO barangay_settings (id, barangay_name, municipality, province, chairman, term, puroks, sitios, updated_by)
-         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-            barangay_name = VALUES(barangay_name),
-            municipality = VALUES(municipality),
-            province = VALUES(province),
-            chairman = VALUES(chairman),
-            term = VALUES(term),
-            puroks = VALUES(puroks),
-            sitios = VALUES(sitios),
-            updated_by = VALUES(updated_by)"
-    );
-    $statement->execute([$barangayName, $municipality, $province, $chairman, $term, $puroks, $sitios, $userId > 0 ? $userId : null]);
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $statement = $pdo->prepare(
+            "INSERT INTO barangay_settings (id, barangay_name, municipality, province, chairman, term, puroks, sitios, updated_by)
+             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+                barangay_name = VALUES(barangay_name),
+                municipality = VALUES(municipality),
+                province = VALUES(province),
+                chairman = VALUES(chairman),
+                term = VALUES(term),
+                puroks = VALUES(puroks),
+                sitios = VALUES(sitios),
+                updated_by = VALUES(updated_by)"
+        );
+        $statement->execute([$barangayName, $municipality, $province, $chairman, $term, $puroks, $sitios, $userId > 0 ? $userId : null]);
+
+        if ($chairman !== '') {
+            $updateChairmanAccount = $pdo->prepare(
+                "UPDATE users u
+                 JOIN roles r ON r.id = u.role_id
+                 SET u.full_name = ?
+                 WHERE r.code IN ('admin', 'captain') AND u.deleted_at IS NULL"
+            );
+            $updateChairmanAccount->execute([$chairman]);
+        }
+
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
 
     return [
         'ok' => true,

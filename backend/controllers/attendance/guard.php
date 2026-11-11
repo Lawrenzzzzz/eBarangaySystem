@@ -25,7 +25,10 @@ $esc = static function ($value): string {
 };
 $csrf = csrf_token();
 
-$attendanceUserName = trim((string) ($currentUser['full_name'] ?? ''));
+$attendanceUserName = trim((string) ($currentUser['account_full_name'] ?? ''));
+if ($attendanceUserName === '') {
+    $attendanceUserName = trim((string) ($currentUser['full_name'] ?? ''));
+}
 if ($attendanceUserName === '') {
     $attendanceUserName = trim((string) ($currentUser['email'] ?? '')) ?: 'Barangay Official';
 }
