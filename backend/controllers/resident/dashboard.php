@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 require_once __DIR__ . '/context.php';
 
-extract(resident_page_context('../login_page/login.php'), EXTR_SKIP);
+extract(resident_page_context(), EXTR_SKIP);
 
 $announcements = list_announcements(2);
 $homeRequests = list_document_requests((int) current_user_id(), null, 5);

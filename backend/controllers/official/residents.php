@@ -22,12 +22,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $result = delete_official_resident($residentId, (int) current_user_id());
 
         if ($result['ok']) {
-            $redirect = 'residents.php?deleted=1';
+            $redirectPath = 'official/residents?deleted=1';
             if ($residentSearch !== '') {
-                $redirect .= '&q=' . urlencode($residentSearch);
+                $redirectPath .= '&q=' . urlencode($residentSearch);
             }
-            header('Location: ' . $redirect);
-            exit;
+            redirect($redirectPath);
         }
         $residentActionError = $result['message'];
     }

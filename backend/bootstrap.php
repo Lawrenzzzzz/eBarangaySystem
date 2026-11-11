@@ -38,6 +38,13 @@ define('APP_ENV', env('APP_ENV', 'local'));
 define('APP_KEY', $appKey === '' ? 'insecure-development-key' : $appKey);
 define('APP_URL', rtrim((string) env('APP_URL', 'http://localhost/MyWebsites/eBarangay'), '/'));
 
+$scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+$basePath = $scriptName !== '' ? rtrim(dirname($scriptName), '/') : '';
+if ($basePath === '/' || $basePath === '.') {
+    $basePath = '';
+}
+define('BASE_PATH', $basePath);
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     session_name('ebarangay_session');

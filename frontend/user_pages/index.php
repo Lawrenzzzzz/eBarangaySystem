@@ -8,14 +8,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Barangay Bucana | Resident Portal</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>">
 </head>
 <body>
 <div class="shell">
 
   <!-- Top bar -->
   <header class="topnav" id="home">
-    <a href="index.php" class="brand">
+    <a href="<?= url('dashboard') ?>" class="brand">
       <span class="avatar sq">B</span>
       <span class="brand-text">
         <strong>Barangay Bucana</strong>
@@ -24,13 +24,13 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
     </a>
 
     <nav class="nav" id="main-nav" aria-label="Main">
-      <a href="index.php" class="active" aria-current="page">Home</a>
-      <a href="documents.php">Documents</a>
-      <a href="blotter.php">Blotter</a>
-      <a href="announcements.php">Announcements</a>
-      <a href="projects.php">Projects</a>
-      <a href="track.php">Track</a>
-      <a href="settings.php">Settings</a>
+      <a href="<?= url('dashboard') ?>" class="active" aria-current="page">Home</a>
+      <a href="<?= url('documents') ?>">Documents</a>
+      <a href="<?= url('blotter') ?>">Blotter</a>
+      <a href="<?= url('announcements') ?>">Announcements</a>
+      <a href="<?= url('projects') ?>">Projects</a>
+      <a href="<?= url('track') ?>">Track</a>
+      <a href="<?= url('settings') ?>">Settings</a>
     </nav>
 
     <div class="nav-right">
@@ -92,19 +92,19 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
             <span class="chip blue">C</span>
             <h3>Barangay Clearance</h3>
             <p>₱50 · 2 business days</p>
-            <a href="documents.php?type=clearance" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            <a href="<?= url('documents') ?>?type=clearance" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
           </article>
           <article class="card doc">
             <span class="chip green">I</span>
             <h3>Certificate of Indigency</h3>
             <p>Free · 1 business day</p>
-            <a href="documents.php?type=indigency" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            <a href="<?= url('documents') ?>?type=indigency" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
           </article>
           <article class="card doc">
             <span class="chip amber">R</span>
             <h3>Certificate of Residency</h3>
             <p>₱30 · same day</p>
-            <a href="documents.php?type=residency" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            <a href="<?= url('documents') ?>?type=residency" class="link">Start request <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
           </article>
         </div>
       </section>
@@ -112,7 +112,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
       <section id="track">
         <div class="section-head">
           <h2>Your requests</h2>
-          <a href="track.php" class="link">View all</a>
+          <a href="<?= url('track') ?>" class="link">View all</a>
         </div>
         <div class="req-list">
           <?php if ($homeRequests): ?>
@@ -165,7 +165,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
             <div><strong class="blue"><?= $homeBlotterStats['this_year'] ?></strong><span>filed this year</span></div>
             <div><strong class="good"><?= $homeBlotterStats['total'] > 0 ? (int) round(($homeBlotterStats['resolved'] / $homeBlotterStats['total']) * 100) : 0 ?>%</strong><span>resolved</span></div>
           </div>
-          <a href="blotter.php" class="btn">File a new report</a>
+          <a href="<?= url('blotter') ?>" class="btn">File a new report</a>
         </div>
       </section>
 
@@ -194,6 +194,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
   </div>
 </div>
 
-<script src="assets/js/app.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/resident/js/app.js') ?>"></script>
 </body>
 </html>

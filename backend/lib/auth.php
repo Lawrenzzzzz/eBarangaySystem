@@ -42,8 +42,8 @@ function send_email_verification(string $rawEmail): array
     ]);
     $verificationId = (int) $pdo->lastInsertId();
 
-    $text = "Your e-Barangay San Isidro verification code is {$code}. It expires in 10 minutes.";
-    $html = '<p>Your e-Barangay San Isidro verification code is:</p>'
+    $text = "Your e-Barangay Bucana verification code is {$code}. It expires in 10 minutes.";
+    $html = '<p>Your e-Barangay Bucana verification code is:</p>'
         . '<p style="font-size:28px;font-weight:700;letter-spacing:6px">' . $code . '</p>'
         . '<p>This code expires in 10 minutes. If you did not request this, you can ignore this email.</p>';
     $mail = send_email($email, 'Your e-Barangay verification code', $text, $html);
@@ -272,9 +272,9 @@ function sign_in_user(string $rawEmail, string $password): array
 
     $roleCode = (string) ($user['role_code'] ?? 'resident');
     $redirect = match ($roleCode) {
-        'admin', 'captain', 'super_admin' => '../admin/dashboard.php',
-        'official', 'staff', 'kagawad', 'secretary', 'treasurer' => '../barangay_officials/dashboard.php',
-        default => '../user_pages/index.php',
+        'admin', 'captain', 'super_admin' => url('admin/dashboard'),
+        'official', 'staff', 'kagawad', 'secretary', 'treasurer' => url('official/dashboard'),
+        default => url('dashboard'),
     };
 
     return [
@@ -383,7 +383,7 @@ function request_password_reset(string $rawEmail): array
         json_encode(['purpose' => 'password_reset']),
     ]);
 
-    $resetUrl = APP_URL . '/frontend/login_page/reset-password.php?token=' . urlencode($token);
+    $resetUrl = APP_URL . url('reset-password') . '?token=' . urlencode($token);
     log_line('mail.log', "Password reset link for {$email}: {$resetUrl}");
 
     $result = ['ok' => true, 'message' => $message];

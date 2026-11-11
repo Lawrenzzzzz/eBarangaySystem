@@ -27,8 +27,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if ($documentRequestSearch !== '') {
                 $params['q'] = $documentRequestSearch;
             }
-            header('Location: document-requests.php?' . http_build_query($params));
-            exit;
+            redirect('official/document-requests?' . http_build_query($params));
         }
 
         $documentRequestError = $result['error'] ?? 'Unable to update this document request.';
@@ -61,7 +60,7 @@ $documentRequestTabUrl = static function (string $tab) use ($documentRequestSear
         $params['q'] = $documentRequestSearch;
     }
 
-    return 'document-requests.php?' . http_build_query($params);
+    return url('official/document-requests?' . http_build_query($params));
 };
 
 $documentRequestArchived = $documentRequestTab === 'archived';

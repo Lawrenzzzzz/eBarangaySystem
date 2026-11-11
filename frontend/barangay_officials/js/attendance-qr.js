@@ -19,7 +19,7 @@
   if (!printBtn) return;
 
   printBtn.addEventListener("click", function () {
-    const barangay = box.dataset.barangay || "Barangay San Isidro";
+    const barangay = box.dataset.barangay || "Barangay Bucana";
     const name = box.dataset.name || "Barangay Official";
     const position = box.dataset.position || "Barangay Official";
     const badgeSvg = qr.createSvgTag({ cellSize: 6, margin: 4 });

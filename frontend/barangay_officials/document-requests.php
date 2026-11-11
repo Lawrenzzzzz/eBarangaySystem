@@ -9,10 +9,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document Requests - E-Barangay Official</title>
   
-  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/official/libs/bootstrap/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <link rel="stylesheet" href="css/ebarangay.css">
+  <link rel="stylesheet" href="<?= url('assets/official/css/ebarangay.css') ?>">
 </head>
 <body>
 
@@ -27,32 +27,32 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
     
     <div class="nav flex-column py-2 flex-grow-1">
       <div class="nav-section">Main</div>
-      <a class="nav-link" href="dashboard.php">
+      <a class="nav-link" href="<?= url('official/dashboard') ?>">
         <span class="nav-dot"></span><span>Dashboard</span>
       </a>
-      <a class="nav-link" href="residents.php">
+      <a class="nav-link" href="<?= url('official/residents') ?>">
         <span class="nav-dot"></span><span>Residents</span>
       </a>
       
       <!-- ACTIVE HIGHLIGHT I2 SA DOCUMENT REQUESTS -->
-      <a class="nav-link active" href="document-requests.php">
+      <a class="nav-link active" href="<?= url('official/document-requests') ?>">
         <span class="nav-dot"></span><span>Document Requests</span>
       </a>
       
-      <a class="nav-link" href="blotter.php">
+      <a class="nav-link" href="<?= url('official/blotter') ?>">
         <span class="nav-dot"></span><span>Blotter</span>
       </a>
-      <a class="nav-link" href="announcements.php">
+      <a class="nav-link" href="<?= url('official/announcements') ?>">
         <span class="nav-dot"></span><span>Announcements</span>
       </a>
-      <a class="nav-link" href="payments.php">
+      <a class="nav-link" href="<?= url('official/payments') ?>">
         <span class="nav-dot"></span><span>Payments</span>
       </a>
-      <a class="nav-link" href="reports.php">
+      <a class="nav-link" href="<?= url('official/reports') ?>">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       <div class="settings-parent">
-        <a class="nav-link" href="document-fees.php">
+        <a class="nav-link" href="<?= url('official/document-fees') ?>">
           <span class="nav-dot"></span><span>Settings</span>
         </a>
         <button class="settings-caret-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="false" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
@@ -62,9 +62,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
 
       <div class="collapse" id="officialSettingsSubmenu">
         <div class="settings-submenu">
-          <a class="nav-link" href="document-fees.php"><span class="sub-dot"></span><span>Documents Fees</span></a>
-          <a class="nav-link" href="change-password.php"><span class="sub-dot"></span><span>Change Password</span></a>
-          <a class="nav-link" href="settings.php#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
+          <a class="nav-link" href="<?= url('official/document-fees') ?>"><span class="sub-dot"></span><span>Documents Fees</span></a>
+          <a class="nav-link" href="<?= url('official/change-password') ?>"><span class="sub-dot"></span><span>Change Password</span></a>
+          <a class="nav-link" href="<?= url('official/settings') ?>#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
         </div>
       </div>
     </div>
@@ -103,7 +103,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
       <?php endif; ?>
 
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <form class="search-box" method="get" action="document-requests.php" role="search">
+        <form class="search-box" method="get" action="<?= url('official/document-requests') ?>" role="search">
           <i class="bi bi-search"></i>
           <input type="hidden" name="status" value="<?= $esc($documentRequestTab) ?>">
           <input type="search" name="q" value="<?= $esc($documentRequestSearch) ?>" placeholder="Search reference, resident, or document..." aria-label="Search document requests">
@@ -168,7 +168,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
                                   ? 'Reject this document request?'
                                   : ($isClaim ? 'Mark this document as claimed?' : '');
                             ?>
-                            <form method="post" action="document-requests.php" class="d-inline"
+                            <form method="post" action="<?= url('official/document-requests') ?>" class="d-inline"
                               <?= $confirm !== '' ? 'onsubmit="return confirm(\'' . $esc($confirm) . '\');"' : '' ?>>
                               <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
                               <input type="hidden" name="action" value="<?= $isClaim ? 'claim' : 'status' ?>">
@@ -201,7 +201,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
   <?php foreach ($documentRequests as $request): ?>
     <?php if ($request['status'] === 'ready' && $request['requires_payment']): ?>
       <dialog class="claim-dialog" id="claim-dialog-<?= (int) $request['id'] ?>">
-        <form method="post" action="document-requests.php" class="claim-form">
+        <form method="post" action="<?= url('official/document-requests') ?>" class="claim-form">
           <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
           <input type="hidden" name="action" value="claim">
           <input type="hidden" name="request_id" value="<?= (int) $request['id'] ?>">
@@ -250,14 +250,15 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/document-reque
   <?php endforeach; ?>
 
   <?php if ($documentRequestArchived): ?>
-    <a href="document-requests.php" class="btn btn-primary archive-fab"><i class="bi bi-arrow-left"></i> Back to requests</a>
+    <a href="<?= url('official/document-requests') ?>" class="btn btn-primary archive-fab"><i class="bi bi-arrow-left"></i> Back to requests</a>
   <?php else: ?>
-    <a href="document-requests.php?status=archived" class="btn btn-primary archive-fab"><i class="bi bi-archive"></i> Archive (<?= (int) $documentRequestStats['archived'] ?>)</a>
+    <a href="<?= url('official/document-requests') ?>?status=archived" class="btn btn-primary archive-fab"><i class="bi bi-archive"></i> Archive (<?= (int) $documentRequestStats['archived'] ?>)</a>
   <?php endif; ?>
 
   <!-- Bootstrap JS -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+  <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+  <script src="<?= url('assets/official/js/app.js') ?>"></script>
   <script>
   (function () {
     var dialogs = document.querySelectorAll('.claim-dialog');

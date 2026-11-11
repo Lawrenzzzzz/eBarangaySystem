@@ -43,7 +43,7 @@ def main() -> None:
         port = 587
     user = os.environ.get("SMTP_USER", "").strip()
     password = os.environ.get("SMTP_PASS", "")
-    from_name = os.environ.get("SMTP_FROM_NAME", "e-Barangay San Isidro").strip()
+    from_name = os.environ.get("SMTP_FROM_NAME", "e-Barangay Bucana").strip()
     use_ssl = os.environ.get("SMTP_USE_SSL", "").strip().lower() in ("1", "true", "yes")
 
     if not user or not password:

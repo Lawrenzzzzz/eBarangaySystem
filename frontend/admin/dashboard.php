@@ -30,7 +30,7 @@ $initials = static function (string $name): string {
     <title>Dashboard - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="<?= url('assets/admin/css/style.css') ?>">
 </head>
 <body>
 <div class="wrapper">
@@ -42,13 +42,13 @@ $initials = static function (string $name): string {
         </div>
         <ul class="nav flex-column mt-3">
             <!-- NOTICE: The active class is on Dashboard -->
-            <li class="nav-item"><a class="nav-link active" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="budget.php"><i class="bi bi-wallet2"></i> Budget</a></li>
-            <li class="nav-item"><a class="nav-link" href="projects.php"><i class="bi bi-kanban"></i> Projects</a></li>
-            <li class="nav-item"><a class="nav-link" href="residents.php"><i class="bi bi-people"></i> Residents</a></li>
-            <li class="nav-item"><a class="nav-link" href="reports.php"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-            <li class="nav-item"><a class="nav-link" href="attendance.php"><i class="bi bi-calendar-check"></i> Attendance</a></li>
-            <li class="nav-item"><a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a></li>
+            <li class="nav-item"><a class="nav-link active" href="<?= url('admin/dashboard') ?>"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/budget') ?>"><i class="bi bi-wallet2"></i> Budget</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/projects') ?>"><i class="bi bi-kanban"></i> Projects</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/residents') ?>"><i class="bi bi-people"></i> Residents</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/reports') ?>"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/attendance') ?>"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/settings') ?>"><i class="bi bi-gear"></i> Settings</a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="user-card">
@@ -61,7 +61,7 @@ $initials = static function (string $name): string {
     </nav>
 
     <!-- MAIN CONTENT -->
-    <div id="content" data-dashboard-endpoint="../../backend/api/admin-dashboard.php">
+    <div id="content" data-dashboard-endpoint="<?= url('api/admin-dashboard') ?>">
         <div class="page-header">
             <div>
                 <h3 class="fw-bold mb-1">Chairman's Dashboard</h3>
@@ -184,7 +184,8 @@ $initials = static function (string $name): string {
 <script>window.DASHBOARD_DATA = <?= json_encode($dashboardData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/main.js"></script>
+<script src="<?= url('assets/admin/js/charts.js') ?>"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/admin/js/main.js') ?>"></script>
 </body>
 </html>

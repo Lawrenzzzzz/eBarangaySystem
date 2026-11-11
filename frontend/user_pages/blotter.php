@@ -9,14 +9,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Barangay Bucana | Blotter</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>">
 </head>
 <body>
 <div class="shell">
 
   <!-- Top bar -->
   <header class="topnav">
-    <a href="index.php" class="brand">
+    <a href="<?= url('dashboard') ?>" class="brand">
       <span class="avatar sq">B</span>
       <span class="brand-text">
         <strong>Barangay Bucana</strong>
@@ -25,13 +25,13 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
     </a>
 
     <nav class="nav" id="main-nav" aria-label="Main">
-      <a href="index.php">Home</a>
-      <a href="documents.php">Documents</a>
-      <a href="blotter.php" class="active" aria-current="page">Blotter</a>
-      <a href="announcements.php">Announcements</a>
-      <a href="projects.php">Projects</a>
-      <a href="track.php">Track</a>
-      <a href="settings.php">Settings</a>
+      <a href="<?= url('dashboard') ?>">Home</a>
+      <a href="<?= url('documents') ?>">Documents</a>
+      <a href="<?= url('blotter') ?>" class="active" aria-current="page">Blotter</a>
+      <a href="<?= url('announcements') ?>">Announcements</a>
+      <a href="<?= url('projects') ?>">Projects</a>
+      <a href="<?= url('track') ?>">Track</a>
+      <a href="<?= url('settings') ?>">Settings</a>
     </nav>
 
     <div class="nav-right">
@@ -96,10 +96,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
               <h3><?= $esc($report['subject']) ?> <span class="badge <?= $esc($report['status_tone']) ?>"><?= $esc($report['status_label']) ?></span></h3>
               <p class="ref">Ref <?= $esc($report['reference_no']) ?> · <?= $esc(date('M j, Y', strtotime($report['created_at']))) ?></p>
               <p><?= $esc($blotterExcerpt($report['details'])) ?></p>
-              <a class="link" href="blotter-report.php?ref=<?= urlencode($report['reference_no']) ?>">View full report <span class="arrow">→</span></a>
+              <a class="link" href="<?= url('blotter-report') ?>?ref=<?= urlencode($report['reference_no']) ?>">View full report <span class="arrow">→</span></a>
             </article>
           <?php endforeach; ?>
-          <a href="track.php" class="link">View all reports</a>
+          <a href="<?= url('track') ?>" class="link">View all reports</a>
         <?php else: ?>
           <p class="empty">You have no blotter reports yet.</p>
         <?php endif; ?>
@@ -138,8 +138,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
         '<p>The barangay has received your report and it is now pending review.</p>' +
         '<p>Reference number: <span class="ref-no">' + escapeHtml(report.reference_no) + '</span></p>' +
         '<div class="form-foot">' +
-          '<a href="track.php" class="btn-primary">View my reports</a>' +
-          '<a href="blotter.php" class="link">File another report</a>' +
+          '<a href="<?= url('track') ?>" class="btn-primary">View my reports</a>' +
+          '<a href="<?= url('blotter') ?>" class="link">File another report</a>' +
         '</div>' +
       '</div>';
   }
@@ -167,7 +167,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
     submitBtn.textContent = 'Submitting…';
 
     try {
-      var response = await fetch('../../backend/api/blotter-reports.php', {
+      var response = await fetch('<?= url('api/blotter-reports') ?>', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -192,6 +192,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/blotter.php';
   });
 })();
 </script>
-<script src="assets/js/app.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/resident/js/app.js') ?>"></script>
 </body>
 </html>

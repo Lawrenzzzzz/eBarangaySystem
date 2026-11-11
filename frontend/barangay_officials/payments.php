@@ -9,10 +9,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payments - E-Barangay Official</title>
   
-  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/official/libs/bootstrap/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <link rel="stylesheet" href="css/ebarangay.css">
+  <link rel="stylesheet" href="<?= url('assets/official/css/ebarangay.css') ?>">
 </head>
 <body>
 
@@ -27,32 +27,32 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
     
     <div class="nav flex-column py-2 flex-grow-1">
       <div class="nav-section">Main</div>
-      <a class="nav-link" href="dashboard.php">
+      <a class="nav-link" href="<?= url('official/dashboard') ?>">
         <span class="nav-dot"></span><span>Dashboard</span>
       </a>
-      <a class="nav-link" href="residents.php">
+      <a class="nav-link" href="<?= url('official/residents') ?>">
         <span class="nav-dot"></span><span>Residents</span>
       </a>
-      <a class="nav-link" href="document-requests.php">
+      <a class="nav-link" href="<?= url('official/document-requests') ?>">
         <span class="nav-dot"></span><span>Document Requests</span>
       </a>
-      <a class="nav-link" href="blotter.php">
+      <a class="nav-link" href="<?= url('official/blotter') ?>">
         <span class="nav-dot"></span><span>Blotter</span>
       </a>
-      <a class="nav-link" href="announcements.php">
+      <a class="nav-link" href="<?= url('official/announcements') ?>">
         <span class="nav-dot"></span><span>Announcements</span>
       </a>
       
       <!-- ACTIVE HIGHLIGHT I2 SA PAYMENTS -->
-      <a class="nav-link active" href="payments.php">
+      <a class="nav-link active" href="<?= url('official/payments') ?>">
         <span class="nav-dot"></span><span>Payments</span>
       </a>
       
-      <a class="nav-link" href="reports.php">
+      <a class="nav-link" href="<?= url('official/reports') ?>">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       <div class="settings-parent">
-        <a class="nav-link" href="document-fees.php">
+        <a class="nav-link" href="<?= url('official/document-fees') ?>">
           <span class="nav-dot"></span><span>Settings</span>
         </a>
         <button class="settings-caret-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="false" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
@@ -62,9 +62,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
 
       <div class="collapse" id="officialSettingsSubmenu">
         <div class="settings-submenu">
-          <a class="nav-link" href="document-fees.php"><span class="sub-dot"></span><span>Documents Fees</span></a>
-          <a class="nav-link" href="change-password.php"><span class="sub-dot"></span><span>Change Password</span></a>
-          <a class="nav-link" href="settings.php#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
+          <a class="nav-link" href="<?= url('official/document-fees') ?>"><span class="sub-dot"></span><span>Documents Fees</span></a>
+          <a class="nav-link" href="<?= url('official/change-password') ?>"><span class="sub-dot"></span><span>Change Password</span></a>
+          <a class="nav-link" href="<?= url('official/settings') ?>#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
         </div>
       </div>
     </div>
@@ -136,7 +136,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
       </div>
 
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <form class="search-box" method="get" action="payments.php" role="search">
+        <form class="search-box" method="get" action="<?= url('official/payments') ?>" role="search">
           <i class="bi bi-search"></i>
           <input type="search" name="q" value="<?= $esc($paymentSearch) ?>" placeholder="Search reference, payee, or document..." aria-label="Search payments">
         </form>
@@ -149,7 +149,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
       <div class="table-card">
         <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
           <h6 class="mb-0 fw-bold">Payment Transactions</h6>
-          <form method="post" action="reports.php" class="d-inline">
+          <form method="post" action="<?= url('official/reports') ?>" class="d-inline">
             <input type="hidden" name="action" value="generate">
             <input type="hidden" name="report" value="payments">
             <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
@@ -203,7 +203,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+  <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+  <script src="<?= url('assets/official/js/app.js') ?>"></script>
 </body>
 </html>

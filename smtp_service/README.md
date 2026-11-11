@@ -15,7 +15,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your.address@gmail.com
 SMTP_PASS=the-16-character-app-password
-SMTP_FROM_NAME=e-Barangay San Isidro
+SMTP_FROM_NAME=e-Barangay Bucana
 SMTP_USE_SSL=0
 PYTHON_BIN=python
 ```

@@ -1,0 +1,29 @@
+# e-Barangay - CodeIgniter-style front controller routing
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny direct access to application internals (force clean URLs)
+    RewriteRule ^backend/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    RewriteRule ^smtp_service/ - [F,L]
+    RewriteRule ^frontend/.*\.php$ - [F,L]
+
+    # Serve existing files and directories directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Public asset aliases (keeps the folder structure out of every URL)
+    RewriteRule ^assets/auth/(.*)$       frontend/login_page/assets/$1 [L]
+    RewriteRule ^assets/resident/style\.css$ frontend/user_pages/style.css [L]
+    RewriteRule ^assets/resident/(.*)$   frontend/user_pages/assets/$1 [L]
+    RewriteRule ^assets/admin/(.*)$      frontend/admin/$1 [L]
+    RewriteRule ^assets/official/(.*)$   frontend/barangay_officials/$1 [L]
+    RewriteRule ^assets/attendance/(.*)$ frontend/attendance/assets/$1 [L]
+    RewriteRule ^assets/uploads/(.*)$    frontend/assets/uploads/$1 [L]
+
+    # Route everything else through the front controller
+    RewriteRule ^ index.php [L]
+</IfModule>

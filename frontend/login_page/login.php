@@ -8,25 +8,25 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
-    <title>Sign in | e-Barangay San Isidro</title>
-    <meta name="description" content="Sign in to your e-Barangay San Isidro resident or official account.">
-    <meta property="og:title" content="Sign in | e-Barangay San Isidro">
-    <meta property="og:description" content="Sign in to your e-Barangay San Isidro resident or official account.">
+    <title>Sign in | e-Barangay Bucana</title>
+    <meta name="description" content="Sign in to your e-Barangay Bucana resident or official account.">
+    <meta property="og:title" content="Sign in | e-Barangay Bucana">
+    <meta property="og:description" content="Sign in to your e-Barangay Bucana resident or official account.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
-    <link rel="stylesheet" href="assets/auth.css">
+    <link rel="stylesheet" href="<?= url('assets/auth/styles.css') ?>">
+    <link rel="stylesheet" href="<?= url('assets/auth/auth.css') ?>">
 </head>
 <body>
 <main class="auth-shell">
     <aside class="auth-brand" aria-label="About the e-Barangay portal">
-        <img class="brand-photo" src="assets/barangay-hall.jpg" alt="" width="1600" height="1000">
+        <img class="brand-photo" src="<?= url('assets/auth/barangay-hall.jpg') ?>" alt="" width="1600" height="1000">
         <div class="brand-scrim" aria-hidden="true"></div>
         <div class="brand-content">
-            <a class="brand" href="index.php">
+            <a class="brand" href="<?= url('') ?>">
                 <span class="brand-mark">
                     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
@@ -35,7 +35,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
                 </span>
                 <span class="brand-text">
                     <strong>e-Barangay</strong>
-                    <small>San Isidro · Nasugbu</small>
+                    <small>Bucana · Nasugbu</small>
                 </span>
             </a>
 
@@ -74,7 +74,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
 
     <section class="auth-side">
         <div class="auth-top">
-            <a class="back-link" href="index.php">
+            <a class="back-link" href="<?= url('') ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
                     <path d="m12 19-7-7 7-7"/>
                     <path d="M19 12H5"/>
@@ -92,7 +92,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
         <div class="auth-center">
             <div class="auth-card" id="auth" data-initial="signin">
                 <header class="auth-head">
-                    <a class="mobile-brand" href="index.php">
+                    <a class="mobile-brand" href="<?= url('') ?>">
                         <span class="brand-mark">
                             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
@@ -101,7 +101,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
                         </span>
                         <span>
                             <strong>e-Barangay</strong>
-                            <small>San Isidro · Nasugbu</small>
+                            <small>Bucana · Nasugbu</small>
                         </span>
                     </a>
                     <p class="eyebrow"><span class="rule" aria-hidden="true"></span>Resident &amp; official portal</p>
@@ -223,7 +223,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
         </div>
 
         <footer class="auth-foot">
-            <span>&copy; 2026 Barangay San Isidro</span>
+            <span>&copy; 2026 Barangay Bucana</span>
             <span class="dot" aria-hidden="true"></span>
             <a href="#">Privacy</a>
             <span class="dot" aria-hidden="true"></span>
@@ -232,6 +232,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
     </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/app.js"></script>
+    <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+    <script src="<?= url('assets/auth/app.js') ?>"></script>
 </body>
 </html>

@@ -8,17 +8,17 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
-    <title>Reset Password | Barangay San Isidro</title>
-    <meta name="description" content="Set a new password for your Barangay San Isidro account.">
-    <meta property="og:title" content="Reset Password | Barangay San Isidro">
+    <title>Reset Password | Barangay Bucana</title>
+    <meta name="description" content="Set a new password for your Barangay Bucana account.">
+    <meta property="og:title" content="Reset Password | Barangay Bucana">
     <meta property="og:description" content="Securely reset your barangay account password.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
-    <link rel="stylesheet" href="assets/auth.css">
+    <link rel="stylesheet" href="<?= url('assets/auth/styles.css') ?>">
+    <link rel="stylesheet" href="<?= url('assets/auth/auth.css') ?>">
 </head>
 <body>
 <main class="auth-plain">
@@ -41,6 +41,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/auth/page.php';
     </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/app.js"></script>
+    <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+    <script src="<?= url('assets/auth/app.js') ?>"></script>
 </body>
 </html>

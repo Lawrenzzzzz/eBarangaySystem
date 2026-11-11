@@ -10,10 +10,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
   <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Residents - E-Barangay Official</title>
   
-  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/official/libs/bootstrap/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <link rel="stylesheet" href="css/ebarangay.css">
+  <link rel="stylesheet" href="<?= url('assets/official/css/ebarangay.css') ?>">
 </head>
 <body>
 
@@ -28,32 +28,32 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
     
     <div class="nav flex-column py-2 flex-grow-1">
       <div class="nav-section">Main</div>
-      <a class="nav-link" href="dashboard.php">
+      <a class="nav-link" href="<?= url('official/dashboard') ?>">
         <span class="nav-dot"></span><span>Dashboard</span>
       </a>
       
       <!-- ACTIVE HIGHLIGHT I2 SA RESIDENTS -->
-      <a class="nav-link active" href="residents.php">
+      <a class="nav-link active" href="<?= url('official/residents') ?>">
         <span class="nav-dot"></span><span>Residents</span>
       </a>
       
-      <a class="nav-link" href="document-requests.php">
+      <a class="nav-link" href="<?= url('official/document-requests') ?>">
         <span class="nav-dot"></span><span>Document Requests</span>
       </a>
-      <a class="nav-link" href="blotter.php">
+      <a class="nav-link" href="<?= url('official/blotter') ?>">
         <span class="nav-dot"></span><span>Blotter</span>
       </a>
-      <a class="nav-link" href="announcements.php">
+      <a class="nav-link" href="<?= url('official/announcements') ?>">
         <span class="nav-dot"></span><span>Announcements</span>
       </a>
-      <a class="nav-link" href="payments.php">
+      <a class="nav-link" href="<?= url('official/payments') ?>">
         <span class="nav-dot"></span><span>Payments</span>
       </a>
-      <a class="nav-link" href="reports.php">
+      <a class="nav-link" href="<?= url('official/reports') ?>">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       <div class="settings-parent">
-        <a class="nav-link" href="document-fees.php">
+        <a class="nav-link" href="<?= url('official/document-fees') ?>">
           <span class="nav-dot"></span><span>Settings</span>
         </a>
         <button class="settings-caret-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="false" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
@@ -63,9 +63,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
 
       <div class="collapse" id="officialSettingsSubmenu">
         <div class="settings-submenu">
-          <a class="nav-link" href="document-fees.php"><span class="sub-dot"></span><span>Documents Fees</span></a>
-          <a class="nav-link" href="change-password.php"><span class="sub-dot"></span><span>Change Password</span></a>
-          <a class="nav-link" href="settings.php#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
+          <a class="nav-link" href="<?= url('official/document-fees') ?>"><span class="sub-dot"></span><span>Documents Fees</span></a>
+          <a class="nav-link" href="<?= url('official/change-password') ?>"><span class="sub-dot"></span><span>Change Password</span></a>
+          <a class="nav-link" href="<?= url('official/settings') ?>#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
         </div>
       </div>
     </div>
@@ -104,12 +104,12 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
       <?php endif; ?>
 
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <form class="search-box" method="get" action="residents.php" role="search">
+        <form class="search-box" method="get" action="<?= url('official/residents') ?>" role="search">
           <i class="bi bi-search"></i>
           <input type="search" name="q" value="<?= $esc($residentSearch) ?>" placeholder="Search name, code, email, or address..." aria-label="Search residents">
         </form>
         <div class="d-flex align-items-center gap-2">
-          <form method="post" action="reports.php" class="d-inline">
+          <form method="post" action="<?= url('official/reports') ?>" class="d-inline">
             <input type="hidden" name="action" value="generate">
             <input type="hidden" name="report" value="residents">
             <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
@@ -176,7 +176,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
                     <td>
                       <div class="d-flex align-items-center gap-2 flex-wrap">
                         <?php if ($canDelete): ?>
-                          <form method="post" action="residents.php" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this?');">
+                          <form method="post" action="<?= url('official/residents') ?>" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this?');">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="csrf_token" value="<?= $esc($csrf) ?>">
                             <input type="hidden" name="resident_id" value="<?= $resident['id'] ?>">
@@ -290,7 +290,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/residents.php'
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+  <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+  <script src="<?= url('assets/official/js/app.js') ?>"></script>
 </body>
 </html>

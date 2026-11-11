@@ -3,16 +3,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Barangay San Isidro | Serbisyong Malapit sa Iyo</title>
-    <meta name="description" content="Access resident services, barangay announcements, emergency contacts, and your secure Barangay San Isidro account.">
-    <meta property="og:title" content="Barangay San Isidro | Serbisyong Malapit sa Iyo">
+    <title>Barangay Bucana | Serbisyong Malapit sa Iyo</title>
+    <meta name="description" content="Access resident services, barangay announcements, emergency contacts, and your secure Barangay Bucana account.">
+    <meta property="og:title" content="Barangay Bucana | Serbisyong Malapit sa Iyo">
     <meta property="og:description" content="A connected, caring, and responsive barangay for every resident.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="<?= url('assets/auth/styles.css') ?>">
 </head>
 <body id="top">
     <header class="site-header">
@@ -37,14 +37,14 @@
             </nav>
             <div class="header-actions">
                 <span data-auth="out" class="inl">
-                    <a class="btn btn-ghost" href="login.php">
+                    <a class="btn btn-ghost" href="<?= url('login') ?>">
                         <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                             <path d="m10 17 5-5-5-5M15 12H3"/>
                         </svg>
                         Sign in
                     </a>
-                    <a class="btn btn-primary btn-pill" href="signup.php">
+                    <a class="btn btn-primary btn-pill" href="<?= url('signup') ?>">
                         <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                             <circle cx="9" cy="7" r="4"/>
@@ -53,7 +53,7 @@
                         Register
                     </a>
                 </span>
-                <a data-auth="in" class="btn btn-primary btn-pill hidden" href="../user_pages/index.php">
+                <a data-auth="in" class="btn btn-primary btn-pill hidden" href="<?= url('dashboard') ?>">
                     <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                         <circle cx="9" cy="7" r="4"/>
@@ -77,7 +77,7 @@
                 <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
         </button>
-        <h2>Barangay San Isidro</h2>
+        <h2>Barangay Bucana</h2>
         <nav>
             <a href="#services">Services</a>
             <a href="#announcements">Announcements</a>
@@ -86,16 +86,16 @@
         </nav>
         <div class="actions">
             <span data-auth="out" style="display:grid;gap:.5rem">
-                <a class="btn btn-outline" href="login.php">Sign in</a>
-                <a class="btn btn-primary" href="signup.php">Register</a>
+                <a class="btn btn-outline" href="<?= url('login') ?>">Sign in</a>
+                <a class="btn btn-primary" href="<?= url('signup') ?>">Register</a>
             </span>
-            <a data-auth="in" class="btn btn-primary hidden" href="../user_pages/index.php">My account</a>
+            <a data-auth="in" class="btn btn-primary hidden" href="<?= url('dashboard') ?>">My account</a>
         </div>
     </aside>
 
     <main>
         <section class="hero">
-            <img class="hero-bg" src="assets/barangay-hall.jpg" alt="Barangay hall and community plaza" width="1600" height="1000">
+            <img class="hero-bg" src="<?= url('assets/auth/barangay-hall.jpg') ?>" alt="Barangay hall and community plaza" width="1600" height="1000">
             <div class="hero-overlay"></div>
             <span class="hero-figure" aria-hidden="true">eB</span>
             <div class="container hero-in">
@@ -108,14 +108,14 @@
                     </h1>
                     <p class="hero-standfirst">Access essential services, receive community updates, and connect with your barangay &mdash; wherever you are.</p>
                     <div class="hero-btns">
-                        <a class="btn btn-lg btn-gold" href="signup.php">
+                        <a class="btn btn-lg btn-gold" href="<?= url('signup') ?>">
                             Create resident account
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M5 12h14"/>
                                 <path d="m12 5 7 7-7 7"/>
                             </svg>
                         </a>
-                        <a class="btn btn-lg btn-hero-outline" href="login.php">Sign in to portal</a>
+                        <a class="btn btn-lg btn-hero-outline" href="<?= url('login') ?>">Sign in to portal</a>
                     </div>
                 </div>
             </div>
@@ -148,7 +148,7 @@
                         </span>
                         <h3>Request documents</h3>
                         <p>Barangay clearance, residency, indigency, and other certificates.</p>
-                        <a class="btn btn-link" data-service="documents" href="login.php">Open service
+                        <a class="btn btn-link" data-service="documents" href="<?= url('login') ?>">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -163,7 +163,7 @@
                         </span>
                         <h3>Community assistance</h3>
                         <p>Ask about health, senior, livelihood, and social support programs.</p>
-                        <a class="btn btn-link" data-service="assistance" href="login.php">Open service
+                        <a class="btn btn-link" data-service="assistance" href="<?= url('login') ?>">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -178,7 +178,7 @@
                         </span>
                         <h3>Report a concern</h3>
                         <p>Send a local concern to the barangay office for proper action.</p>
-                        <a class="btn btn-link" data-service="concern" href="login.php">Open service
+                        <a class="btn btn-link" data-service="concern" href="<?= url('login') ?>">Open service
                             <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"/>
                             </svg>
@@ -281,12 +281,13 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>� 2026 Barangay San Isidro. Serbisyo para sa lahat.</p>
+            <p>� 2026 Barangay Bucana. Serbisyo para sa lahat.</p>
             <p>Privacy � Accessibility � Citizen�s Charter</p>
         </div>
     </footer>
 
     <div id="toasts" aria-live="polite"></div>
-    <script src="assets/app.js"></script>
+    <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+    <script src="<?= url('assets/auth/app.js') ?>"></script>
 </body>
 </html>

@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
       '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving\u2026';
 
     try {
-      const response = await fetch("../../backend/api/settings.php", {
+      const response = await fetch((window.EB_BASE || "") + "/api/settings", {
         method: "POST",
         headers: {
           Accept: "application/json",

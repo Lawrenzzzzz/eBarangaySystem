@@ -9,10 +9,10 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - E-Barangay Official</title>
   
-  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/official/libs/bootstrap/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <link rel="stylesheet" href="css/ebarangay.css">
+  <link rel="stylesheet" href="<?= url('assets/official/css/ebarangay.css') ?>">
   <style>
     /* Dashboard layout */
     .table-card { padding: 1.5rem; }
@@ -47,29 +47,29 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
     
     <div class="nav flex-column py-2 flex-grow-1">
       <div class="nav-section">Main</div>
-      <a class="nav-link active" href="dashboard.php">
+      <a class="nav-link active" href="<?= url('official/dashboard') ?>">
         <span class="nav-dot"></span><span>Dashboard</span>
       </a>
-      <a class="nav-link" href="residents.php">
+      <a class="nav-link" href="<?= url('official/residents') ?>">
         <span class="nav-dot"></span><span>Residents</span>
       </a>
-      <a class="nav-link" href="document-requests.php">
+      <a class="nav-link" href="<?= url('official/document-requests') ?>">
         <span class="nav-dot"></span><span>Document Requests</span>
       </a>
-      <a class="nav-link" href="blotter.php">
+      <a class="nav-link" href="<?= url('official/blotter') ?>">
         <span class="nav-dot"></span><span>Blotter</span>
       </a>
-      <a class="nav-link" href="announcements.php">
+      <a class="nav-link" href="<?= url('official/announcements') ?>">
         <span class="nav-dot"></span><span>Announcements</span>
       </a>
-      <a class="nav-link" href="payments.php">
+      <a class="nav-link" href="<?= url('official/payments') ?>">
         <span class="nav-dot"></span><span>Payments</span>
       </a>
-      <a class="nav-link" href="reports.php">
+      <a class="nav-link" href="<?= url('official/reports') ?>">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       <div class="settings-parent">
-        <a class="nav-link" href="document-fees.php">
+        <a class="nav-link" href="<?= url('official/document-fees') ?>">
           <span class="nav-dot"></span><span>Settings</span>
         </a>
         <button class="settings-caret-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="false" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
@@ -79,9 +79,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
 
       <div class="collapse" id="officialSettingsSubmenu">
         <div class="settings-submenu">
-          <a class="nav-link" href="document-fees.php"><span class="sub-dot"></span><span>Documents Fees</span></a>
-          <a class="nav-link" href="change-password.php"><span class="sub-dot"></span><span>Change Password</span></a>
-          <a class="nav-link" href="settings.php#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
+          <a class="nav-link" href="<?= url('official/document-fees') ?>"><span class="sub-dot"></span><span>Documents Fees</span></a>
+          <a class="nav-link" href="<?= url('official/change-password') ?>"><span class="sub-dot"></span><span>Change Password</span></a>
+          <a class="nav-link" href="<?= url('official/settings') ?>#profile-information"><span class="sub-dot"></span><span>Profile Information</span></a>
         </div>
       </div>
     </div>
@@ -186,7 +186,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
                       <div class="text-muted"><?= $esc(date('M j, Y', strtotime($request['created_at']))) ?></div>
                     </div>
 
-                    <a href="document-requests.php?q=<?= urlencode($request['reference_no']) ?>" class="btn btn-sm btn-primary fw-semibold">
+                    <a href="<?= url('official/document-requests') ?>?q=<?= urlencode($request['reference_no']) ?>" class="btn btn-sm btn-primary fw-semibold">
                       Review
                     </a>
                   </li>
@@ -234,7 +234,8 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+  <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+  <script src="<?= url('assets/official/js/app.js') ?>"></script>
 </body>
 </html>

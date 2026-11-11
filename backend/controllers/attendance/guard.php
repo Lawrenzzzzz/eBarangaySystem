@@ -7,17 +7,15 @@ $attendanceRoles = ['admin', 'captain', 'super_admin'];
 $currentUser = account_details((int) current_user_id());
 
 if ($currentUser === null) {
-    header('Location: login.php');
-    exit;
+    redirect('attendance/login');
 }
 
 $attendanceRoleCode = (string) ($currentUser['role_code'] ?? '');
 if (!in_array($attendanceRoleCode, $attendanceRoles, true)) {
     $attendanceHome = in_array($attendanceRoleCode, ['official', 'staff', 'kagawad', 'secretary', 'treasurer'], true)
-        ? '../barangay_officials/dashboard.php'
-        : '../user_pages/index.php';
-    header('Location: ' . $attendanceHome);
-    exit;
+        ? 'official/dashboard'
+        : 'dashboard';
+    redirect($attendanceHome);
 }
 
 $esc = static function ($value): string {

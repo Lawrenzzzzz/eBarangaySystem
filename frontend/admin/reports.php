@@ -10,7 +10,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
     <title>Reports - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="<?= url('assets/admin/css/style.css') ?>">
     <style>
         .report-sheet-header {
             margin-bottom: 1.5rem;
@@ -264,14 +264,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
             <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
-            <li class="nav-item"><a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="budget.php"><i class="bi bi-wallet2"></i> Budget</a></li>
-            <li class="nav-item"><a class="nav-link" href="projects.php"><i class="bi bi-kanban"></i> Projects</a></li>
-            <li class="nav-item"><a class="nav-link" href="residents.php"><i class="bi bi-people"></i> Residents</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/dashboard') ?>"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/budget') ?>"><i class="bi bi-wallet2"></i> Budget</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/projects') ?>"><i class="bi bi-kanban"></i> Projects</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/residents') ?>"><i class="bi bi-people"></i> Residents</a></li>
             <!-- ACTIVE CLASS MOVED HERE -->
-            <li class="nav-item"><a class="nav-link active" href="reports.php"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-            <li class="nav-item"><a class="nav-link" href="attendance.php"><i class="bi bi-calendar-check"></i> Attendance</a></li>
-            <li class="nav-item"><a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a></li>
+            <li class="nav-item"><a class="nav-link active" href="<?= url('admin/reports') ?>"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/attendance') ?>"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/settings') ?>"><i class="bi bi-gear"></i> Settings</a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="user-card">
@@ -290,7 +290,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                 <h3 class="fw-bold mb-1">Reports</h3>
                 <p class="text-muted mb-0">Generate and export official barangay records</p>
             </div>
-            <form class="d-flex align-items-center gap-2 mb-0" method="get" action="reports.php">
+            <form class="d-flex align-items-center gap-2 mb-0" method="get" action="<?= url('admin/reports') ?>">
                 <label for="reportYear" class="form-label mb-0">Year</label>
                 <select name="year" id="reportYear" class="form-select form-select-sm" aria-label="Select report year" style="width: 110px;" onchange="this.form.submit()">
                     <option value=""<?= $reportYear === null ? ' selected' : '' ?>>All</option>
@@ -308,7 +308,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                 $reportRows = $selectedReport['data'];
             ?>
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 no-print">
-                <a href="reports.php<?= $reportYear !== null ? '?year=' . $reportYear : '' ?>" class="btn btn-light border btn-sm fw-semibold">
+                <a href="<?= url('admin/reports') ?><?= $reportYear !== null ? '?year=' . $reportYear : '' ?>" class="btn btn-light border btn-sm fw-semibold">
                     <i class="bi bi-arrow-left me-1"></i> Back
                 </a>
                 <button
@@ -558,7 +558,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
                                 </div>
 
                                 <div class="report-record-actions">
-                                    <a class="btn btn-primary fw-semibold w-100" href="reports.php?report_id=<?= (int) $savedReport['id'] ?>">
+                                    <a class="btn btn-primary fw-semibold w-100" href="<?= url('admin/reports') ?>?report_id=<?= (int) $savedReport['id'] ?>">
                                         <i class="bi bi-eye me-1"></i> View Report
                                     </a>
                                 </div>
@@ -690,6 +690,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/reports.php';
         });
     });
 </script>
-<script src="js/main.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/admin/js/main.js') ?>"></script>
 </body>
 </html>

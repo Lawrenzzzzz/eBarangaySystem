@@ -33,7 +33,7 @@ function send_email(string $to, string $subject, string $text, string $html = ''
         'SMTP_PORT' => (string) env('SMTP_PORT', '587'),
         'SMTP_USER' => $smtpUser,
         'SMTP_PASS' => $smtpPass,
-        'SMTP_FROM_NAME' => (string) env('SMTP_FROM_NAME', 'e-Barangay San Isidro'),
+        'SMTP_FROM_NAME' => (string) env('SMTP_FROM_NAME', 'e-Barangay Bucana'),
         'SMTP_USE_SSL' => (string) env('SMTP_USE_SSL', '0'),
     ]);
 

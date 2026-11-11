@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
       codeEl.textContent = "Loading\u2026";
       try {
         const response = await fetch(
-          "../../backend/api/residents.php?action=next-code",
+          (window.EB_BASE || "") + "/api/residents?action=next-code",
           { headers: { Accept: "application/json" }, credentials: "same-origin" },
         );
         const data = await response.json();
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving\u2026';
 
       try {
-        const response = await fetch("../../backend/api/residents.php", {
+        const response = await fetch((window.EB_BASE || "") + "/api/residents", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -318,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Posting\u2026';
 
       try {
-        const response = await fetch("../../backend/api/announcements.php", {
+        const response = await fetch((window.EB_BASE || "") + "/api/announcements", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -365,12 +365,12 @@ document.addEventListener("DOMContentLoaded", () => {
     signOutButton.addEventListener("click", async () => {
       signOutButton.disabled = true;
       try {
-        const sessionResponse = await fetch("../../backend/api/session.php", {
+        const sessionResponse = await fetch((window.EB_BASE || "") + "/api/session", {
           headers: { Accept: "application/json" },
           credentials: "same-origin",
         });
         const session = await sessionResponse.json();
-        const logoutResponse = await fetch("../../backend/api/logout.php", {
+        const logoutResponse = await fetch((window.EB_BASE || "") + "/api/logout", {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -380,9 +380,9 @@ document.addEventListener("DOMContentLoaded", () => {
           credentials: "same-origin",
         });
         const result = await logoutResponse.json();
-        location.href = result.redirect || "../login_page/index.php";
+        location.href = result.redirect || (window.EB_BASE || "") + "/login";
       } catch (error) {
-        location.href = "../login_page/index.php";
+        location.href = (window.EB_BASE || "") + "/login";
       } finally {
         signOutButton.disabled = false;
       }

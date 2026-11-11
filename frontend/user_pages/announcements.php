@@ -8,14 +8,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/announcements.
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Barangay Bucana | Announcements</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>">
 </head>
 <body>
 <div class="shell">
 
   <!-- Top bar -->
   <header class="topnav">
-    <a href="index.php" class="brand">
+    <a href="<?= url('dashboard') ?>" class="brand">
       <span class="avatar sq">B</span>
       <span class="brand-text">
         <strong>Barangay Bucana</strong>
@@ -24,13 +24,13 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/announcements.
     </a>
 
     <nav class="nav" id="main-nav" aria-label="Main">
-      <a href="index.php">Home</a>
-      <a href="documents.php">Documents</a>
-      <a href="blotter.php">Blotter</a>
-      <a href="announcements.php" class="active" aria-current="page">Announcements</a>
-      <a href="projects.php">Projects</a>
-      <a href="track.php">Track</a>
-      <a href="settings.php">Settings</a>
+      <a href="<?= url('dashboard') ?>">Home</a>
+      <a href="<?= url('documents') ?>">Documents</a>
+      <a href="<?= url('blotter') ?>">Blotter</a>
+      <a href="<?= url('announcements') ?>" class="active" aria-current="page">Announcements</a>
+      <a href="<?= url('projects') ?>">Projects</a>
+      <a href="<?= url('track') ?>">Track</a>
+      <a href="<?= url('settings') ?>">Settings</a>
     </nav>
 
     <div class="nav-right">
@@ -77,6 +77,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/announcements.
   </div>
 </div>
 
-<script src="assets/js/app.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/resident/js/app.js') ?>"></script>
 </body>
 </html>

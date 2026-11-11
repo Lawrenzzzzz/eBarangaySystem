@@ -1,7 +1,8 @@
 (function () {
   const $ = (s, r = document) => r.querySelector(s),
     $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const API = "../../backend/api";
+  const BASE = window.EB_BASE || "";
+  const API = BASE + "/api";
   let csrf =
     document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ||
     "";
@@ -58,8 +59,8 @@
     signout.onclick = async () => {
       signout.disabled = true;
       try {
-        await api("/logout.php", { method: "POST", body: {} });
-        location.href = "login.php";
+        await api("/logout", { method: "POST", body: {} });
+        location.href = BASE + "/attendance/login";
       } catch (e) {
         toast(e.message, "bad");
         signout.disabled = false;
@@ -149,11 +150,11 @@
         }
         submit.disabled = true;
         try {
-          await api("/attendance-login.php", {
+          await api("/attendance-login", {
             method: "POST",
             body: { email, password },
           });
-          location.href = "index.php";
+          location.href = BASE + "/attendance";
         } catch (e) {
           fail(e.message);
           submit.disabled = false;
@@ -164,7 +165,7 @@
         if (!emailOk(email)) return fail("Enter a valid email address.");
         submit.disabled = true;
         try {
-          const data = await api("/forgot-password.php", {
+          const data = await api("/forgot-password", {
             method: "POST",
             body: { email },
           });
@@ -319,7 +320,7 @@
 
     async function refreshLog() {
       try {
-        const data = await api("/attendance-scan.php");
+        const data = await api("/attendance-scan");
         renderLog(data.records || []);
       } catch (e) {}
     }
@@ -328,7 +329,7 @@
       if (busy) return;
       busy = true;
       try {
-        const data = await api("/attendance-scan.php", {
+        const data = await api("/attendance-scan", {
           method: "POST",
           body,
         });

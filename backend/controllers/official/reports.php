@@ -54,8 +54,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'data' => $definition['data'](),
         ]);
 
-        header('Location: reports.php?year=' . $generatedYear . '&report_id=' . $reportId . '&generated=1');
-        exit;
+        redirect('official/reports?year=' . $generatedYear . '&report_id=' . $reportId . '&generated=1');
     }
 }
 

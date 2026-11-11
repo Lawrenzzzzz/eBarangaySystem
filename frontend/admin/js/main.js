@@ -2,7 +2,7 @@
 console.log("Barangay Dashboard Loaded");
 
 const initAdminDashboard = (root) => {
-    const endpoint = root.dataset.dashboardEndpoint || "../../backend/api/admin-dashboard.php";
+    const endpoint = root.dataset.dashboardEndpoint || (window.EB_BASE || "") + "/api/admin-dashboard";
     const numberFormat = new Intl.NumberFormat("en-PH");
     const currencyFormat = new Intl.NumberFormat("en-PH", {
         style: "currency",
@@ -166,12 +166,12 @@ document.addEventListener("DOMContentLoaded", () => {
         signOutButton.addEventListener("click", async () => {
             signOutButton.disabled = true;
             try {
-                const sessionResponse = await fetch("../../backend/api/session.php", {
+                const sessionResponse = await fetch((window.EB_BASE || "") + "/api/session", {
                     headers: { Accept: "application/json" },
                     credentials: "same-origin",
                 });
                 const session = await sessionResponse.json();
-                const logoutResponse = await fetch("../../backend/api/logout.php", {
+                const logoutResponse = await fetch((window.EB_BASE || "") + "/api/logout", {
                     method: "POST",
                     headers: {
                         Accept: "application/json",
@@ -181,9 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     credentials: "same-origin",
                 });
                 const result = await logoutResponse.json();
-                location.href = result.redirect || "../login_page/login.php";
+                location.href = result.redirect || (window.EB_BASE || "") + "/login";
             } catch (error) {
-                location.href = "../login_page/login.php";
+                location.href = (window.EB_BASE || "") + "/login";
             } finally {
                 signOutButton.disabled = false;
             }
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const refreshResidentStats = async () => {
         try {
-            const response = await fetch("../../backend/api/residents.php?action=stats", {
+            const response = await fetch((window.EB_BASE || "") + "/api/residents?action=stats", {
                 headers: { Accept: "application/json" },
                 credentials: "same-origin",
             });

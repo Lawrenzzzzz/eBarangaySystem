@@ -2,7 +2,7 @@
 (function () {
   var csrfMeta = document.querySelector('meta[name="csrf-token"]');
   var csrf = csrfMeta ? csrfMeta.getAttribute('content') || '' : '';
-  var endpoint = '../../backend/api/settings.php';
+  var endpoint = (window.EB_BASE || '') + '/api/settings';
 
   function showAlert(el, message, type) {
     if (!el) return;

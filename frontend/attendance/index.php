@@ -12,18 +12,18 @@ $attendanceDateLabel = date('l, F j, Y');
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= $esc($csrf) ?>">
-    <title>Attendance | e-Barangay San Isidro</title>
-    <meta name="description" content="Barangay San Isidro attendance portal for officials and staff.">
-    <meta property="og:title" content="Attendance | e-Barangay San Isidro">
-    <meta property="og:description" content="Barangay San Isidro attendance portal for officials and staff.">
+    <title>Attendance | e-Barangay Bucana</title>
+    <meta name="description" content="Barangay Bucana attendance portal for officials and staff.">
+    <meta property="og:title" content="Attendance | e-Barangay Bucana">
+    <meta property="og:description" content="Barangay Bucana attendance portal for officials and staff.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="../login_page/assets/styles.css">
-    <link rel="stylesheet" href="../login_page/assets/auth.css">
-    <link rel="stylesheet" href="assets/attendance.css">
+    <link rel="stylesheet" href="<?= url('assets/auth/styles.css') ?>">
+    <link rel="stylesheet" href="<?= url('assets/auth/auth.css') ?>">
+    <link rel="stylesheet" href="<?= url('assets/attendance/attendance.css') ?>">
 </head>
 <body>
 <div class="att-shell">
@@ -38,7 +38,7 @@ $attendanceDateLabel = date('l, F j, Y');
             </span>
             <span class="att-brand-text">
                 <strong>e-Barangay</strong>
-                <small>San Isidro &middot; Attendance</small>
+                <small>Bucana &middot; Attendance</small>
             </span>
         </div>
         <div class="att-user">
@@ -141,7 +141,8 @@ $attendanceDateLabel = date('l, F j, Y');
     </div>
 </div>
 <div id="toasts" aria-live="polite"></div>
-<script src="assets/libs/html5-qrcode.min.js"></script>
-<script src="assets/app.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/attendance/libs/html5-qrcode.min.js') ?>"></script>
+<script src="<?= url('assets/attendance/app.js') ?>"></script>
 </body>
 </html>

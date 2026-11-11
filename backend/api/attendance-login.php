@@ -18,7 +18,7 @@ try {
         json_error('The attendance portal is for admin accounts only.', 403);
     }
 
-    $result['redirect'] = 'index.php';
+    $result['redirect'] = url('attendance');
     respond_result($result);
 } catch (Throwable $exception) {
     log_line('app.log', $exception->getMessage() . ' @ ' . $exception->getFile() . ':' . $exception->getLine());

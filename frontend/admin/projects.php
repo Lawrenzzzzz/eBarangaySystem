@@ -28,7 +28,7 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
     <title>Projects - <?= $esc($settingsBarangayName) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="<?= url('assets/admin/css/style.css') ?>">
 </head>
 <body>
 <div class="wrapper">
@@ -39,14 +39,14 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
             <div><h6 class="mb-0 fw-bold"><?= $esc($settingsBarangayName) ?></h6><small class="text-muted">Office of the Chairman</small></div>
         </div>
         <ul class="nav flex-column mt-3">
-            <li class="nav-item"><a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="budget.php"><i class="bi bi-wallet2"></i> Budget</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/dashboard') ?>"><i class="bi bi-grid"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/budget') ?>"><i class="bi bi-wallet2"></i> Budget</a></li>
             <!-- ACTIVE CLASS MOVED HERE -->
-            <li class="nav-item"><a class="nav-link active" href="projects.php"><i class="bi bi-kanban"></i> Projects</a></li>
-            <li class="nav-item"><a class="nav-link" href="residents.php"><i class="bi bi-people"></i> Residents</a></li>
-            <li class="nav-item"><a class="nav-link" href="reports.php"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
-            <li class="nav-item"><a class="nav-link" href="attendance.php"><i class="bi bi-calendar-check"></i> Attendance</a></li>
-            <li class="nav-item"><a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a></li>
+            <li class="nav-item"><a class="nav-link active" href="<?= url('admin/projects') ?>"><i class="bi bi-kanban"></i> Projects</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/residents') ?>"><i class="bi bi-people"></i> Residents</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/reports') ?>"><i class="bi bi-file-earmark-text"></i> Reports</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/attendance') ?>"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= url('admin/settings') ?>"><i class="bi bi-gear"></i> Settings</a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="user-card">
@@ -277,7 +277,8 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/main.js"></script>
+<script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+<script src="<?= url('assets/admin/js/main.js') ?>"></script>
 <script>
 window.__initialProjects = <?= json_encode($projects, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 window.__sectorAllocations = <?= json_encode($sectorAllocations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
@@ -411,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const postProject = async (payload) => {
-        const response = await fetch('../../backend/api/projects.php', {
+        const response = await fetch('<?= url('api/projects') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

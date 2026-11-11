@@ -29,7 +29,7 @@ foreach (list_official_document_requests('all', null, 5) as $request) {
         'icon' => 'bi-file-earmark-text',
         'title' => 'Document request ' . strtolower($request['status_label']),
         'meta' => $request['full_name'] . ' · ' . $request['document_name'],
-        'url' => 'document-requests.php?q=' . urlencode($request['reference_no']),
+        'url' => url('official/document-requests?q=' . urlencode($request['reference_no'])),
     ];
 }
 foreach (list_official_blotter_reports(null, 5) as $report) {
@@ -39,7 +39,7 @@ foreach (list_official_blotter_reports(null, 5) as $report) {
         'icon' => 'bi-shield-exclamation',
         'title' => 'Blotter report ' . strtolower($report['status_label']),
         'meta' => $report['filed_by'] . ' · ' . $report['subject'],
-        'url' => 'blotter.php?q=' . urlencode($report['reference_no']),
+        'url' => url('official/blotter?q=' . urlencode($report['reference_no'])),
     ];
 }
 foreach (list_official_payments(null, 5) as $payment) {
@@ -49,7 +49,7 @@ foreach (list_official_payments(null, 5) as $payment) {
         'icon' => 'bi-cash-coin',
         'title' => 'Payment ' . strtolower($payment['status_label']),
         'meta' => $payment['payee'] . ' · ' . $payment['amount_label'],
-        'url' => 'payments.php?q=' . urlencode($payment['reference_no']),
+        'url' => url('official/payments?q=' . urlencode($payment['reference_no'])),
     ];
 }
 foreach (list_announcements(3) as $announcement) {
@@ -59,7 +59,7 @@ foreach (list_announcements(3) as $announcement) {
         'icon' => 'bi-megaphone',
         'title' => 'Announcement posted',
         'meta' => $announcement['type_label'] . ' · ' . $announcement['title'],
-        'url' => 'announcements.php',
+        'url' => url('official/announcements'),
     ];
 }
 

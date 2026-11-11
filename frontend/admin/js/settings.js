@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrf = csrfMeta ? csrfMeta.getAttribute("content") || "" : "";
-    const endpoint = "../../backend/api/settings.php";
+    const endpoint = (window.EB_BASE || "") + "/api/settings";
 
     const showAlert = (id, type, message) => {
         const element = document.getElementById(id);

@@ -34,12 +34,12 @@
   button.addEventListener('click', async function () {
     button.disabled = true;
     try {
-      var sessionResponse = await fetch('../../backend/api/session.php', {
+      var sessionResponse = await fetch((window.EB_BASE || '') + '/api/session', {
         headers: { Accept: 'application/json' },
         credentials: 'same-origin',
       });
       var session = await sessionResponse.json();
-      var logoutResponse = await fetch('../../backend/api/logout.php', {
+      var logoutResponse = await fetch((window.EB_BASE || '') + '/api/logout', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -49,9 +49,9 @@
         credentials: 'same-origin',
       });
       var result = await logoutResponse.json();
-      location.href = result.redirect || '../login_page/login.php';
+      location.href = result.redirect || (window.EB_BASE || '') + '/login';
     } catch (error) {
-      location.href = '../login_page/login.php';
+      location.href = (window.EB_BASE || '') + '/login';
     } finally {
       button.disabled = false;
     }
@@ -60,7 +60,7 @@
 
 // Resident onboarding: first-login profile interview
 (function () {
-  var endpoint = '../../backend/api/resident-profile.php';
+  var endpoint = (window.EB_BASE || '') + '/api/resident-profile';
 
   function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
@@ -261,7 +261,7 @@
   }
 
   async function fetchCsrf() {
-    var response = await fetch('../../backend/api/session.php', {
+    var response = await fetch((window.EB_BASE || '') + '/api/session', {
       headers: { Accept: 'application/json' },
       credentials: 'same-origin',
     });

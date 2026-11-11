@@ -1,25 +1,22 @@
 <?php
 declare(strict_types=1);
 
-function resident_page_context(string $loginPath = '../login_page/login.php'): array
+function resident_page_context(string $loginPath = 'login'): array
 {
     require_login_page($loginPath);
 
     $currentUser = account_details((int) current_user_id());
     if ($currentUser === null) {
         unset($_SESSION['user_id']);
-        header('Location: ' . $loginPath);
-        exit;
+        redirect($loginPath);
     }
 
     $roleCode = (string) ($currentUser['role_code'] ?? '');
     if (in_array($roleCode, ['admin', 'captain', 'super_admin'], true)) {
-        header('Location: ../admin/dashboard.php');
-        exit;
+        redirect('admin/dashboard');
     }
     if (in_array($roleCode, ['official', 'staff', 'kagawad', 'secretary', 'treasurer'], true)) {
-        header('Location: ../barangay_officials/dashboard.php');
-        exit;
+        redirect('official/dashboard');
     }
 
     $esc = static function ($value): string {
@@ -51,7 +48,7 @@ function resident_page_context(string $loginPath = '../login_page/login.php'): a
 
     $userAvatarFile = trim((string) ($currentUser['avatar_filename'] ?? ''));
     $userAvatarUrl = $userAvatarFile !== ''
-        ? '../assets/uploads/avatars/' . rawurlencode($userAvatarFile)
+        ? url('assets/uploads/avatars/' . rawurlencode($userAvatarFile))
         : '';
 
     $csrf = csrf_token();

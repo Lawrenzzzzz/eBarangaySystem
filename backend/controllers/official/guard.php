@@ -6,8 +6,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
 $officialRoles = ['official', 'staff', 'kagawad', 'secretary', 'treasurer', 'admin', 'captain', 'super_admin'];
 $currentUser = account_details((int) current_user_id());
 if ($currentUser === null || !in_array($currentUser['role_code'] ?? '', $officialRoles, true)) {
-    header('Location: ../login_page/login.php');
-    exit;
+    redirect('login');
 }
 
 $esc = static function ($value): string {
@@ -23,5 +22,5 @@ $officialRoleName = trim((string) ($currentUser['role_name'] ?? '')) ?: 'Baranga
 
 $officialAvatarFile = trim((string) ($currentUser['avatar_filename'] ?? ''));
 $officialAvatarUrl = $officialAvatarFile !== ''
-    ? '../assets/uploads/avatars/' . rawurlencode($officialAvatarFile)
-    : 'img/captain.jpg';
+    ? url('assets/uploads/avatars/' . rawurlencode($officialAvatarFile))
+    : url('assets/official/img/captain.jpg');

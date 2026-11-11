@@ -6,7 +6,7 @@ $officialAttendanceQr = attendance_account_eligible($currentUser)
     ? attendance_payload((int) $currentUser['user_id'])
     : null;
 $officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay_name'] ?? ''))
-    ?: 'Barangay San Isidro';
+    ?: 'Barangay Bucana';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,10 +16,10 @@ $officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay
   <meta name="csrf-token" content="<?= $esc($csrf) ?>">
   <title>Settings - E-Barangay Official</title>
   
-  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="<?= url('assets/official/libs/bootstrap/css/bootstrap.min.css') ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <link rel="stylesheet" href="css/ebarangay.css">
+  <link rel="stylesheet" href="<?= url('assets/official/css/ebarangay.css') ?>">
 </head>
 <body>
 
@@ -34,31 +34,31 @@ $officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay
     
     <div class="nav flex-column py-2 flex-grow-1">
       <div class="nav-section">Main</div>
-      <a class="nav-link" href="dashboard.php">
+      <a class="nav-link" href="<?= url('official/dashboard') ?>">
         <span class="nav-dot"></span><span>Dashboard</span>
       </a>
-      <a class="nav-link" href="residents.php">
+      <a class="nav-link" href="<?= url('official/residents') ?>">
         <span class="nav-dot"></span><span>Residents</span>
       </a>
-      <a class="nav-link" href="document-requests.php">
+      <a class="nav-link" href="<?= url('official/document-requests') ?>">
         <span class="nav-dot"></span><span>Document Requests</span>
       </a>
-      <a class="nav-link" href="blotter.php">
+      <a class="nav-link" href="<?= url('official/blotter') ?>">
         <span class="nav-dot"></span><span>Blotter</span>
       </a>
-      <a class="nav-link" href="announcements.php">
+      <a class="nav-link" href="<?= url('official/announcements') ?>">
         <span class="nav-dot"></span><span>Announcements</span>
       </a>
-      <a class="nav-link" href="payments.php">
+      <a class="nav-link" href="<?= url('official/payments') ?>">
         <span class="nav-dot"></span><span>Payments</span>
       </a>
-      <a class="nav-link" href="reports.php">
+      <a class="nav-link" href="<?= url('official/reports') ?>">
         <span class="nav-dot"></span><span>Reports</span>
       </a>
       
       <!-- SETTINGS WITH SUB-OPTIONS -->
       <div class="settings-parent">
-        <a class="nav-link" href="document-fees.php">
+        <a class="nav-link" href="<?= url('official/document-fees') ?>">
           <span class="nav-dot"></span><span>Settings</span>
         </a>
         <button class="settings-caret-btn" type="button" data-bs-toggle="collapse" data-bs-target="#officialSettingsSubmenu" aria-expanded="true" aria-controls="officialSettingsSubmenu" aria-label="Toggle settings options">
@@ -68,10 +68,10 @@ $officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay
 
       <div class="collapse show" id="officialSettingsSubmenu">
         <div class="settings-submenu">
-          <a class="nav-link" href="document-fees.php">
+          <a class="nav-link" href="<?= url('official/document-fees') ?>">
             <span class="sub-dot"></span><span>Documents Fees</span>
           </a>
-          <a class="nav-link" href="change-password.php">
+          <a class="nav-link" href="<?= url('official/change-password') ?>">
             <span class="sub-dot"></span><span>Change Password</span>
           </a>
 
@@ -195,10 +195,11 @@ $officialAttendanceBarangay = trim((string) (barangay_profile_record()['barangay
   </div>
 
   <!-- Bootstrap JS -->
-  <script src="libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="libs/qrcode/qrcode.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/profile.js"></script>
-  <script src="js/attendance-qr.js"></script>
+  <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+  <script src="<?= url('assets/official/libs/qrcode/qrcode.js') ?>"></script>
+  <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
+  <script src="<?= url('assets/official/js/app.js') ?>"></script>
+  <script src="<?= url('assets/official/js/profile.js') ?>"></script>
+  <script src="<?= url('assets/official/js/attendance-qr.js') ?>"></script>
 </body>
 </html>

@@ -22,8 +22,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if ($blotterSearch !== '') {
                 $params['q'] = $blotterSearch;
             }
-            header('Location: blotter.php?' . http_build_query($params));
-            exit;
+            redirect('official/blotter?' . http_build_query($params));
         }
 
         $blotterError = $result['error'] ?? 'Unable to update this blotter report.';

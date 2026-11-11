@@ -1,7 +1,8 @@
 (function () {
   const $ = (s, r = document) => r.querySelector(s),
     $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const API = "../../backend/api";
+  const BASE = window.EB_BASE || "";
+  const API = BASE + "/api";
   let csrf =
     document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ||
     "";
@@ -107,7 +108,7 @@
         "Sign in to access barangay services and updates.",
         "Sign in",
         "New to the barangay portal?",
-        "signup.php",
+        "/signup",
         "Create an account",
       ],
       signup: [
@@ -115,7 +116,7 @@
         "Register as a resident to access barangay services.",
         null,
         "Already registered?",
-        "login.php",
+        "/login",
         "Sign in",
       ],
       forgot: [
@@ -151,7 +152,7 @@
       l.classList.toggle("hidden", !t[4]);
       b.classList.toggle("hidden", !!t[4]);
       if (t[4]) {
-        l.href = t[4];
+        l.href = BASE + t[4];
         l.textContent = t[5];
       }
       err.classList.add("hidden");
@@ -225,7 +226,7 @@
       emRs.disabled = true;
       emRs.textContent = "Sending...";
       try {
-        const data = await api("/email-send.php", {
+        const data = await api("/email-send", {
           method: "POST",
           body: { email: value },
         });
@@ -292,7 +293,7 @@
       emBtn.disabled = true;
       emErr.classList.add("hidden");
       try {
-        const data = await api("/email-verify.php", {
+        const data = await api("/email-verify", {
           method: "POST",
           body: { verification_id: emailVerificationId, code: entered },
         });
@@ -321,14 +322,14 @@
         }
         submit.disabled = true;
         try {
-          const data = await api("/login.php", {
+          const data = await api("/login", {
             method: "POST",
             body: {
               email: f("email"),
               password: form.elements.password.value,
             },
           });
-          location.href = data.redirect || "../user_pages/index.php";
+          location.href = data.redirect || BASE + "/dashboard";
         } catch (e) {
           fail(e.message);
           submit.disabled = false;
@@ -339,7 +340,7 @@
         if (!emailOk(f("email"))) return fail("Enter a valid email address.");
         submit.disabled = true;
         try {
-          const data = await api("/forgot-password.php", {
+          const data = await api("/forgot-password", {
             method: "POST",
             body: { email: f("email") },
           });
@@ -378,7 +379,7 @@
       }
       submit.disabled = true;
       try {
-        const data = await api("/signup.php", {
+        const data = await api("/signup", {
           method: "POST",
           body: {
             fullName: full,
@@ -394,7 +395,7 @@
         lastMsg = data.message || "Account created. You can now sign in.";
         toast(lastMsg, "ok");
         location.href =
-          "login.php?registered=1&email=" + encodeURIComponent(em);
+          BASE + "/login?registered=1&email=" + encodeURIComponent(em);
       } catch (e) {
         fail(e.message);
         submit.disabled = false;
@@ -439,12 +440,12 @@
       er.classList.add("hidden");
       if (button) button.disabled = true;
       try {
-        await api("/reset-password.php", {
+        await api("/reset-password", {
           method: "POST",
           body: { token, password: p, confirmPassword: c },
         });
         toast("Password updated. You can now sign in.", "ok");
-        setTimeout(() => (location.href = "login.php"), 800);
+        setTimeout(() => (location.href = BASE + "/login"), 800);
       } catch (err) {
         er.textContent = err.message;
         er.classList.remove("hidden");
@@ -455,7 +456,7 @@
 
   (async () => {
     try {
-      const data = await api("/session.php");
+      const data = await api("/session");
       if (data.csrf) csrf = data.csrf;
       const signedIn = !!data.authenticated;
       $$('[data-auth="out"]').forEach((e) =>
@@ -463,27 +464,27 @@
       );
       const role = (data.user && data.user.role_code) || "resident";
       const dashboard = ["admin", "captain", "super_admin"].includes(role)
-        ? "../admin/dashboard.php"
+        ? BASE + "/admin/dashboard"
         : ["official", "staff", "kagawad", "secretary", "treasurer"].includes(
               role,
             )
-          ? "../barangay_officials/dashboard.php"
-          : "../user_pages/index.php";
+          ? BASE + "/official/dashboard"
+          : BASE + "/dashboard";
       $$('[data-auth="in"]').forEach((e) => {
         e.classList.toggle("hidden", !signedIn);
         e.setAttribute("href", dashboard);
       });
       const destinations = {
-        documents: "../user_pages/documents.php",
-        assistance: "../user_pages/index.php",
-        concern: "../user_pages/blotter.php",
+        documents: BASE + "/documents",
+        assistance: BASE + "/dashboard",
+        concern: BASE + "/blotter",
       };
       $$("[data-service]").forEach((a) => {
         a.setAttribute(
           "href",
           signedIn
-            ? destinations[a.dataset.service] || "../user_pages/index.php"
-            : "login.php",
+            ? destinations[a.dataset.service] || BASE + "/dashboard"
+            : BASE + "/login",
         );
       });
     } catch (e) {}

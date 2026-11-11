@@ -131,11 +131,22 @@ function require_login_json(): int
     return $userId;
 }
 
-function require_login_page(string $redirect): void
+function url(string $path = ''): string
+{
+    $path = ltrim($path, '/');
+    return $path === '' ? BASE_PATH : BASE_PATH . '/' . $path;
+}
+
+function redirect(string $path): never
+{
+    header('Location: ' . (str_starts_with($path, 'http') ? $path : url($path)));
+    exit;
+}
+
+function require_login_page(string $redirectPath): void
 {
     if (current_user_id() === null) {
-        header('Location: ' . $redirect);
-        exit;
+        redirect($redirectPath);
     }
 }
 
