@@ -229,6 +229,61 @@ function attendance_officials_for_date(string $date, ?int $officialId = null): a
             'name' => (string) $row['display_name'],
             'position' => attendance_position_label($row),
             'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'work_date' => $date,
+            'work_date_label' => date('M j, Y', strtotime($date)),
+            'time_in' => $timeIn !== null ? date('g:i A', strtotime($timeIn)) : null,
+            'time_out' => $timeOut !== null ? date('g:i A', strtotime($timeOut)) : null,
+            'hours' => $hours,
+            'hours_label' => attendance_hours($timeIn, $timeOut),
+        ];
+    }
+
+    return $officials;
+}
+
+function attendance_official_history(int $officialId): array
+{
+    if ($officialId < 1) {
+        return [];
+    }
+
+    $operatorPlaceholders = implode(', ', array_fill(0, count(ATTENDANCE_OPERATOR_ROLES), '?'));
+
+    $statement = db()->prepare(
+        "SELECT v.user_id, v.role_code, v.role_name, v.requested_position, v.employee_number,
+                COALESCE(NULLIF(v.full_name, ''), NULLIF(u.full_name, ''), u.email) AS display_name,
+                ar.work_date, ar.time_in, ar.time_out
+         FROM attendance_records ar
+         JOIN v_user_accounts v ON v.user_id = ar.user_id
+         JOIN users u ON u.id = ar.user_id
+         WHERE ar.user_id = ?
+           AND ar.time_in IS NOT NULL
+           AND v.account_type = 'official'
+           AND v.account_status = 'active'
+           AND v.role_code NOT IN ({$operatorPlaceholders})
+         ORDER BY ar.work_date DESC, ar.time_in DESC"
+    );
+    $statement->execute(array_merge([$officialId], ATTENDANCE_OPERATOR_ROLES));
+
+    $officials = [];
+    foreach ($statement->fetchAll() as $row) {
+        $timeIn = $row['time_in'] !== null ? (string) $row['time_in'] : null;
+        $timeOut = $row['time_out'] !== null ? (string) $row['time_out'] : null;
+        $hours = null;
+        if ($timeIn !== null && $timeOut !== null) {
+            $seconds = max(strtotime($timeOut) - strtotime($timeIn), 0);
+            $hours = round($seconds / 3600, 2);
+        }
+
+        $workDate = (string) $row['work_date'];
+
+        $officials[] = [
+            'user_id' => (int) $row['user_id'],
+            'name' => (string) $row['display_name'],
+            'position' => attendance_position_label($row),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'work_date' => $workDate,
+            'work_date_label' => date('M j, Y', strtotime($workDate)),
             'time_in' => $timeIn !== null ? date('g:i A', strtotime($timeIn)) : null,
             'time_out' => $timeOut !== null ? date('g:i A', strtotime($timeOut)) : null,
             'hours' => $hours,

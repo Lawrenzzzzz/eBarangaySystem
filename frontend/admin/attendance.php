@@ -86,7 +86,7 @@ $attendanceInitials = static function (string $name): string {
 
         <div class="card">
             <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <span>Official Attendance</span>
+                <span><?= $attendanceSelectedOfficial !== null ? 'Official Attendance History' : 'Official Attendance' ?></span>
                 <small class="text-muted fw-normal">Green: 6 hours or more &middot; Red: under 6 hours</small>
             </div>
             <div class="card-body pt-2">
@@ -104,7 +104,7 @@ $attendanceInitials = static function (string $name): string {
                         </thead>
                         <tbody>
                         <?php if ($attendanceOfficials === []): ?>
-                            <tr><td colspan="6" class="text-center text-muted py-4">No officials logged in on this date.</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted py-4"><?= $attendanceSelectedOfficial !== null ? 'No attendance records found for this official.' : 'No officials logged in on this date.' ?></td></tr>
                         <?php else: ?>
                             <?php foreach ($attendanceOfficials as $official): ?>
                                 <?php
@@ -121,7 +121,7 @@ $attendanceInitials = static function (string $name): string {
                                         </div>
                                     </td>
                                     <td><?= $esc($official['position']) ?></td>
-                                    <td class="text-muted"><?= $esc($attendanceDateShort) ?></td>
+                                    <td class="text-muted"><?= $esc($official['work_date_label'] ?? $attendanceDateShort) ?></td>
                                     <td>
                                         <?php if ($official['time_in'] !== null): ?>
                                             <span class="status-pill status-released"><?= $esc($official['time_in']) ?></span>

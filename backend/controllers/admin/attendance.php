@@ -13,5 +13,12 @@ $attendanceSelectedOfficial = (int) ($_GET['official'] ?? 0);
 if ($attendanceSelectedOfficial <= 0) {
     $attendanceSelectedOfficial = null;
 }
-$attendanceOfficials = attendance_officials_for_date($attendanceDate, $attendanceSelectedOfficial);
+
+if ($attendanceSelectedOfficial !== null) {
+    $attendanceOfficials = attendance_official_history($attendanceSelectedOfficial);
+    $attendanceDateLabel = 'All recorded dates';
+} else {
+    $attendanceOfficials = attendance_officials_for_date($attendanceDate, null);
+}
+
 $settingsCsrf = csrf_token();
