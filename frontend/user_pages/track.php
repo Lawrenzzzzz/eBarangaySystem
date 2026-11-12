@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/track.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Barangay Bucana | Track</title>
-  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>">
+  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>?v=2">
 </head>
 <body>
 <div class="shell">
@@ -31,6 +31,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/track.php';
       <a href="<?= url('projects') ?>">Projects</a>
       <a href="<?= url('track') ?>" class="active" aria-current="page">Track</a>
       <a href="<?= url('settings') ?>">Settings</a>
+      <button class="nav-signout" type="button" data-signout>Sign out</button>
     </nav>
 
     <div class="nav-right">
@@ -160,6 +161,6 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/track.php';
 })();
 </script>
 <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
-<script src="<?= url('assets/resident/js/app.js') ?>"></script>
+<script src="<?= url('assets/resident/js/app.js') ?>?v=2"></script>
 </body>
 </html>

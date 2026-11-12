@@ -13,7 +13,7 @@
     setOpen(!nav.classList.contains('open'));
   });
 
-  nav.querySelectorAll('a').forEach(function (link) {
+  Array.prototype.forEach.call(nav.querySelectorAll('a'), function (link) {
     link.addEventListener('click', function () { setOpen(false); });
   });
 
@@ -28,10 +28,7 @@
 
 // Sign out
 (function () {
-  var button = document.getElementById('signout');
-  if (!button) return;
-
-  button.addEventListener('click', async function () {
+  async function signOut(button) {
     button.disabled = true;
     try {
       var sessionResponse = await fetch((window.EB_BASE || '') + '/api/session', {
@@ -54,6 +51,22 @@
       location.href = (window.EB_BASE || '') + '/login';
     } finally {
       button.disabled = false;
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    while (target && target !== document) {
+      if (target.id === 'signout' || target.hasAttribute('data-signout')) {
+        event.preventDefault();
+        var nav = document.getElementById('main-nav');
+        var toggle = document.getElementById('nav-toggle');
+        if (nav) nav.classList.remove('open');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        signOut(target);
+        return;
+      }
+      target = target.parentNode;
     }
   });
 })();

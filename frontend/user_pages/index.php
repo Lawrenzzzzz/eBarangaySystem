@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Barangay Bucana | Resident Portal</title>
-  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>">
+  <link rel="stylesheet" href="<?= url('assets/resident/style.css') ?>?v=2">
 </head>
 <body>
 <div class="shell">
@@ -31,6 +31,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
       <a href="<?= url('projects') ?>">Projects</a>
       <a href="<?= url('track') ?>">Track</a>
       <a href="<?= url('settings') ?>">Settings</a>
+      <button class="nav-signout" type="button" data-signout>Sign out</button>
     </nav>
 
     <div class="nav-right">
@@ -169,32 +170,11 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/resident/dashboard.php'
         </div>
       </section>
 
-      <section>
-        <h2 class="side-title">Your details</h2>
-        <dl class="card details">
-          <div>
-            <dt><span class="chip sm blue">E</span>Email</dt>
-            <dd><?= $esc($userEmail !== '' ? $userEmail : 'Not provided') ?></dd>
-          </div>
-          <div>
-            <dt><span class="chip sm blue">ID</span>Resident ID</dt>
-            <dd><?= $esc($userResidentCode !== '' ? $userResidentCode : 'Not assigned') ?></dd>
-          </div>
-          <div>
-            <dt><span class="chip sm green">H</span>Household</dt>
-            <dd><?= $esc($userHousehold !== '' ? $userHousehold : 'Not provided') ?></dd>
-          </div>
-          <div>
-            <dt><span class="chip sm amber">A</span>Address</dt>
-            <dd><?= $esc($userAddress !== '' ? $userAddress : 'Not provided') ?></dd>
-          </div>
-        </dl>
-      </section>
     </aside>
   </div>
 </div>
 
 <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
-<script src="<?= url('assets/resident/js/app.js') ?>"></script>
+<script src="<?= url('assets/resident/js/app.js') ?>?v=2"></script>
 </body>
 </html>
