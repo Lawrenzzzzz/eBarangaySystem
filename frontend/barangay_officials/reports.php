@@ -71,6 +71,22 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
       background: #f8fafc;
     }
 
+    .report-table tr.report-section-row td {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #ffffff;
+      background: #1f4d3a !important;
+      border-color: #1f4d3a;
+    }
+
+    .report-table.report-field-table tbody tr:not(.report-section-row) td:first-child {
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
     .report-record-card {
       display: flex;
       flex-direction: column;
@@ -380,6 +396,60 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
                   <?php endif; ?>
                 </tbody>
               </table>
+            <?php elseif ($selectedReport['report_type'] === 'projects'): ?>
+              <?php
+                $projectReport = is_array($reportRows) && isset($reportRows[0]) && is_array($reportRows[0]) ? $reportRows[0] : [];
+                $projectText = static function (string $key, string $fallback = '—') use ($projectReport): string {
+                    $value = $projectReport[$key] ?? '';
+                    if (!is_scalar($value) || trim((string) $value) === '') {
+                        return $fallback;
+                    }
+                    return nl2br(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
+                };
+                $projectBudgetValue = $projectReport['total_budget'] ?? null;
+                $projectBudget = is_numeric($projectBudgetValue) ? '₱' . number_format((float) $projectBudgetValue, 2) : '—';
+              ?>
+              <table class="report-table report-field-table" id="reportDataTable">
+                <thead>
+                  <tr>
+                    <th style="width: 28%;">Field</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="report-section-row"><td colspan="2">I. Project Information</td></tr>
+                  <tr><td>Project Title</td><td class="fw-semibold"><?= $projectText('project_title') ?></td></tr>
+                  <tr><td>Sector</td><td><?= $projectText('sector') ?></td></tr>
+                  <tr><td>Project Location</td><td><?= $projectText('location') ?></td></tr>
+                  <tr><td>Project Category</td><td><?= $projectText('category') ?></td></tr>
+                  <tr><td>Project Contractor</td><td><?= $projectText('contractor') ?></td></tr>
+                  <tr><td>Project Start Date</td><td><?= $projectText('start_date') ?></td></tr>
+                  <tr><td>Target Completion Date</td><td><?= $projectText('target_date') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">II. Project Description</td></tr>
+                  <tr><td>Description</td><td><?= $projectText('description') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">III. Project Objectives</td></tr>
+                  <tr><td>Objectives</td><td><?= $projectText('objectives') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">IV. Project Budget and Funding</td></tr>
+                  <tr><td>Total Approved Budget</td><td class="fw-semibold"><?= $esc($projectBudget) ?></td></tr>
+                  <tr><td>Source of Funds</td><td><?= $projectText('fund_source') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">V. Project Challenges and Issues</td></tr>
+                  <tr><td>Challenges and Issues Encountered</td><td><?= $projectText('challenges') ?></td></tr>
+                  <tr><td>Actions Taken</td><td><?= $projectText('actions') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">VI. Recommendations</td></tr>
+                  <tr><td>Recommendations</td><td><?= $projectText('recommendations') ?></td></tr>
+
+                  <tr class="report-section-row"><td colspan="2">VII. Certification and Approval</td></tr>
+                  <tr><td>Prepared by</td><td><?= $projectText('prepared_by') ?></td></tr>
+                  <tr><td>Reviewed by</td><td><?= $projectText('reviewed_by') ?></td></tr>
+                  <tr><td>Approved by</td><td><?= $projectText('approved_by') ?></td></tr>
+                  <tr><td>Date</td><td><?= $projectText('report_date') ?></td></tr>
+                </tbody>
+              </table>
             <?php else: ?>
               <table class="report-table" id="reportDataTable">
                 <thead>
@@ -441,6 +511,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
                 $reportIcons = [
                     'residents' => 'bi-people-fill',
                     'payments' => 'bi-cash-coin',
+                    'projects' => 'bi-kanban',
                 ];
                 $savedIcon = $reportIcons[$savedReport['report_type']] ?? 'bi-file-earmark-bar-graph-fill';
                 $savedTypeLabel = ucfirst(str_replace('_', ' ', $savedReport['report_type']));
@@ -504,6 +575,44 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
       }
 
       const reportTitle = (downloadBtn.dataset.title || "Report").toUpperCase();
+      const isFieldTable = reportTable.classList.contains("report-field-table");
+      const sectionGreen = [31, 77, 58];
+
+      const pdfText = (value) => String(value)
+        .replace(/₱/g, "PHP ")
+        .replace(/\u00a0/g, " ")
+        .replace(/[ \t]+/g, " ")
+        .trim();
+
+      const cellText = (element) => {
+        const clone = element.cloneNode(true);
+        clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+        return pdfText(clone.textContent)
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line !== "")
+          .join("\n");
+      };
+
+      const headRows = Array.from(reportTable.querySelectorAll("thead tr")).map((tr) =>
+        Array.from(tr.querySelectorAll("th")).map((th) => pdfText(th.textContent))
+      );
+
+      const bodyRows = Array.from(reportTable.querySelectorAll("tbody tr")).map((tr) => {
+        if (tr.classList.contains("report-section-row")) {
+          return [{
+            content: pdfText(tr.textContent),
+            colSpan: 2,
+            styles: {
+              fillColor: sectionGreen,
+              textColor: [255, 255, 255],
+              fontStyle: "bold",
+              fontSize: 8,
+            },
+          }];
+        }
+        return Array.from(tr.querySelectorAll("td")).map((td) => cellText(td));
+      });
 
       downloadBtn.addEventListener("click", function () {
         if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -512,16 +621,20 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
         }
 
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        const doc = new jsPDF({
+          orientation: isFieldTable ? "portrait" : "landscape",
+          unit: "mm",
+          format: "a4",
+        });
         const pageWidth = doc.internal.pageSize.getWidth();
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
-        doc.text(downloadBtn.dataset.barangay || "", pageWidth / 2, 15, { align: "center" });
+        doc.text(pdfText(downloadBtn.dataset.barangay || ""), pageWidth / 2, 15, { align: "center" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text("Municipality of " + (downloadBtn.dataset.municipality || ""), pageWidth / 2, 21, { align: "center" });
+        doc.text("Municipality of " + pdfText(downloadBtn.dataset.municipality || ""), pageWidth / 2, 21, { align: "center" });
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
@@ -529,17 +642,19 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
-        doc.text("Barangay Chairman: " + (downloadBtn.dataset.chairman || ""), pageWidth / 2, 35, { align: "center" });
-        doc.text("Date: " + (downloadBtn.dataset.date || ""), pageWidth / 2, 40, { align: "center" });
+        doc.text("Barangay Chairman: " + pdfText(downloadBtn.dataset.chairman || ""), pageWidth / 2, 35, { align: "center" });
+        doc.text("Date: " + pdfText(downloadBtn.dataset.date || ""), pageWidth / 2, 40, { align: "center" });
 
         doc.autoTable({
-          html: "#reportDataTable",
+          head: headRows.length > 0 ? headRows : undefined,
+          body: bodyRows,
           startY: 46,
           theme: "grid",
-          styles: { fontSize: 7, cellPadding: 1.6, overflow: "linebreak", valign: "top" },
+          styles: { fontSize: 7.5, cellPadding: 1.8, overflow: "linebreak", valign: "top" },
           headStyles: { fillColor: [248, 250, 252], textColor: [51, 65, 85], fontStyle: "bold" },
           alternateRowStyles: { fillColor: [248, 250, 252] },
           margin: { left: 10, right: 10 },
+          columnStyles: isFieldTable ? { 0: { cellWidth: 55, fontStyle: "bold" } } : undefined,
         });
 
         doc.save(

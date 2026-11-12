@@ -37,7 +37,11 @@
         ".badge svg{width:220px;height:220px;margin-top:16px}" +
         ".badge .who{margin-top:16px;font-size:14px;font-weight:600;color:#14211b}" +
         ".badge .hint{margin:18px 0 0;font-size:11px;color:#55645b;line-height:1.6}" +
-        "@media print{body{display:block;padding-top:24px}}" +
+        "@page{size:auto;margin:12mm}" +
+        "@media print{" +
+        "body{display:block;margin:0;padding:0;min-height:0;height:auto}" +
+        ".badge{margin:0 auto;break-inside:avoid;page-break-inside:avoid}" +
+        "}" +
         "</style></head><body>" +
         '<div class="badge">' +
         "<h1>" + escapeHtml(barangay) + "</h1>" +
