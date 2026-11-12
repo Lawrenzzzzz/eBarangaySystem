@@ -46,8 +46,70 @@ body {
 .page-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
 .page-header-year { margin-left: auto; }
 .page-header-buttons { display: flex; align-items: center; gap: 8px; }
-.page-header-search { width: 240px; margin-left: auto; }
+.page-header-search { width: 300px; max-width: 100%; margin-left: auto; }
 .page-header-filter { margin-left: auto; }
+
+/* Search field */
+.search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #f1f4f2;
+    border: 1px solid #000000;
+    border-radius: 50px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.search-field:hover { background-color: #e9efeb; }
+.search-field:focus-within {
+    background-color: #ffffff;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(31, 77, 58, 0.12);
+}
+.search-field-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+.search-field:focus-within .search-field-icon { color: var(--primary-green); }
+.search-field-input {
+    width: 100%;
+    padding: 9px 38px 9px 40px;
+    border: 0;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+    box-shadow: none !important;
+}
+.search-field-input::placeholder { color: var(--text-muted); }
+.search-field-input:focus { background: transparent; }
+.search-field-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+.search-field-clear {
+    position: absolute;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background-color: #dfe6e2;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.search-field-clear:hover { background-color: var(--primary-green); color: #ffffff; }
+.search-field-clear[hidden] { display: none; }
 .attendance-filter { width: 260px; max-width: 100%; }
 
 /* Cards & Components */

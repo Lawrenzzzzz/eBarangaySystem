@@ -70,9 +70,14 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
                     <p class="text-muted mb-0 page-header-subtitle">Barangay infrastructure and community projects</p>
                 </div>
             </div>
-            <div class="input-group input-group-sm page-header-search">
-                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                <input type="search" class="form-control" id="project-search" placeholder="Search projects..." aria-label="Search projects">
+            <div class="page-header-search">
+                <div class="search-field">
+                    <i class="bi bi-search search-field-icon" aria-hidden="true"></i>
+                    <input type="search" class="form-control search-field-input" id="project-search" placeholder="Search projects..." aria-label="Search projects">
+                    <button type="button" class="search-field-clear" id="project-search-clear" aria-label="Clear search" hidden>
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
             <button class="btn btn-primary-green btn-sm px-3 page-header-create" type="button" data-bs-toggle="modal" data-bs-target="#createProjectModal">Create Project</button>
         </div>
@@ -291,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
     const grid = document.getElementById('project-grid');
     const search = document.getElementById('project-search');
+    const searchClear = document.getElementById('project-search-clear');
     const empty = document.getElementById('project-empty');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -362,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         empty.classList.toggle('d-none', visible !== 0);
+        searchClear.hidden = term === '';
     };
 
     const buildCard = (project) => {
@@ -575,6 +582,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     search.addEventListener('input', filterProjects);
+
+    searchClear.addEventListener('click', () => {
+        search.value = '';
+        filterProjects();
+        search.focus();
+    });
+
+    search.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && search.value !== '') {
+            search.value = '';
+            filterProjects();
+        }
+    });
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
