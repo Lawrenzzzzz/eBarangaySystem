@@ -66,21 +66,21 @@ $formatShort = static function (float $amount): string {
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div class="d-flex align-items-center gap-3">
+            <div class="page-header-title d-flex align-items-center gap-3">
                 <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
                     <i class="bi bi-list"></i>
                 </button>
                 <div>
                     <h3 class="fw-bold mb-1">Budget</h3>
-                    <p class="text-muted mb-0">Sector allocations and disbursements - FY <?= $currentYear ?></p>
+                    <p class="text-muted mb-0 page-header-subtitle">Sector allocations and disbursements - FY <?= $currentYear ?></p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <select class="form-select form-select-sm" id="budget-year-filter" style="width: 100px;">
-                    <?php for ($year = $currentYear - 2; $year <= $currentYear; $year++): ?>
-                        <option value="<?= $year ?>"<?= $year === $currentYear ? ' selected' : '' ?>><?= $year ?></option>
-                    <?php endfor; ?>
-                </select>
+            <select class="form-select form-select-sm page-header-year" id="budget-year-filter" style="width: 100px;">
+                <?php for ($year = $currentYear - 2; $year <= $currentYear; $year++): ?>
+                    <option value="<?= $year ?>"<?= $year === $currentYear ? ' selected' : '' ?>><?= $year ?></option>
+                <?php endfor; ?>
+            </select>
+            <div class="page-header-buttons">
                 <button class="btn btn-outline-secondary btn-sm px-3" type="button" data-bs-toggle="modal" data-bs-target="#divideBudgetModal">Divide Budget</button>
                 <button class="btn btn-primary-green btn-sm px-3" type="button" data-bs-toggle="modal" data-bs-target="#addBudgetModal">Add Budget</button>
             </div>

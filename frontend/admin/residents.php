@@ -43,22 +43,20 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/residents.php';
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div class="d-flex align-items-center gap-3">
+            <div class="page-header-title d-flex align-items-center gap-3">
                 <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
                     <i class="bi bi-list"></i>
                 </button>
                 <div>
                     <h3 class="fw-bold mb-1">Residents</h3>
-                    <p class="text-muted mb-0">Population &amp; demographic statistics &ndash; live from database</p>
+                    <p class="text-muted mb-0 page-header-subtitle">Population &amp; demographic statistics &ndash; live from database</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <select class="form-select form-select-sm" style="width: 100px;">
-                    <option>2020</option>
-                    <option selected>2021</option>
-                    <option>2022</option>
-                </select>
-            </div>
+            <select class="form-select form-select-sm page-header-year" style="width: 100px;">
+                <option>2020</option>
+                <option selected>2021</option>
+                <option>2022</option>
+            </select>
         </div>
 
         <!-- RESIDENTS SPECIFIC CONTENT -->

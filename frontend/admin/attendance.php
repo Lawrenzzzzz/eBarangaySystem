@@ -58,19 +58,19 @@ $attendanceInitials = static function (string $name): string {
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div class="d-flex align-items-center gap-3">
+            <div class="page-header-title d-flex align-items-center gap-3">
                 <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
                     <i class="bi bi-list"></i>
                 </button>
                 <div>
                     <h3 class="fw-bold mb-1">Attendance</h3>
-                    <p class="text-muted mb-0">Hours worked by each barangay official</p>
+                    <p class="text-muted mb-0 page-header-subtitle">Hours worked by each barangay official</p>
                 </div>
             </div>
-            <form method="get" class="d-flex flex-column gap-2" style="min-width: 260px; max-width: 100%;">
+            <form method="get" class="attendance-filter d-flex flex-column gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <label for="attendance-date" class="text-muted small fw-semibold mb-0" style="min-width: 50px;">Date</label>
-                    <input type="date" class="form-control form-control-sm" id="attendance-date" name="date" value="<?= $esc($attendanceDateInput) ?>" onchange="this.form.submit()">
+                    <input type="hidden" id="attendance-date" name="date" value="<?= $esc($attendanceDateInput) ?>">
+                    <span class="text-muted small fw-semibold" id="attendance-date-display"><?= $esc($attendanceDateLabel) ?></span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <label for="attendance-official" class="text-muted small fw-semibold mb-0" style="min-width: 50px;">Official</label>
@@ -85,13 +85,13 @@ $attendanceInitials = static function (string $name): string {
         </div>
 
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history me-2"></i>Official Attendance</span>
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>Official Attendance</span>
                 <small class="text-muted fw-normal">Green: 6 hours or more &middot; Red: under 6 hours</small>
             </div>
             <div class="card-body pt-2">
                 <div class="table-responsive">
-                    <table class="table table-custom align-middle mb-0">
+                    <table class="table table-custom align-middle mb-0 attendance-table">
                         <thead>
                             <tr>
                                 <th>Name</th>

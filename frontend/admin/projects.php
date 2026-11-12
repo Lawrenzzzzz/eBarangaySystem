@@ -61,22 +61,20 @@ foreach ($sectorBudgetSources as $projectSector => $budgetSector) {
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div class="d-flex align-items-center gap-3">
+            <div class="page-header-title d-flex align-items-center gap-3">
                 <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
                     <i class="bi bi-list"></i>
                 </button>
                 <div>
                     <h3 class="fw-bold mb-1">Projects</h3>
-                    <p class="text-muted mb-0">Barangay infrastructure and community projects</p>
+                    <p class="text-muted mb-0 page-header-subtitle">Barangay infrastructure and community projects</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <div class="input-group input-group-sm" style="width: 240px;">
-                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input type="search" class="form-control" id="project-search" placeholder="Search projects..." aria-label="Search projects">
-                </div>
-                <button class="btn btn-primary-green btn-sm px-3" type="button" data-bs-toggle="modal" data-bs-target="#createProjectModal">Create Project</button>
+            <div class="input-group input-group-sm page-header-search">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="search" class="form-control" id="project-search" placeholder="Search projects..." aria-label="Search projects">
             </div>
+            <button class="btn btn-primary-green btn-sm px-3 page-header-create" type="button" data-bs-toggle="modal" data-bs-target="#createProjectModal">Create Project</button>
         </div>
 
         <!-- PROJECTS SPECIFIC CONTENT -->

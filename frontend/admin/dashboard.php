@@ -144,7 +144,7 @@ $initials = static function (string $name): string {
                     </div>
                     <div class="card-body pt-2">
                         <div class="table-responsive">
-                            <table class="table table-custom align-middle mb-0">
+                            <table class="table table-custom align-middle mb-0 official-login-table">
                                 <thead>
                                     <tr>
                                         <th>Official</th>
