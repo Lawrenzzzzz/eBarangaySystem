@@ -200,21 +200,21 @@
                         <time>15 SEP</time>
                         <div>
                             <h3>Free medical and dental mission</h3>
-                            <p>Barangay covered court � 8:00 AM to 3:00 PM</p>
+                            <p>TBA</p>
                         </div>
                     </article>
                     <article class="ann">
                         <time>18 SEP</time>
                         <div>
                             <h3>Community clean-up drive</h3>
-                            <p>Assembly at the barangay hall � 6:30 AM</p>
+                            <p>TBA</p>
                         </div>
                     </article>
                     <article class="ann">
                         <time>22 SEP</time>
                         <div>
                             <h3>Senior citizen assistance registration</h3>
-                            <p>Barangay session hall � 9:00 AM to 4:00 PM</p>
+                            <p>TBA</p>
                         </div>
                     </article>
                 </div>
@@ -229,7 +229,6 @@
                     <p class="muted">We work alongside residents to build a safer, healthier, and more inclusive community. Transparent service and responsive local leadership guide every program we deliver.</p>
                     <div class="nums">
                         <div><strong>12</strong><p>Active community programs</p></div>
-                        <div><strong>7</strong><p>Puroks served</p></div>
                     </div>
                 </div>
                 <div class="quote">
@@ -253,7 +252,7 @@
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                     </span>
-                    <div><small>Barangay office</small><b>(02) 8123 4567</b></div>
+                    <div><small>Barangay office</small><b>09XX XXX XXXX</b></div>
                 </div>
                 <div class="ct">
                     <span>
@@ -263,7 +262,7 @@
                             <path d="M21 12h1M2 12h1M12 2v1M4.93 4.93l.7.7M19.07 4.93l-.7.7"/>
                         </svg>
                     </span>
-                    <div><small>Emergency response</small><b>0917 123 4567</b></div>
+                    <div><small>Emergency response</small><b>09XX XXX XXXX</b></div>
                 </div>
                 <div class="ct">
                     <span>
@@ -273,7 +272,7 @@
                             <path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
                         </svg>
                     </span>
-                    <div><small>Office hours</small><b>Mon�Fri � 8:00 AM�5:00 PM</b></div>
+                    <div><small>Office hours</small><b>Mon-Fri  8:00 AM-5:00 PM</b></div>
                 </div>
             </div>
         </section>
@@ -281,8 +280,8 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>� 2026 Barangay Bucana. Serbisyo para sa lahat.</p>
-            <p>Privacy � Accessibility � Citizen�s Charter</p>
+            <p> 2026 Barangay Bucana. Serbisyo para sa lahat.</p>
+            <p>Privacy | Accessibility | Citizens| Charter</p>
         </div>
     </footer>
 
