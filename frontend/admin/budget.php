@@ -66,11 +66,16 @@ $formatShort = static function (float $amount): string {
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div>
-                <h3 class="fw-bold mb-1">Budget</h3>
-                <p class="text-muted mb-0">Sector allocations and disbursements - FY <?= $currentYear ?></p>
-            </div>
             <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-1">Budget</h3>
+                    <p class="text-muted mb-0">Sector allocations and disbursements - FY <?= $currentYear ?></p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
                 <select class="form-select form-select-sm" id="budget-year-filter" style="width: 100px;">
                     <?php for ($year = $currentYear - 2; $year <= $currentYear; $year++): ?>
                         <option value="<?= $year ?>"<?= $year === $currentYear ? ' selected' : '' ?>><?= $year ?></option>
@@ -82,7 +87,7 @@ $formatShort = static function (float $amount): string {
         </div>
 
         <!-- BUDGET SPECIFIC CONTENT -->
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 admin-stats-scroll">
             <div class="col-md-4">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Total Budget</div>

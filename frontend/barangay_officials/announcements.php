@@ -93,6 +93,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/announcements.
   <div class="eb-main">
     <div class="eb-topbar">
       <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none" id="ebSidebarToggle" type="button" aria-label="Toggle menu">
+          <i class="bi bi-list"></i>
+        </button>
         <div class="page-title">
           <h5>Announcements</h5>
           <small>Municipality of Nasugbu - Barangay Bucana</small>

@@ -43,9 +43,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/residents.php';
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div>
-                <h3 class="fw-bold mb-1">Residents</h3>
-                <p class="text-muted mb-0">Population &amp; demographic statistics · live from database</p>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-1">Residents</h3>
+                    <p class="text-muted mb-0">Population &amp; demographic statistics &ndash; live from database</p>
+                </div>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <select class="form-select form-select-sm" style="width: 100px;">
@@ -57,7 +62,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/residents.php';
         </div>
 
         <!-- RESIDENTS SPECIFIC CONTENT -->
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 admin-stats-scroll">
             <div class="col-md-4">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Total Residents</div>

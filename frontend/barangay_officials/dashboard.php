@@ -103,19 +103,27 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
 
   <div class="eb-main">
     <div class="eb-topbar">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-light d-lg-none">
-          <i class="bi bi-list"></i>
-        </button>
-        <div class="page-title">
-          <h5>Dashboard</h5>
-          <small>Municipality of Nasugbu - Barangay Bucana</small>
+      <div class="d-flex align-items-center justify-content-between gap-3 w-100">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-light d-lg-none" id="ebSidebarToggle" type="button" aria-label="Toggle menu">
+            <i class="bi bi-list"></i>
+          </button>
+          <div class="page-title">
+            <h5>Dashboard</h5>
+            <small>Municipality of Nasugbu - Barangay Bucana</small>
+          </div>
         </div>
+        <button type="button" class="btn btn-light position-relative d-lg-none" data-bs-toggle="modal" data-bs-target="#recentActivityModal" aria-label="Recent activity">
+          <i class="bi bi-bell"></i>
+          <?php if (!empty($recentActivity)): ?>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          <?php endif; ?>
+        </button>
       </div>
     </div>
 
     <div class="eb-content">
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-4 eb-stats-scroll">
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Residents</div>
@@ -198,7 +206,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
           </div>
         </div>
         
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none d-lg-block">
           <div class="table-card">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
@@ -233,9 +241,99 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/dashboard.php'
     </div>
   </div>
 
+  <div class="modal fade" id="recentActivityModal" tabindex="-1" aria-labelledby="recentActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="recentActivityModalLabel">Recent Activity</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <?php if ($recentActivity): ?>
+            <ul class="activity-feed list-unstyled mb-0">
+              <?php foreach ($recentActivity as $activity): ?>
+                <li class="activity-item">
+                  <a href="<?= $esc($activity['url']) ?>" class="activity-link">
+                    <span class="activity-icon kind-<?= $esc($activity['kind']) ?>">
+                      <i class="bi <?= $esc($activity['icon']) ?>"></i>
+                    </span>
+                    <div class="activity-body">
+                      <div class="activity-title"><?= $esc($activity['title']) ?></div>
+                      <div class="activity-meta"><?= $esc($activity['meta']) ?></div>
+                    </div>
+                    <span class="activity-time"><?= $esc($relativeTime($activity['at'])) ?></span>
+                  </a>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php else: ?>
+            <p class="text-muted small mb-0">No activity recorded yet.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bootstrap JS -->
   <script src="<?= url('assets/official/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
   <script>window.EB_BASE = <?= json_encode(url('')) ?>;</script>
   <script src="<?= url('assets/official/js/app.js') ?>"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var modalEl = document.getElementById('recentActivityModal');
+      if (!modalEl) return;
+      var backdrop = null;
+
+      function openModal() {
+        if (window.bootstrap && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(modalEl).show();
+          return;
+        }
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        modalEl.removeAttribute('aria-hidden');
+        modalEl.setAttribute('aria-modal', 'true');
+        document.body.classList.add('modal-open');
+        if (!backdrop) {
+          backdrop = document.createElement('div');
+          backdrop.className = 'modal-backdrop fade show';
+          document.body.appendChild(backdrop);
+          backdrop.addEventListener('click', closeModal);
+        }
+      }
+
+      function closeModal() {
+        if (window.bootstrap && bootstrap.Modal) {
+          var inst = bootstrap.Modal.getInstance(modalEl);
+          if (inst) { inst.hide(); return; }
+        }
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        modalEl.setAttribute('aria-hidden', 'true');
+        modalEl.removeAttribute('aria-modal');
+        document.body.classList.remove('modal-open');
+        if (backdrop) { backdrop.remove(); backdrop = null; }
+      }
+
+      document.querySelectorAll('[data-bs-target="#recentActivityModal"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          openModal();
+        });
+      });
+      modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          closeModal();
+        });
+      });
+      modalEl.addEventListener('click', function (e) {
+        if (e.target === modalEl) closeModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalEl.classList.contains('show')) closeModal();
+      });
+    });
+  </script>
 </body>
 </html>

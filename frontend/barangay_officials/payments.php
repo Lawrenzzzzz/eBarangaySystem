@@ -87,21 +87,20 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/payments.php';
   <div class="eb-main">
     <div class="eb-topbar">
       <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none" id="ebSidebarToggle" type="button" aria-label="Toggle menu">
+          <i class="bi bi-list"></i>
+        </button>
         <div class="page-title">
           <h5>Payments</h5>
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <a href="#" class="btn btn-success btn-sm px-3">
-          <i class="bi bi-plus-lg me-1"></i> New Request
-        </a>
-      </div>
+
     </div>
 
     <div class="eb-content">
       <!-- STATS CARDS -->
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-4 eb-stats-scroll">
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Collected</div>

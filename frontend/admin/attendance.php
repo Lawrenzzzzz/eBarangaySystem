@@ -58,11 +58,16 @@ $attendanceInitials = static function (string $name): string {
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div>
-                <h3 class="fw-bold mb-1">Attendance</h3>
-                <p class="text-muted mb-0">Hours worked by each barangay official</p>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-1">Attendance</h3>
+                    <p class="text-muted mb-0">Hours worked by each barangay official</p>
+                </div>
             </div>
-            <form method="get" class="d-flex flex-column gap-2" style="min-width: 260px;">
+            <form method="get" class="d-flex flex-column gap-2" style="min-width: 260px; max-width: 100%;">
                 <div class="d-flex align-items-center gap-2">
                     <label for="attendance-date" class="text-muted small fw-semibold mb-0" style="min-width: 50px;">Date</label>
                     <input type="date" class="form-control form-control-sm" id="attendance-date" name="date" value="<?= $esc($attendanceDateInput) ?>" onchange="this.form.submit()">

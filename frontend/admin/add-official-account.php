@@ -69,9 +69,14 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/admin/add-official-acco
     <!-- MAIN CONTENT -->
     <div id="content">
         <div class="page-header">
-            <div>
-                <h3 class="fw-bold mb-1">Add Official Account</h3>
-                <p class="text-muted mb-0">Create an active account so a barangay official can sign in</p>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-1">Add Official Account</h3>
+                    <p class="text-muted mb-0">Create an active account so a barangay official can sign in</p>
+                </div>
             </div>
         </div>
 

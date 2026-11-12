@@ -161,6 +161,32 @@ const initAdminDashboard = (root) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("adminSidebarToggle");
+    if (sidebar && sidebarToggle) {
+        let sidebarBackdrop = null;
+        const closeSidebar = () => {
+            sidebar.classList.remove("show");
+            if (sidebarBackdrop) { sidebarBackdrop.remove(); sidebarBackdrop = null; }
+        };
+        const openSidebar = () => {
+            sidebar.classList.add("show");
+            if (!sidebarBackdrop) {
+                sidebarBackdrop = document.createElement("div");
+                sidebarBackdrop.className = "admin-sidebar-backdrop";
+                sidebarBackdrop.addEventListener("click", closeSidebar);
+                document.body.appendChild(sidebarBackdrop);
+            }
+        };
+        sidebarToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            sidebar.classList.contains("show") ? closeSidebar() : openSidebar();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeSidebar();
+        });
+    }
+
     const signOutButton = document.getElementById("admin-signout");
     if (signOutButton) {
         signOutButton.addEventListener("click", async () => {

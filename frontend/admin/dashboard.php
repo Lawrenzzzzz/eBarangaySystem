@@ -63,14 +63,19 @@ $initials = static function (string $name): string {
     <!-- MAIN CONTENT -->
     <div id="content" data-dashboard-endpoint="<?= url('api/admin-dashboard') ?>">
         <div class="page-header">
-            <div>
-                <h3 class="fw-bold mb-1">Chairman's Dashboard</h3>
-                <p class="text-muted mb-0">Financial &amp; population overview</p>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="adminSidebarToggle" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-1">Chairman's Dashboard</h3>
+                    <p class="text-muted mb-0">Financial &amp; population overview</p>
+                </div>
             </div>
         </div>
 
         <!-- DASHBOARD SPECIFIC CONTENT -->
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 admin-stats-scroll">
             <div class="col-md-3">
                 <div class="card h-100"><div class="card-body">
                     <div class="kpi-title">Total Budget</div>
@@ -181,6 +186,7 @@ $initials = static function (string $name): string {
         </div>
     </div>
 </div>
+
 <script>window.DASHBOARD_DATA = <?= json_encode($dashboardData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -270,21 +270,25 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/reports.php';
 
   <div class="eb-main">
     <div class="eb-topbar">
-      <div class="d-flex align-items-center gap-3">
-        <div class="page-title">
-          <h5>Reports</h5>
+      <div class="d-flex align-items-center gap-3 flex-grow-1">
+        <button class="btn btn-light d-lg-none" id="ebSidebarToggle" type="button" aria-label="Toggle menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="page-title flex-grow-1">
+          <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+            <h5 class="mb-0">Reports</h5>
+            <form class="d-flex align-items-center gap-2 mb-0" method="get" action="<?= url('official/reports') ?>">
+              <label for="reportYear" class="form-label mb-0">Year</label>
+              <select name="year" id="reportYear" class="form-select form-select-sm" aria-label="Select report year" style="width: 100px;" onchange="this.form.submit()">
+                <?php for ($year = $currentYear; $year >= $currentYear - 5; $year--): ?>
+                  <option value="<?= $year ?>"<?= $year === $reportYear ? ' selected' : '' ?>><?= $year ?></option>
+                <?php endfor; ?>
+              </select>
+            </form>
+          </div>
           <small>Municipality of Nasugbu - Barangay Bucana</small>
         </div>
       </div>
-
-      <form class="d-flex align-items-center gap-2 mb-0" method="get" action="<?= url('official/reports') ?>">
-        <label for="reportYear" class="form-label mb-0">Year</label>
-        <select name="year" id="reportYear" class="form-select form-select-sm" aria-label="Select report year" style="width: 100px;" onchange="this.form.submit()">
-          <?php for ($year = $currentYear; $year >= $currentYear - 5; $year--): ?>
-            <option value="<?= $year ?>"<?= $year === $reportYear ? ' selected' : '' ?>><?= $year ?></option>
-          <?php endfor; ?>
-        </select>
-      </form>
     </div>
 
     <div class="eb-content">

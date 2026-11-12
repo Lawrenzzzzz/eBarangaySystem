@@ -1,4 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const sidebar = document.getElementById("ebSidebar") || document.querySelector(".eb-sidebar");
+  const sidebarToggle = document.getElementById("ebSidebarToggle");
+  if (sidebar && sidebarToggle) {
+    let sidebarBackdrop = null;
+    const closeSidebar = () => {
+      sidebar.classList.remove("show");
+      if (sidebarBackdrop) { sidebarBackdrop.remove(); sidebarBackdrop = null; }
+    };
+    const openSidebar = () => {
+      sidebar.classList.add("show");
+      if (!sidebarBackdrop) {
+        sidebarBackdrop = document.createElement("div");
+        sidebarBackdrop.className = "eb-sidebar-backdrop";
+        sidebarBackdrop.addEventListener("click", closeSidebar);
+        document.body.appendChild(sidebarBackdrop);
+      }
+    };
+    sidebarToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      sidebar.classList.contains("show") ? closeSidebar() : openSidebar();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSidebar();
+    });
+  }
+
   const searchBox = document.querySelector(".search-box");
   const searchInput = searchBox ? searchBox.querySelector('input[name="q"]') : null;
   const residentsTable = document.querySelector(".residents-table");

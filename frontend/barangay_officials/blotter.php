@@ -87,6 +87,9 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/blotter.php';
   <div class="eb-main">
     <div class="eb-topbar">
       <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none" id="ebSidebarToggle" type="button" aria-label="Toggle menu">
+          <i class="bi bi-list"></i>
+        </button>
         <div class="page-title">
           <h5>Blotter</h5>
           <small>Municipality of Nasugbu - Barangay Bucana</small>
@@ -103,7 +106,7 @@ require_once dirname(__DIR__, 2) . '/backend/controllers/official/blotter.php';
       <?php endif; ?>
 
       <!-- STATS CARDS -->
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-4 eb-stats-scroll">
         <div class="col-6 col-md-3">
           <div class="stats-card">
             <div class="stats-label">Total Cases</div>
